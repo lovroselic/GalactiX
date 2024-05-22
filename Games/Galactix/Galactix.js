@@ -52,481 +52,14 @@ const INI = {
 	sprite_maxH: 64
 };
 
-/*
-const UP = new Vector(0, -1);
-const DOWN = new Vector(0, 1);
-const LEFT = new Vector(-1, 0);
-const RIGHT = new Vector(1, 0);
-*/
-
-//////////////////engine.js/////////////////////////
-
-/*
-const ENGINE = {
-	VERSION: "GEN-1",
-	init() {
-		LAYER = {};
-		SPRITE = {};
-		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
-		$("#temp2").append("<canvas id ='temp_canvas2'></canvas>");
-		LAYER.temp = $("#temp_canvas")[0].getContext("2d");
-		LAYER.temp2 = $("#temp_canvas2")[0].getContext("2d");
-	},
-	gameWindowId: "#game",
-	gameWIDTH: 960,
-	currentTOP: 0,
-	addBOX(id, height, layers, alias) {
-		if (id == null) return;
-		if (height == null) return;
-		layers = layers || 1;
-		$(ENGINE.gameWindowId).append(
-			"<div id ='" + id + "' style='position: relative'></div>"
-		);
-		var prop;
-		if (layers === 1) {
-			$("#" + id).append(
-				"<canvas id='" +
-				id +
-				"_canvas' width='" +
-				ENGINE.gameWIDTH +
-				"' height='" +
-				height +
-				"'></canvas>"
-			);
-			prop = alias.shift();
-			LAYER[prop] = $("#" + id + "_canvas")[0].getContext("2d");
-		} else {
-			var canvasElement;
-			for (var x = 0; x < layers; x++) {
-				canvasElement =
-					"<canvas class='layer' id='" +
-					id +
-					"_canvas_" +
-					x +
-					"' width='" +
-					ENGINE.gameWIDTH +
-					"' height='" +
-					height +
-					"' style='z-index:" +
-					x +
-					"; top:" +
-					ENGINE.currentTOP +
-					"px'></canvas>";
-				$("#" + id).append(canvasElement);
-				prop = alias.shift();
-				LAYER[prop] = $("#" + id + "_canvas_" + x)[0].getContext("2d");
-			}
-			ENGINE.currentTOP = ENGINE.currentTOP + height;
-		}
-	},
-	spriteDraw(layer, X, Y, image) {
-		var CX = X - image.width / 2;
-		var CY = Y - image.height / 2;
-		var CTX = LAYER[layer];
-		CTX.drawImage(image, CX, CY);
-	},
-	draw(layer, X, Y, image) {
-		var CTX = LAYER[layer];
-		CTX.drawImage(image, X, Y);
-	},
-	clearLayer(layer) {
-		var CTX = LAYER[layer];
-		CTX.clearRect(0, 0, CTX.canvas.width, CTX.canvas.height);
-	},
-	fillLayer(layer, colour) {
-		var CTX = LAYER[layer];
-		CTX.fillStyle = colour;
-		CTX.fillRect(0, 0, CTX.canvas.width, CTX.canvas.height);
-	},
-	tileToImage() {
-		var image;
-		for (var prop in World) {
-			var LN = World[prop].length;
-			if (LN) {
-				for (var ix = 0; ix < LN; ix++) {
-					image = $("#" + World[prop][ix].id)[0];
-					SPRITE[World[prop][ix].name] = image;
-				}
-			}
-		}
-	},
-	trimCanvas(data) {
-		var top = 0,
-			bottom = data.height,
-			left = 0,
-			right = data.width;
-		var width = data.width;
-		while (top < bottom && rowBlank(data, width, top)) ++top;
-		while (bottom - 1 > top && rowBlank(data, width, bottom - 1)) --bottom;
-		while (left < right && columnBlank(data, width, left, top, bottom)) ++left;
-		while (right - 1 > left && columnBlank(data, width, right - 1, top, bottom))
-			--right;
-
-		return { left: left, top: top, right: right, bottom: bottom };
-
-		function rowBlank(data, width, y) {
-			for (var x = 0; x < width; ++x) {
-				if (data.data[y * width * 4 + x * 4 + 3] !== 0) return false;
-			}
-			return true;
-		}
-
-		function columnBlank(data, width, x, top, bottom) {
-			for (var y = top; y < bottom; ++y) {
-				if (data.data[y * width * 4 + x * 4 + 3] !== 0) return false;
-			}
-			return true;
-		}
-	},
-	rotateImage(image, degree, newName) {
-		var CTX = LAYER.temp;
-		var CW = image.width;
-		var CH = image.height;
-		var max = Math.max(CW, CH);
-		var min = Math.max(CW, CH);
-		CTX.canvas.width = max * 2;
-		CTX.canvas.height = max * 2;
-		CTX.save();
-		CTX.translate(CW, CH);
-		CTX.rotate(degree * Math.PI / 180);
-		CTX.drawImage(image, -min / 2, -min / 2);
-		CTX.restore();
-		var imgDATA = CTX.getImageData(0, 0, CTX.canvas.width, CTX.canvas.height);
-		var TRIM = ENGINE.trimCanvas(imgDATA);
-		var trimmed = CTX.getImageData(
-			TRIM.left,
-			TRIM.top,
-			TRIM.right - TRIM.left,
-			TRIM.bottom - TRIM.top
-		);
-		CTX.canvas.width = TRIM.right - TRIM.left;
-		CTX.canvas.height = TRIM.bottom - TRIM.top;
-		CTX.putImageData(trimmed, 0, 0);
-		SPRITE[newName] = new Image();
-		SPRITE[newName].onload = ENGINE.creationSpriteCount;
-		SPRITE[newName].crossOrigin = "Anonymous";
-		SPRITE[newName].src = CTX.canvas.toDataURL("image/png");
-		SPRITE[newName].width = CTX.canvas.width;
-		SPRITE[newName].height = CTX.canvas.height;
-	},
-	createSprites() {
-		var LN = Creation.length;
-		var totalLength = 0;
-		for (var x = 0; x < LN; x++) {
-			var LAN = Creation[x].angles.length;
-			if (LAN === 0) {
-				for (
-					var q = Creation[x].series.first;
-					q <= Creation[x].series.last;
-					q += Creation[x].series.step
-				) {
-					Creation[x].angles.push(q);
-				}
-			}
-			LAN = Creation[x].angles.length;
-			totalLength += LAN;
-			for (var y = 0; y < LAN; y++) {
-				var newName = Creation[x].name + "_" + Creation[x].angles[y];
-				ENGINE.rotateImage(Creation[x].origin, Creation[x].angles[y], newName);
-			}
-		}
-		PRG.HMCI = totalLength;
-	},
-	creationSpriteCount() {
-		PRG.spriteCount++;
-		ENGINE.drawLoadingGraph(PRG.spriteCount, PRG.HMCI, "Sprites");
-		if (PRG.spriteCount === PRG.HMCI) {
-			$("#buttons").prepend("<input type='button' id='startGame' value='START'>");
-			$("#load").addClass("hidden");
-			$("#startGame").on("click", PRG.start);
-		}
-	},
-	collision(actor1, actor2) {
-		var X = Math.abs(actor1.x - actor2.x);
-		var Y = Math.abs(actor1.y - actor2.y);
-		if (Y >= INI.COLLISION_SAFE) return false;
-		if (X >= INI.COLLISION_SAFE) return false;
-		var w1 = parseInt(actor1.width / 2, 10);
-		var w2 = parseInt(actor2.width / 2, 10);
-		var h1 = parseInt(actor1.height / 2, 10);
-		var h2 = parseInt(actor2.height / 2, 10);
-		if ((X >= w1 + w2) || (Y >= h1 + h2)) return false; //no rectangle overlapping 
-
-		var act1 = new Vector(actor1.x, actor1.y);
-		var act2 = new Vector(actor2.x, actor2.y);
-		var SQ1 = new Area(act1.x - w1, act1.y - h1, w1 * 2, h1 * 2);
-		var SQ2 = new Area(act2.x - w2, act2.y - h2, w2 * 2, h2 * 2);
-
-		var x = parseInt(Math.max(SQ1.x, SQ2.x), 10) - 1;
-		var y = parseInt(Math.max(SQ1.y, SQ2.y), 10) - 1;
-		var w = parseInt(Math.min(SQ1.x + SQ1.w - x, SQ2.x + SQ2.w - x), 10) + 1;
-		var h = parseInt(Math.min(SQ1.y + SQ1.h - y, SQ2.y + SQ2.h - y), 10) + 1;
-		if (w === 0 || h === 0) return false;
-
-		var area = new Area(x, y, w, h);
-		var area1 = new Area(
-			area.x - SQ1.x,
-			area.y - SQ1.y,
-			area.w,
-			area.h
-		);
-
-		var area2 = new Area(
-			area.x - SQ2.x,
-			area.y - SQ2.y,
-			area.w,
-			area.h
-		);
-		var CTX1 = LAYER.temp;
-		var CTX2 = LAYER.temp2;
-
-		CTX1.canvas.width = INI.sprite_maxW;
-		CTX1.canvas.height = INI.sprite_maxH;
-		CTX2.canvas.width = INI.sprite_maxW;
-		CTX2.canvas.height = INI.sprite_maxH;
-
-
-		ENGINE.draw("temp", 0, 0, SPRITE[actor1.name]);
-		ENGINE.draw("temp2", 0, 0, SPRITE[actor2.name]);
-		var data1 = CTX1.getImageData(area1.x, area1.y, area1.w, area1.h);
-		var data2 = CTX2.getImageData(area2.x, area2.y, area2.w, area2.h);
-		var DL = data1.data.length;
-		var index;
-		for (index = 3; index < DL; index += 4) {
-			if (data1.data[index] > 0 && data2.data[index] > 0) return true;
-		}
-		return false;
-	},
-	collisionBulletShip() {
-		if (SHIP.dead) return;
-		if (DEBUG.INVINCIBLE) return;
-		if (!SHIP.live) return;
-		var SBAL = ALIENS.bullet.arsenal.length;
-		if (SBAL === 0) return;
-		var ship = new ACTOR(SHIP.ship, SHIP.x, SHIP.y, 0);
-		for (var q = SBAL - 1; q >= 0; q--) {
-			var BulletActor = new ACTOR(
-				"alienbullet",
-				ALIENS.bullet.arsenal[q].x,
-				ALIENS.bullet.arsenal[q].y,
-				0
-			);
-			var hit = ENGINE.collision(BulletActor, ship);
-			if (hit) {
-				EXPLOSIONS.pool.push(new AnimationSPRITE(SHIP.x, SHIP.y, "ShipExp", 8));
-				ALIENS.bullet.kill(q);
-				if (!DEBUG.ENDLESS_LIFE) GAME.lives--;
-				TEXT.ships();
-				ALIENS.ready = false;
-				if (ALIENS.existence.length === 0) GAME.levelComplete = true;
-				SHIP.live = false;
-				SHIP.init();
-				break;
-			}
-		}
-		if (GAME.lives < 0) GAME.over();
-	},
-	collisionBulletAlien() {
-		var SBAL = SHIP.bullet.arsenal.length;
-		if (SBAL === 0) return;
-		for (var q = SBAL - 1; q >= 0; q--) {
-			var BulletActor = new ACTOR(
-				"bullet",
-				SHIP.bullet.arsenal[q].x,
-				SHIP.bullet.arsenal[q].y,
-				0
-			);
-			var AEL = ALIENS.existence.length;
-			var hit;
-			for (var w = AEL - 1; w >= 0; w--) {
-				hit = ENGINE.collision(BulletActor, ALIENS.existence[w]);
-				if (hit) {
-					GAME.score += ALIENS.existence[w].score;
-					SHIP.killShots += 1;
-					TEXT.score();
-					EXPLOSIONS.pool.push(
-						new AnimationSPRITE(
-							ALIENS.existence[w].x,
-							ALIENS.existence[w].y,
-							"AlienExp",
-							6
-						)
-					);
-					ALIENS.existence.splice(w, 1);
-					SHIP.bullet.kill(q);
-					if (ALIENS.existence.length === 0) {
-						console.log("Level " + GAME.level + " clear!");
-						GAME.levelComplete = true;
-						GAME.endLevel();
-					}
-					break;
-				}
-			}
-		}
-	},
-	collisionAlienShip() {
-		if (SHIP.dead) return;
-		if (DEBUG.INVINCIBLE) return;
-		if (!SHIP.live) return;
-		var ship = new ACTOR(SHIP.ship, SHIP.x, SHIP.y, 0);
-		var AEL = ALIENS.existence.length;
-		var hit;
-		for (var w = AEL - 1; w >= 0; w--) {
-			hit = ENGINE.collision(ship, ALIENS.existence[w]);
-			if (hit) {
-				GAME.score += ALIENS.existence[w].score;
-				TEXT.score();
-				EXPLOSIONS.pool.push(
-					new AnimationSPRITE(
-						ALIENS.existence[w].x,
-						ALIENS.existence[w].y,
-						"AlienExp",
-						6
-					)
-				);
-				ALIENS.existence.splice(w, 1);
-				EXPLOSIONS.pool.push(new AnimationSPRITE(SHIP.x, SHIP.y, "ShipExp", 8));
-				if (!DEBUG.ENDLESS_LIFE) GAME.lives--;
-				TEXT.ships();
-				ALIENS.ready = false;
-				if (ALIENS.existence.length === 0) GAME.levelComplete = true;
-				SHIP.init();
-				SHIP.live = false;
-				break;
-			}
-		}
-		if (GAME.lives < 0) GAME.over();
-	},
-	collisionBulletRubble() {
-		var SBAL = SHIP.bullet.arsenal.length;
-		var ABAL = ALIENS.bullet.arsenal.length;
-		var RPL = RUBBLE.pool.length;
-		var hit;
-		if (SBAL === 0 && ABAL === 0) return false;
-		if (SBAL > 0) {
-			for (var q = SBAL - 1; q >= 0; q--) {
-				var BulletActor = new ACTOR(
-					"bullet",
-					SHIP.bullet.arsenal[q].x,
-					SHIP.bullet.arsenal[q].y,
-					0
-				);
-				RPL = RUBBLE.pool.length;
-				for (var w = RPL - 1; w >= 0; w--) {
-					hit = ENGINE.collision(BulletActor, RUBBLE.pool[w].actor);
-					if (hit) {
-						SHIP.bullet.kill(q);
-						RUBBLE.pool[w].lives--;
-						if (RUBBLE.pool[w].lives <= 0) {
-							GAME.score += RUBBLE.pool[w].actor.score;
-							TEXT.score();
-							RUBBLE.kill(w);
-						}
-					}
-				}
-			}
-		}
-		if (ABAL > 0) {
-			for (var z = ABAL - 1; z >= 0; z--) {
-				var AlienBullet = new ACTOR(
-					"alienbullet",
-					ALIENS.bullet.arsenal[z].x,
-					ALIENS.bullet.arsenal[z].y,
-					0
-				);
-				RPL = RUBBLE.pool.length;
-				for (var ww = RPL - 1; ww >= 0; ww--) {
-					hit = ENGINE.collision(AlienBullet, RUBBLE.pool[ww].actor);
-					if (hit) {
-						ALIENS.bullet.kill(z);
-						RUBBLE.pool[ww].lives--;
-						if (RUBBLE.pool[ww].lives <= 0) {
-							GAME.score += RUBBLE.pool[ww].actor.score;
-							TEXT.score();
-							RUBBLE.kill(ww);
-						}
-					}
-				}
-			}
-		}
-	},
-	collisionAlienRubble() {
-		var AEL = ALIENS.existence.length;
-		var RPL = RUBBLE.pool.length;
-		if (AEL === 0 || RPL === 0) return false;
-		var hit;
-		for (var q = RPL - 1; q >= 0; q--) {
-			AEL = ALIENS.existence.length;
-			for (var w = AEL - 1; w >= 0; w--) {
-				hit = ENGINE.collision(ALIENS.existence[w], RUBBLE.pool[q].actor);
-				if (hit) {
-					GAME.score += ALIENS.existence[w].score;
-					TEXT.score();
-					EXPLOSIONS.pool.push(
-						new AnimationSPRITE(
-							ALIENS.existence[w].x,
-							ALIENS.existence[w].y,
-							"AlienExp",
-							6
-						)
-					);
-					ALIENS.existence.splice(w, 1);
-					if (ALIENS.existence.length === 0) {
-						GAME.levelComplete = true;
-						GAME.endLevel();
-					}
-					RPL = RUBBLE.pool.length;
-					if (RPL === 0) return;
-					RUBBLE.pool[q].lives--;
-					if (RUBBLE.pool[q].lives <= 0) {
-						GAME.score += RUBBLE.pool[q].actor.score;
-						TEXT.score();
-						RUBBLE.kill(q);
-						break;
-					}
-				}
-			}
-		}
-	},
-	drawLoadingGraph(count, HMI, text) {
-		var percent = Math.floor(count / HMI * 100);
-		var CTX = PRG.ctx;
-		CTX.clearRect(0, 0, INI.LOAD_W, INI.LOAD_H);
-		CTX.beginPath();
-		CTX.lineWidth = "1";
-		CTX.strokeStyle = "black";
-		CTX.rect(0, 0, INI.LOAD_W, INI.LOAD_H);
-		CTX.closePath();
-		CTX.stroke();
-		CTX.fillStyle = "#999";
-		CTX.fillRect(
-			1,
-			1,
-			Math.floor((INI.LOAD_W - 2) * (percent / 100)),
-			INI.LOAD_H - 2
-		);
-		CTX.fillStyle = "black";
-		CTX.font = "10px Verdana";
-		CTX.fillText(
-			text + ": " + percent + "%",
-			INI.LOAD_W * 0.1,
-			INI.LOAD_H * 0.62
-		);
-		return;
-	}
-};
-*/
-
-///////////////////////////////prg.js/////////////////////
-
 const PRG = {
-	VERSION: "1.05.03",
+	VERSION: "1.05.04",
 	NAME: "GalactiX",
-	YEAR: "2022",
+	YEAR: "2017",
 	CSS: "color: #239AFF;",
-	SOURCE: "https://www.c00lsch00l.eu/Games/AA/",
-	SRC_rel: "/Games/AA/",
-	tileGraphics: [],
+	//SOURCE: "https://www.c00lsch00l.eu/Games/AA/",
+	//SRC_rel: "/Games/AA/",
+	//tileGraphics: [],
 	INIT() {
 		console.clear();
 		console.log("%c**************************************************************************************************************************************", PRG.CSS);
@@ -537,33 +70,18 @@ const PRG = {
 		$("input#toggleAbout").val("About " + PRG.NAME);
 		$("#about fieldset legend").append(" " + PRG.NAME + " ");
 
-
-		/*$("#load").append(
-			"<canvas id ='preload_canvas' width='" +
-			INI.LOAD_W +
-			"' height='" +
-			INI.LOAD_H +
-			"'></canvas>"
-		);*/
-
-		//PRG.ctx = $("#preload_canvas")[0].getContext("2d");
 		ENGINE.autostart = true;
 		ENGINE.start = PRG.start;
 		ENGINE.readyCall = GAME.setup;
-
 		ENGINE.init();
 
-
-
-
-		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
+		//$("#temp").append("<canvas id ='temp_canvas'></canvas>");
 	},
 	setup() {
 		$("#engine_version").html(ENGINE.VERSION);
 		//$("#grid_version").html(GRID.VERSION);
 		//$("#iam_version").html(IndexArrayManagers.VERSION);
 		$("#lib_version").html(LIB.VERSION);
-
 
 		$("#toggleHelp").click(function () {
 			$("#help").toggle(400);
@@ -584,7 +102,7 @@ const PRG = {
 		$(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
 
 		ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
-		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "text"]);
+		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "text", "FPS", "button"]);
 		ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
 
 	},
@@ -602,280 +120,9 @@ const PRG = {
 
 		TITLE.startTitle();
 	},
-
-	/*
-	preLoadImages() {
-		PRG.count = 0;
-		PRG.spriteCount = 0;
-		var fileNames = getImgFileNames();
-		PRG.HMI = fileNames.length;
-		for (var ix = 0; ix < PRG.HMI; ix++) {
-			PRG.tileGraphics[ix] = new Image();
-			PRG.tileGraphics[ix].onload = cnt;
-			PRG.tileGraphics[ix].crossOrigin = "Anonymous";
-			PRG.tileGraphics[ix].src = fileNames[ix].filename;
-			$("#preload").append(
-				"<img id='" +
-				fileNames[ix].id +
-				"' src='" +
-				fileNames[ix].filename +
-				"' crossOrigin='Anonymous'/>"
-			);
-		}
-		return;
-
-		function cnt() {
-			PRG.count++;
-			ENGINE.drawLoadingGraph(PRG.count, PRG.HMI, "Loading");
-
-			if (PRG.count === PRG.HMI) {
-				PRG.imagesLoaded = true;
-				ENGINE.tileToImage();
-				Creation = [
-					{
-						origin: SPRITE.invader,
-						name: "invader",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.redinvader,
-						name: "redinvader",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.greeninvader,
-						name: "greeninvader",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.bullet,
-						name: "bullet",
-						angles: [0]
-					},
-					{
-						origin: SPRITE.alienbullet,
-						name: "alienbullet",
-						angles: [0]
-					},
-					{
-						origin: SPRITE.whiteship,
-						name: "whiteship",
-						angles: [0]
-					},
-					{
-						origin: SPRITE.darkship,
-						name: "darkship",
-						angles: [0]
-					},
-					{
-						origin: SPRITE.redship,
-						name: "redship",
-						angles: [0]
-					},
-					{
-						origin: SPRITE.redship,
-						name: "slimship",
-						angles: [0]
-					},
-					{
-						origin: SPRITE.Asteroid1,
-						name: "Asteroid1",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.Asteroid2,
-						name: "Asteroid2",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.Asteroid3,
-						name: "Asteroid3",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.Asteroid4,
-						name: "Asteroid4",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.Asteroid5,
-						name: "Asteroid5",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.Asteroid6,
-						name: "Asteroid6",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					},
-					{
-						origin: SPRITE.basic1Fighter,
-						name: "basic1Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic3Attacker,
-						name: "basic3Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic1Attacker,
-						name: "basic1Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic1Charger,
-						name: "basic1Charger",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic2Attacker,
-						name: "basic2Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic4Attacker,
-						name: "basic4Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic2Fighter,
-						name: "basic2Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic2Charger,
-						name: "basic2Charger",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic5Attacker,
-						name: "basic5Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic3Fighter,
-						name: "basic3Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic3Charger,
-						name: "basic3Charger",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic4Charger,
-						name: "basic4Charger",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic7Attacker,
-						name: "basic7Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic4Fighter,
-						name: "basic4Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic5Fighter,
-						name: "basic5Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic6Fighter,
-						name: "basic6Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic7Fighter,
-						name: "basic7Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic8Fighter,
-						name: "basic8Fighter",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic6Attacker,
-						name: "basic6Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.basic5Attacker,
-						name: "basic5Attacker",
-						angles: [],
-						series: { first: 0, last: 350, step: 10 }
-					},
-					{
-						origin: SPRITE.alienMother,
-						name: "alienMother",
-						angles: [],
-						series: { first: 0, last: 355, step: 5 }
-					}
-				];
-
-				ENGINE.createSprites();
-			}
-		}
-
-		function getImgFileNames() {
-			var fileNames = [];
-			for (var prop in World) {
-				var LN = World[prop].length;
-				if (LN) {
-					for (var ix = 0; ix < LN; ix++) {
-						var name = PRG.SOURCE + World[prop][ix].id + "." + World[prop][ix].type;
-						fileNames.push({
-							id: World[prop][ix].id,
-							filename: name
-						});
-					}
-				}
-			}
-			return fileNames;
-		}
-	}*/
 };
 
-const map = { 17: false, 37: false, 38: false, 39: false, 40: false };
-/////////////////////////////////////////score.js//////////////
-
-
-
-////////////////////end of score.js/////////////////////////
-
-///////////////Preloading////////////////////
-
+//const map = { 17: false, 37: false, 38: false, 39: false, 40: false };
 
 /*
 var Tile = function (id, x, y, type, name) {
@@ -1504,20 +751,55 @@ var RUBBLE = {
 };
 */
 //////////////
+
 const GAME = {
+	getRealLevel() {
+		return GAME.level % INI.LAST_LEVEL;
+	},
 	start() {
-		$("#bottom")[0].scrollIntoView();
-		$(document).keydown(GAME.checkKey);
-		$(document).keyup(GAME.clearKey);
+		console.log("GAME started");
+		if (AUDIO.Title) {
+			AUDIO.Title.pause();
+			AUDIO.Title.currentTime = 0;
+		}
+
+
+		$(ENGINE.topCanvas).off("mousemove", ENGINE.mouseOver);
+		$(ENGINE.topCanvas).off("click", ENGINE.mouseClick);
+		$(ENGINE.topCanvas).css("cursor", "");
+		ENGINE.hideMouse();
+
+		$("#pause").prop("disabled", false);
+		$("#pause").off();
+		GAME.paused = true;
+		ENGINE.watchVisibility(GAME.lostFocus);
+		ENGINE.GAME.start(16);
+
+		//$(document).keyup(GAME.clearKey);
+
+		//$("#bottom")[0].scrollIntoView();
+		//$(document).keydown(GAME.checkKey);
+		//$(document).keyup(GAME.clearKey);
 		GAME.level = 1;
+
 		/****************/
+
 		if (DEBUG.CHEAT) {
 			GAME.level = DEBUG.LEVEL;
 		}
+
 		/****************/
 		GAME.score = 0;
-		GAME.extraLife = [].concat(SCORE.extraLife);
+		GAME.extraLife = SCORE.extraLife.clone();
 		GAME.lives = 4;
+
+		GAME.fps = new FPS_short_term_measurement(300);
+		GAME.ended = false;
+
+		//SHIP.firstInit(); //
+		GAME.levelStart(GAME.level);
+
+		/*
 		ALIENS.init();
 		ALIENS.ready = false;
 		SHIP.dead = false;
@@ -1527,119 +809,34 @@ const GAME = {
 		GAME.frame = {};
 		GAME.frame.start = null;
 		GAME.firstFrameDraw();
-		GAME.run();
+		GAME.run();*/
+
+		/** DEBUG */
+		ENGINE.GAME.ANIMATION.stop();
 	},
 	setup() {
 		console.info("GAME SETUP");
 	},
-	stop() {
-		console.log(PRG.NAME, " is stopping.");
-		GAME.stopAnimation = true;
-		$(document).off("keyup", GAME.clearKey);
-		$(document).off("keydown", GAME.checkKey);
-		GAME.end();
+	prepareForRestart() {
+		let clear = ["background", "text", "FPS", "button", "bottomText"];
+		ENGINE.clearManylayers(clear);
 	},
-	over() {
-		if (SHIP.dead) return;
-		RUBBLE.purge(false);
-		console.log("GAME OVER");
-		SHIP.dead = true;
-		ENGINE.clearLayer("text");
-		TITLE.gameOver();
-		setTimeout(GAME.stop, 2000);
-	},
-	end() {
-		TITLE.render();
-		console.log(PRG.NAME, " ended.");
-		SCORE.checkScore(GAME.score);
-		SCORE.hiScore();
-		TEXT.score();
-		$("#startGame").removeClass("hidden");
-	},
-	run() {
-		if (!GAME.frame.start) GAME.frame.start = Date.now();
-		var current = Date.now();
-		GAME.frame.delta = current - GAME.frame.start;
-		if (GAME.frame.delta > INI.ANIMATION_INTERVAL) {
-			ALIENS.move();
-			ALIENS.shoot();
-			SHIP.bullet.move();
-			ALIENS.bullet.move();
-			RUBBLE.move();
-			GAME.respond();
-			GAME.frameDraw();
-			ENGINE.collisionBulletAlien();
-			ENGINE.collisionBulletShip();
-			ENGINE.collisionAlienShip();
-			ENGINE.collisionBulletRubble();
-			ENGINE.collisionAlienRubble();
-			GAME.frame.start = null;
-		}
-		if (GAME.stopAnimation) {
-			return;
-		} else requestAnimationFrame(GAME.run);
-	},
-	firstFrameDraw() {
-		TITLE.render();
-		BACKGROUND.render();
-		TEXT.ships();
-		TEXT.score();
-		SHIP.draw();
-		ALIENS.draw();
-		RUBBLE.draw();
-	},
-	frameDraw() {
-		SHIP.draw();
-		ENGINE.clearLayer("bullets");
-		SHIP.bullet.draw();
-		ALIENS.bullet.draw();
-		ALIENS.draw();
-		RUBBLE.draw();
-		EXPLOSIONS.draw();
-	},
-	endLevel() {
-		GAME.levelComplete = true;
-		ALIENS.bullet.killAll();
-		var RPL = RUBBLE.pool.length;
-		RUBBLE.purge(true);
-		ENGINE.clearLayer("text");
-		var y = INI.GAME_HEIGHT / 2 - 100;
-		var accuracy = SHIP.killShots / SHIP.shots * 100;
-		accuracy = accuracy.toFixed(1);
-		var fs = 32;
-		TITLE.centeredText("Wave " + GAME.level + " destroyed", fs, y);
-		y += fs;
-		TITLE.centeredText("Accuracy: " + accuracy + "%", fs, y);
-		y += fs;
-		var bonus = parseInt(accuracy * GAME.level * 1000 / 100, 10);
-		TITLE.centeredText("Level bonus: " + bonus, fs, y);
-		y += fs;
-		TITLE.centeredText("Asteroid bonus: " + RPL + " * 100 = " + RPL * 100, fs, y);
-		GAME.score += bonus;
-		TEXT.score();
-		setTimeout(function () {
-			GAME.nextLevel();
-		}, INI.LEVEL_DELAY);
-	},
-	nextLevel() {
-		ENGINE.clearLayer("text");
-		GAME.level++;
-		console.log("Ascending to level ", GAME.level);
-		ALIENS.ready = false;
-		GAME.initLevel(GAME.level);
-	},
-	createLevel(level) {
-		GAME.levels[level] = $.extend(true, {}, GAME.levels[level - 1]);
-		var layout = GAME.levels[level].layout;
-		for (var row in layout) {
-			layout[row].actor = "random";
-		}
-		GAME.levels[level].chargers++;
-		GAME.levels[level].alienBullets++;
-		GAME.levels[level].AXS++;
-		GAME.levels[level].chargerDescent;
+	levelStart(level) {
+		console.info(" - start -", GAME.level);
+		GAME.prepareForRestart();
+		//DESTRUCTION_ANIMATION.init(null);
+		//PROFILE_BALLISTIC.init(MAP[GAME.getRealLevel()]);
+		//PROFILE_ACTORS.init(MAP[GAME.getRealLevel()]);
+		//GAME.initLevel(GAME.getRealLevel());
+		GAME.initLevel(level);
+		GAME.continueLevel(level);
 	},
 	initLevel(level) {
+		console.info("init level", level);
+		GAME.levelComplete = false;
+	},
+	/*
+initLevel(level) {
 		if (level > INI.LAST_LEVEL) {
 			GAME.createLevel(level);
 		}
@@ -1694,6 +891,126 @@ const GAME = {
 		}
 		RUBBLE.set(GAME.levels[level].asteroids);
 	},
+	*/
+
+	continueLevel(level) {
+        console.log("game continues on level", level);
+        GAME.levelExecute(level);
+    },
+	levelExecute(level){
+		console.log("level", level, "executes");
+        GAME.firstFrameDraw(); 
+
+		//GAME.resume();
+	},
+	stop() {
+		console.log(PRG.NAME, " is stopping.");
+		GAME.stopAnimation = true;
+		$(document).off("keyup", GAME.clearKey);
+		$(document).off("keydown", GAME.checkKey);
+		GAME.end();
+	},
+	over() {
+		if (SHIP.dead) return;
+		RUBBLE.purge(false);
+		console.log("GAME OVER");
+		SHIP.dead = true;
+		ENGINE.clearLayer("text");
+		TITLE.gameOver();
+		setTimeout(GAME.stop, 2000);
+	},
+	end() {
+		TITLE.render();
+		console.log(PRG.NAME, " ended.");
+		SCORE.checkScore(GAME.score);
+		SCORE.hiScore();
+		TEXT.score();
+		$("#startGame").removeClass("hidden");
+	},
+	run() {
+		if (!GAME.frame.start) GAME.frame.start = Date.now();
+		var current = Date.now();
+		GAME.frame.delta = current - GAME.frame.start;
+		if (GAME.frame.delta > INI.ANIMATION_INTERVAL) {
+			ALIENS.move();
+			ALIENS.shoot();
+			SHIP.bullet.move();
+			ALIENS.bullet.move();
+			RUBBLE.move();
+			GAME.respond();
+			GAME.frameDraw();
+			ENGINE.collisionBulletAlien();
+			ENGINE.collisionBulletShip();
+			ENGINE.collisionAlienShip();
+			ENGINE.collisionBulletRubble();
+			ENGINE.collisionAlienRubble();
+			GAME.frame.start = null;
+		}
+		if (GAME.stopAnimation) {
+			return;
+		} else requestAnimationFrame(GAME.run);
+	},
+	firstFrameDraw() {
+		TITLE.render();
+		BACKGROUND.render();
+		//TEXT.ships();
+		//TEXT.score();
+		//SHIP.draw();
+		//ALIENS.draw();
+		//RUBBLE.draw();
+	},
+	frameDraw() {
+		SHIP.draw();
+		ENGINE.clearLayer("bullets");
+		SHIP.bullet.draw();
+		ALIENS.bullet.draw();
+		ALIENS.draw();
+		RUBBLE.draw();
+		EXPLOSIONS.draw();
+	},
+	endLevel() {
+		GAME.levelComplete = true;
+		ALIENS.bullet.killAll();
+		var RPL = RUBBLE.pool.length;
+		RUBBLE.purge(true);
+		ENGINE.clearLayer("text");
+		var y = INI.GAME_HEIGHT / 2 - 100;
+		var accuracy = SHIP.killShots / SHIP.shots * 100;
+		accuracy = accuracy.toFixed(1);
+		var fs = 32;
+		TITLE.centeredText("Wave " + GAME.level + " destroyed", fs, y);
+		y += fs;
+		TITLE.centeredText("Accuracy: " + accuracy + "%", fs, y);
+		y += fs;
+		var bonus = parseInt(accuracy * GAME.level * 1000 / 100, 10);
+		TITLE.centeredText("Level bonus: " + bonus, fs, y);
+		y += fs;
+		TITLE.centeredText("Asteroid bonus: " + RPL + " * 100 = " + RPL * 100, fs, y);
+		GAME.score += bonus;
+		TEXT.score();
+		setTimeout(function () {
+			GAME.nextLevel();
+		}, INI.LEVEL_DELAY);
+	},
+	nextLevel() {
+		ENGINE.clearLayer("text");
+		GAME.level++;
+		console.log("Ascending to level ", GAME.level);
+		ALIENS.ready = false;
+		GAME.initLevel(GAME.level);
+	},
+	createLevel(level) {
+		GAME.levels[level] = $.extend(true, {}, GAME.levels[level - 1]);
+		var layout = GAME.levels[level].layout;
+		for (var row in layout) {
+			layout[row].actor = "random";
+		}
+		GAME.levels[level].chargers++;
+		GAME.levels[level].alienBullets++;
+		GAME.levels[level].AXS++;
+		GAME.levels[level].chargerDescent;
+	},
+
 	respond() {
 		if (map[17]) {
 			SHIP.shoot();
@@ -1715,7 +1032,7 @@ const GAME = {
 			return;
 		}
 	},
-	clearKey(e) {
+	/*clearKey(e) {
 		e = e || window.event;
 		if (e.keyCode in map) {
 			map[e.keyCode] = false;
@@ -1727,7 +1044,7 @@ const GAME = {
 			map[e.keyCode] = true;
 			e.preventDefault();
 		}
-	},
+	},*/
 	levels: {
 		1: {
 			maxBullets: 1,
@@ -2164,7 +1481,72 @@ const GAME = {
 				}
 			}
 		}
-	}
+	},
+	setTitle() {
+		const text = GAME.generateTitleText();
+		const RD = new RenderData("Annie", 16, "#0E0", "bottomText");
+		const SQ = new RectArea(0, 0, LAYER.bottomText.canvas.width, LAYER.bottomText.canvas.height);
+		GAME.movingText = new MovingText(text, 4, RD, SQ);
+	},
+	generateTitleText() {
+		let text = `${PRG.NAME} ${PRG.VERSION
+			}, a game by Lovro Selič, ${"\u00A9"} LaughingSkull ${PRG.YEAR
+			}. 
+             
+            Music: 'Dance In the Rain' written and performed by LaughingSkull, ${"\u00A9"
+			} 2014 Lovro Selič. `;
+		text += "     ENGINE, GRID, IAM, .... and GAME code by Lovro Selič using JavaScript. ";
+		text += "     Remastered and ported to ENGINE v4 in 2024. ";
+		text = text.split("").join(String.fromCharCode(8202));
+		return text;
+	},
+	runTitle() {
+		if (ENGINE.GAME.stopAnimation) return;
+		GAME.movingText.process();
+		GAME.titleFrameDraw();
+	},
+	titleFrameDraw() {
+		GAME.movingText.draw();
+	},
+	addScore(score) {
+		GAME.score += score;
+		TEXT.score();
+	},
+	lostFocus() {
+        if (GAME.paused) return;
+        GAME.clickPause();
+    },
+    clickPause() {
+        if (GAME.levelCompleted) return;
+        $("#pause").trigger("click");
+        ENGINE.GAME.keymap[ENGINE.KEY.map.F4] = false;
+    },
+    pause() {
+        if (GAME.paused) return;
+        if (GAME.levelFinished) return;
+        if (PLANE.dead) return;
+        console.log("%cGAME paused.", PRG.CSS);
+        let GameRD = new RenderData("Arcade", 48, "#DDD", "text", "#000", 2, 2, 2);
+        ENGINE.TEXT.setRD(GameRD);
+        $("#pause").prop("value", "Resume Game [F4]");
+        $("#pause").off("click", GAME.pause);
+        $("#pause").on("click", GAME.resume);
+        ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.clickPause, "F4"));
+        ENGINE.TEXT.centeredText("Game Paused", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
+        GAME.paused = true;
+    },
+    resume() {
+        console.log("%cGAME resumed.", PRG.CSS);
+
+        $("#pause").prop("value", "Pause Game [F4]");
+        $("#pause").off("click", GAME.resume);
+        $("#pause").on("click", GAME.pause);
+        ENGINE.clearLayer("text");
+        ENGINE.GAME.ANIMATION.resetTimer();
+        ENGINE.GAME.ANIMATION.next(GAME.run);
+        GAME.paused = false;
+    },
+
 };
 /*var BulletClass = function (x, y) {
 	this.x = x;
@@ -2285,7 +1667,7 @@ var SHIP = {
 
 const BACKGROUND = {
 	render() {
-		ENGINE.draw("background", 0, 0, SPRITE.stars);
+		ENGINE.draw("background", 0, 0, TEXTURE.stars);
 	},
 	black() {
 		const CTX = LAYER.background;
@@ -2348,8 +1730,34 @@ const TEXT = {
 const TITLE = {
 	startTitle() {
 		console.info(" - start title -");
+		if (AUDIO.Title) TITLE.music();
 		TITLE.render();
 		ENGINE.draw("background", (ENGINE.gameWIDTH - TEXTURE.Title.width) / 2, (ENGINE.gameHEIGHT - TEXTURE.Title.height) / 2, TEXTURE.Title);
+		ENGINE.topCanvas = ENGINE.getCanvasName("ROOM");
+		TITLE.drawButtons();
+		$("#DOWN")[0].scrollIntoView();
+		GAME.setTitle();
+		ENGINE.GAME.start(16);
+		ENGINE.GAME.ANIMATION.next(GAME.runTitle);
+	},
+	drawButtons() {
+		ENGINE.clearLayer("button");
+		FORM.BUTTON.POOL.clear();
+		const w = 166;
+		const h = 24;
+		let x = ((ENGINE.gameWIDTH - TEXTURE.Title.width) / 2);
+		let y = ENGINE.gameHEIGHT - (3 * h);
+
+		let startBA = new Area(x, y, w, h);
+		const buttonColors = new ColorInfo("#F00", "#A00", "#222", "#666", 13);
+		const musicColors = new ColorInfo("#0E0", "#090", "#222", "#666", 13);
+		FORM.BUTTON.POOL.push(new Button("Start game", startBA, buttonColors, GAME.start));
+		y += 1.8 * h;
+		let music = new Area(x, y, w, h);
+		FORM.BUTTON.POOL.push(new Button("Play title music", music, musicColors, TITLE.music));
+		FORM.BUTTON.draw();
+		$(ENGINE.topCanvas).on("mousemove", { layer: ENGINE.topCanvas }, ENGINE.mouseOver);
+		$(ENGINE.topCanvas).on("click", { layer: ENGINE.topCanvas }, ENGINE.mouseClick);
 	},
 	render() {
 		TITLE.background();
@@ -2369,7 +1777,6 @@ const TITLE = {
 	text(text, fs, x, y) {
 		var CTX = LAYER["text"];
 		CTX.fillStyle = "#FFF";
-		//CTX.font = fs + "px Consolas";
 		CTX.font = fs + "px Arcade";
 		CTX.shadowColor = "#333333";
 		CTX.shadowOffsetX = 3;
@@ -2426,7 +1833,10 @@ const TITLE = {
 		let CTX = LAYER.title;
 		CTX.fillStyle = "#000";
 		CTX.roundRect(0, 0, ENGINE.gameWIDTH, ENGINE.titleHEIGHT, { upperLeft: 10, upperRight: 10, lowerLeft: 0, lowerRight: 0 }, true, true);
-	}
+	},
+	music() {
+		AUDIO.Title.play();
+	},
 };
 
 $(document).ready(function () {
