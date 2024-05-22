@@ -738,7 +738,7 @@ var ENGINE = {
 ///////////////////////////////prg.js/////////////////////
 
 var PRG = {
-	VERSION: "1.04",
+	VERSION: "1.05.00",
 	NAME: "GalactiX",
 	SOURCE: "https://www.c00lsch00l.eu/Games/AA/",
 	SRC_rel: "/Games/AA/",
@@ -749,7 +749,7 @@ var PRG = {
 			PRG.NAME +
 				" " +
 				PRG.VERSION +
-				" by Lovro Selic, (c) C00lSch00l 2017 on " +
+				" by Lovro Selic, (c) LaughingSkull 2017 on " +
 				navigator.userAgent
 		);
 		PRG.isFirefox = navigator.userAgent.indexOf("Firefox");
@@ -758,7 +758,7 @@ var PRG = {
 			PRG.NAME +
 				" V" +
 				PRG.VERSION +
-				" by Lovro Selič <span style='font-size:14px'>&copy</span> C00lSch00l 2017"
+				" by Lovro Selič <span style='font-size:14px'>&copy</span> LaughingSkull 2017"
 		);
 		$("input#toggleAbout").val("About " + PRG.NAME);
 		$("#about fieldset legend").append(" " + PRG.NAME + " ");
@@ -787,12 +787,21 @@ var PRG = {
 		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
 	},
 	setup: function() {
+		//$("#engine_version").html(ENGINE.VERSION);
+		//$("#grid_version").html(GRID.VERSION);
+		//$("#iam_version").html(IndexArrayManagers.VERSION);
+		//$("#lib_version").html(LIB.VERSION);
+
+
 		$("#toggleHelp").click(function() {
 			$("#help").toggle(400);
 		});
 		$("#toggleAbout").click(function() {
 			$("#about").toggle(400);
 		});
+		$("#toggleVersion").click(function () {
+            $("#debug").toggle(400);
+        });
 	},
 	start: function() {
 		console.log(PRG.NAME + " started.");
@@ -1202,6 +1211,7 @@ var Tile = function(id, x, y, type, name) {
 	this.type = type;
 	this.name = name;
 };
+
 var Invader = new Tile("invader", 48, 38, "png", "invader");
 var RedInvader = new Tile("redinvader", 44, 40, "png", "redinvader");
 var GreenInvader = new Tile("greeninvader", 48, 35, "png", "greeninvader");
@@ -2711,7 +2721,7 @@ var TITLE = {
 		x = 400;
 		CTX.font = "14px Consolas";
 		//CTX.font = "14px Arcade";
-		CTX.fillText(String.fromCharCode(169) + " C00lSch00l 2017", x, y);
+		CTX.fillText(String.fromCharCode(169) + " LaughingSkull 2017", x, y);
 	},
 	background: function() {
 		var CTX = LAYER.title;
