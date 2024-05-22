@@ -520,7 +520,7 @@ const ENGINE = {
 ///////////////////////////////prg.js/////////////////////
 
 const PRG = {
-	VERSION: "1.05.02",
+	VERSION: "1.05.03",
 	NAME: "GalactiX",
 	YEAR: "2022",
 	CSS: "color: #239AFF;",
@@ -553,9 +553,7 @@ const PRG = {
 
 		ENGINE.init();
 
-		$(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
-		ENGINE.addBOX("TITLE", INI.TITLE_HEIGHT, 1, ["title"]);
-		ENGINE.addBOX("ROOM", INI.GAME_HEIGHT, 8, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "text"]);
+
 
 
 		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
@@ -578,6 +576,16 @@ const PRG = {
 		});
 
 		ENGINE.gameWIDTH = 960;
+		ENGINE.titleHEIGHT = INI.TITLE_HEIGHT;
+		ENGINE.gameHEIGHT = INI.GAME_HEIGHT;
+		ENGINE.bottomHEIGHT = 40;
+
+		$("#bottom").css("margin-top", ENGINE.gameHEIGHT + ENGINE.titleHEIGHT + ENGINE.bottomHEIGHT);
+		$(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
+
+		ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
+		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "text"]);
+		ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
 
 	},
 	start() {
@@ -2278,6 +2286,11 @@ var SHIP = {
 const BACKGROUND = {
 	render() {
 		ENGINE.draw("background", 0, 0, SPRITE.stars);
+	},
+	black() {
+		const CTX = LAYER.background;
+		CTX.fillStyle = "#000";
+		CTX.fillRect(0, 0, ENGINE.gameWIDTH, ENGINE.gameHEIGHT);
 	}
 };
 
@@ -2335,10 +2348,14 @@ const TEXT = {
 const TITLE = {
 	startTitle() {
 		console.info(" - start title -");
+		TITLE.render();
+		ENGINE.draw("background", (ENGINE.gameWIDTH - TEXTURE.Title.width) / 2, (ENGINE.gameHEIGHT - TEXTURE.Title.height) / 2, TEXTURE.Title);
 	},
 	render() {
 		TITLE.background();
 		TITLE.title();
+		BACKGROUND.black();
+		TITLE.bottomBackground();
 	},
 	bigText(text, fs) {
 		var x = ENGINE.gameWIDTH / 2;
@@ -2400,23 +2417,15 @@ const TITLE = {
 		CTX.font = "14px Consolas";
 		CTX.fillText(String.fromCharCode(169) + " LaughingSkull 2017", x, y);
 	},
-	background() {
-		var CTX = LAYER.title;
+	bottomBackground() {
+		let CTX = LAYER.bottom;
 		CTX.fillStyle = "#000";
-		CTX.roundRect(
-			0,
-			0,
-			ENGINE.gameWIDTH,
-			INI.TITLE_HEIGHT,
-			{
-				upperLeft: 10,
-				upperRight: 10,
-				lowerLeft: 10,
-				lowerRight: 10
-			},
-			true,
-			true
-		);
+		CTX.roundRect(0, 0, ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, { upperLeft: 0, upperRight: 0, lowerLeft: 10, lowerRight: 10 }, true, true);
+	},
+	background() {
+		let CTX = LAYER.title;
+		CTX.fillStyle = "#000";
+		CTX.roundRect(0, 0, ENGINE.gameWIDTH, ENGINE.titleHEIGHT, { upperLeft: 10, upperRight: 10, lowerLeft: 0, lowerRight: 0 }, true, true);
 	}
 };
 
