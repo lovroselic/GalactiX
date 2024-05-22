@@ -10,7 +10,7 @@
 
 
 /////////////debug vars: remove all in production/////////////////////
-var DEBUG = {};
+const DEBUG = {};
 //DEBUG.CHEAT = true;
 //DEBUG.ENDLESS_LIFE = true;
 //DEBUG.INVINCIBLE = true;
@@ -19,15 +19,52 @@ var DEBUG = {};
 //DEBUG.LEVEL = 10;
 ////////////////////////////////////////////////////////////////////
 
+const CONST = {
+	SPACE: "\u0020",
+	NBS: "&nbsp",
+	NEWLINE: "\n"
+};
 
-var UP = new Vector(0, -1);
-var DOWN = new Vector(0, 1);
-var LEFT = new Vector(-1, 0);
-var RIGHT = new Vector(1, 0);
+const INI = {
+	LOAD_W: 202,
+	LOAD_H: 22,
+	TITLE_HEIGHT: 72,
+	GAME_HEIGHT: 768,
+	ANIMATION_INTERVAL: 17,
+	BORDER_PADDING: 24,
+	BOTTOM_PADDING: 32,
+	SHIPS_SPACE: 96,
+	BULLET_TIMEOUT: 200,
+	COLLISION_SAFE: 50,
+	PADDING: 72,
+	TOP_Y: 24,
+	ALIEN_EXP_MAX: 6,
+	START_TIMEOUT: 2500,
+	SHIP_TIMEOUT: 1000,
+	ALIEN_DELAY_TIMEOUT: 600,
+	RUBBLE_Y: 540,
+	METEOR_OUT: 30,
+	METEOR_ROTATION_PROBABILITY: 15,
+	LEVEL_DELAY: 5000,
+	LAST_LEVEL: 11,
+	ATTACK: 420,
+	sprite_maxW: 64,
+	sprite_maxH: 64
+};
+
+/*
+const UP = new Vector(0, -1);
+const DOWN = new Vector(0, 1);
+const LEFT = new Vector(-1, 0);
+const RIGHT = new Vector(1, 0);
+*/
 
 //////////////////engine.js/////////////////////////
-var ENGINE = {
-	init: function () {
+
+/*
+const ENGINE = {
+	VERSION: "GEN-1",
+	init() {
 		LAYER = {};
 		SPRITE = {};
 		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
@@ -38,7 +75,7 @@ var ENGINE = {
 	gameWindowId: "#game",
 	gameWIDTH: 960,
 	currentTOP: 0,
-	addBOX: function (id, height, layers, alias) {
+	addBOX(id, height, layers, alias) {
 		if (id == null) return;
 		if (height == null) return;
 		layers = layers || 1;
@@ -82,26 +119,26 @@ var ENGINE = {
 			ENGINE.currentTOP = ENGINE.currentTOP + height;
 		}
 	},
-	spriteDraw: function (layer, X, Y, image) {
+	spriteDraw(layer, X, Y, image) {
 		var CX = X - image.width / 2;
 		var CY = Y - image.height / 2;
 		var CTX = LAYER[layer];
 		CTX.drawImage(image, CX, CY);
 	},
-	draw: function (layer, X, Y, image) {
+	draw(layer, X, Y, image) {
 		var CTX = LAYER[layer];
 		CTX.drawImage(image, X, Y);
 	},
-	clearLayer: function (layer) {
+	clearLayer(layer) {
 		var CTX = LAYER[layer];
 		CTX.clearRect(0, 0, CTX.canvas.width, CTX.canvas.height);
 	},
-	fillLayer: function (layer, colour) {
+	fillLayer(layer, colour) {
 		var CTX = LAYER[layer];
 		CTX.fillStyle = colour;
 		CTX.fillRect(0, 0, CTX.canvas.width, CTX.canvas.height);
 	},
-	tileToImage: function () {
+	tileToImage() {
 		var image;
 		for (var prop in World) {
 			var LN = World[prop].length;
@@ -113,7 +150,7 @@ var ENGINE = {
 			}
 		}
 	},
-	trimCanvas: function (data) {
+	trimCanvas(data) {
 		var top = 0,
 			bottom = data.height,
 			left = 0,
@@ -141,7 +178,7 @@ var ENGINE = {
 			return true;
 		}
 	},
-	rotateImage: function (image, degree, newName) {
+	rotateImage(image, degree, newName) {
 		var CTX = LAYER.temp;
 		var CW = image.width;
 		var CH = image.height;
@@ -172,7 +209,7 @@ var ENGINE = {
 		SPRITE[newName].width = CTX.canvas.width;
 		SPRITE[newName].height = CTX.canvas.height;
 	},
-	createSprites: function () {
+	createSprites() {
 		var LN = Creation.length;
 		var totalLength = 0;
 		for (var x = 0; x < LN; x++) {
@@ -195,7 +232,7 @@ var ENGINE = {
 		}
 		PRG.HMCI = totalLength;
 	},
-	creationSpriteCount: function () {
+	creationSpriteCount() {
 		PRG.spriteCount++;
 		ENGINE.drawLoadingGraph(PRG.spriteCount, PRG.HMCI, "Sprites");
 		if (PRG.spriteCount === PRG.HMCI) {
@@ -204,7 +241,7 @@ var ENGINE = {
 			$("#startGame").on("click", PRG.start);
 		}
 	},
-	collision: function (actor1, actor2) {
+	collision(actor1, actor2) {
 		var X = Math.abs(actor1.x - actor2.x);
 		var Y = Math.abs(actor1.y - actor2.y);
 		if (Y >= INI.COLLISION_SAFE) return false;
@@ -260,7 +297,7 @@ var ENGINE = {
 		}
 		return false;
 	},
-	collisionBulletShip: function () {
+	collisionBulletShip() {
 		if (SHIP.dead) return;
 		if (DEBUG.INVINCIBLE) return;
 		if (!SHIP.live) return;
@@ -289,7 +326,7 @@ var ENGINE = {
 		}
 		if (GAME.lives < 0) GAME.over();
 	},
-	collisionBulletAlien: function () {
+	collisionBulletAlien() {
 		var SBAL = SHIP.bullet.arsenal.length;
 		if (SBAL === 0) return;
 		for (var q = SBAL - 1; q >= 0; q--) {
@@ -327,7 +364,7 @@ var ENGINE = {
 			}
 		}
 	},
-	collisionAlienShip: function () {
+	collisionAlienShip() {
 		if (SHIP.dead) return;
 		if (DEBUG.INVINCIBLE) return;
 		if (!SHIP.live) return;
@@ -360,7 +397,7 @@ var ENGINE = {
 		}
 		if (GAME.lives < 0) GAME.over();
 	},
-	collisionBulletRubble: function () {
+	collisionBulletRubble() {
 		var SBAL = SHIP.bullet.arsenal.length;
 		var ABAL = ALIENS.bullet.arsenal.length;
 		var RPL = RUBBLE.pool.length;
@@ -413,7 +450,7 @@ var ENGINE = {
 			}
 		}
 	},
-	collisionAlienRubble: function () {
+	collisionAlienRubble() {
 		var AEL = ALIENS.existence.length;
 		var RPL = RUBBLE.pool.length;
 		if (AEL === 0 || RPL === 0) return false;
@@ -451,7 +488,7 @@ var ENGINE = {
 			}
 		}
 	},
-	drawLoadingGraph: function (count, HMI, text) {
+	drawLoadingGraph(count, HMI, text) {
 		var percent = Math.floor(count / HMI * 100);
 		var CTX = PRG.ctx;
 		CTX.clearRect(0, 0, INI.LOAD_W, INI.LOAD_H);
@@ -478,52 +515,53 @@ var ENGINE = {
 		return;
 	}
 };
+*/
 
 ///////////////////////////////prg.js/////////////////////
 
-var PRG = {
-	VERSION: "1.05.01",
+const PRG = {
+	VERSION: "1.05.02",
 	NAME: "GalactiX",
+	YEAR: "2022",
+	CSS: "color: #239AFF;",
 	SOURCE: "https://www.c00lsch00l.eu/Games/AA/",
 	SRC_rel: "/Games/AA/",
 	tileGraphics: [],
-	INIT: function () {
+	INIT() {
 		console.clear();
-		console.log(
-			PRG.NAME +
-			" " +
-			PRG.VERSION +
-			" by Lovro Selic, (c) LaughingSkull 2017 on " +
-			navigator.userAgent
-		);
-		PRG.isFirefox = navigator.userAgent.indexOf("Firefox");
+		console.log("%c**************************************************************************************************************************************", PRG.CSS);
+		console.log(`${PRG.NAME} ${PRG.VERSION} by Lovro Selic, (c) LaughingSkull ${PRG.YEAR} on ${navigator.userAgent}`);
+		console.log("%c**************************************************************************************************************************************", PRG.CSS);
 		$("#title").html(PRG.NAME);
-		$("#version").html(
-			PRG.NAME +
-			" V" +
-			PRG.VERSION +
-			" by Lovro Selič <span style='font-size:14px'>&copy</span> LaughingSkull 2017"
-		);
+		$("#version").html(`${PRG.NAME} V${PRG.VERSION} <span style='font-size:14px'>&copy</span> LaughingSkull ${PRG.YEAR}`);
 		$("input#toggleAbout").val("About " + PRG.NAME);
 		$("#about fieldset legend").append(" " + PRG.NAME + " ");
 
-		$("#load").append(
+
+		/*$("#load").append(
 			"<canvas id ='preload_canvas' width='" +
 			INI.LOAD_W +
 			"' height='" +
 			INI.LOAD_H +
 			"'></canvas>"
-		);
-		PRG.ctx = $("#preload_canvas")[0].getContext("2d");
+		);*/
+
+		//PRG.ctx = $("#preload_canvas")[0].getContext("2d");
+		ENGINE.autostart = true;
+		ENGINE.start = PRG.start;
+		ENGINE.readyCall = GAME.setup;
+
 		ENGINE.init();
+
 		$(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
 		ENGINE.addBOX("TITLE", INI.TITLE_HEIGHT, 1, ["title"]);
-		ENGINE.addBOX("ROOM", INI.GAME_HEIGHT, 8, [			"background",			"sign",			"ship",			"aliens",			"explosion",			"rubble",			"bullets",			"text"		]);
+		ENGINE.addBOX("ROOM", INI.GAME_HEIGHT, 8, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "text"]);
+
 
 		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
 	},
-	setup: function () {
-		//$("#engine_version").html(ENGINE.VERSION);
+	setup() {
+		$("#engine_version").html(ENGINE.VERSION);
 		//$("#grid_version").html(GRID.VERSION);
 		//$("#iam_version").html(IndexArrayManagers.VERSION);
 		$("#lib_version").html(LIB.VERSION);
@@ -538,25 +576,27 @@ var PRG = {
 		$("#toggleVersion").click(function () {
 			$("#debug").toggle(400);
 		});
+
+		ENGINE.gameWIDTH = 960;
+
 	},
-	start: function () {
+	start() {
 		console.log(PRG.NAME + " started.");
 		$("#startGame").addClass("hidden");
 
 		$(document).keypress(function (event) {
-			if (event.which === 32) {
-				event.preventDefault();
-			}
-		});
-		$(document).keypress(function (event) {
-			if (event.which === 13) {
+			if (event.which === 32 || event.which === 13) {
 				event.preventDefault();
 			}
 		});
 
-		GAME.start();
+		//GAME.start();
+
+		TITLE.startTitle();
 	},
-	preLoadImages: function () {
+
+	/*
+	preLoadImages() {
 		PRG.count = 0;
 		PRG.spriteCount = 0;
 		var fileNames = getImgFileNames();
@@ -816,41 +856,10 @@ var PRG = {
 			}
 			return fileNames;
 		}
-	}
+	}*/
 };
 
-var CONST = {
-	SPACE: "\u0020",
-	NBS: "&nbsp",
-	NEWLINE: "\n"
-};
-var INI = {
-	LOAD_W: 202,
-	LOAD_H: 22
-};
-INI.TITLE_HEIGHT = 72;
-INI.GAME_HEIGHT = 768;
-INI.ANIMATION_INTERVAL = 17;
-INI.BORDER_PADDING = 24;
-INI.BOTTOM_PADDING = 32;
-INI.SHIPS_SPACE = 96;
-INI.BULLET_TIMEOUT = 200;
-INI.COLLISION_SAFE = 50;
-INI.PADDING = 72;
-INI.TOP_Y = 24;
-INI.ALIEN_EXP_MAX = 6;
-INI.START_TIMEOUT = 2500;
-INI.SHIP_TIMEOUT = 1000;
-INI.ALIEN_DELAY_TIMEOUT = 600;
-INI.RUBBLE_Y = 540;
-INI.METEOR_OUT = 30;
-INI.METEOR_ROTATION_PROBABILITY = 15;
-INI.LEVEL_DELAY = 5000;
-INI.LAST_LEVEL = 11;
-INI.ATTACK = 420;
-var map = { 17: false, 37: false, 38: false, 39: false, 40: false };
-INI.sprite_maxW = 64;
-INI.sprite_maxH = 64;
+const map = { 17: false, 37: false, 38: false, 39: false, 40: false };
 /////////////////////////////////////////score.js//////////////
 
 
@@ -859,6 +868,8 @@ INI.sprite_maxH = 64;
 
 ///////////////Preloading////////////////////
 
+
+/*
 var Tile = function (id, x, y, type, name) {
 	this.id = id;
 	this.x = x;
@@ -1015,15 +1026,19 @@ var World = {
 	],
 	background: [Stars]
 };
-var AnimationSPRITE = function (x, y, type, howmany) {
+*/
+
+/*var AnimationSPRITE = function (x, y, type, howmany) {
 	this.x = x;
 	this.y = y;
 	this.pool = [];
 	for (var i = 1; i <= howmany; i++) {
 		this.pool.push(type + i);
 	}
-};
-var Creation;
+};*/
+//var Creation;
+
+/*
 var ACTOR = function (sprite_class, x, y, angle, score, probable) {
 	this.class = sprite_class;
 	this.x = x || 0;
@@ -1047,7 +1062,7 @@ ACTOR.prototype.refresh = function () {
 var ALIENS = {
 	bullet: {
 		speed: 16,
-		draw: function () {
+		draw() {
 			var LN = ALIENS.bullet.arsenal.length;
 			for (var i = 0; i < LN; i++) {
 				ENGINE.spriteDraw(
@@ -1058,7 +1073,7 @@ var ALIENS = {
 				);
 			}
 		},
-		move: function () {
+		move() {
 			var LN = ALIENS.bullet.arsenal.length;
 			if (LN < 1) return;
 			for (var i = LN - 1; i >= 0; i--) {
@@ -1066,14 +1081,14 @@ var ALIENS = {
 				if (ALIENS.bullet.arsenal[i].y > INI.GAME_HEIGHT) ALIENS.bullet.kill(i);
 			}
 		},
-		kill: function (i) {
+		kill(i) {
 			ALIENS.bullet.arsenal.splice(i, 1);
 		},
-		killAll: function () {
+		killAll() {
 			ALIENS.bullet.arsenal.clear();
 		}
 	},
-	init: function () {
+	init() {
 		ALIENS.existence = [];
 		ALIENS.chargers = [];
 		ALIENS.bullet.arsenal = [];
@@ -1089,7 +1104,7 @@ var ALIENS = {
 			ALIENS.chargerReady = true;
 		}, GAME.levels[GAME.level].CD);
 	},
-	findChargers: function () {
+	findChargers() {
 		var AEL = ALIENS.existence.length;
 		var find = [];
 		for (var i = 0; i < AEL; i++) {
@@ -1101,21 +1116,21 @@ var ALIENS = {
 		}
 		return find;
 	},
-	findActiveChargers: function () {
+	findActiveChargers() {
 		ALIENS.chargers.clear();
 		var AEL = ALIENS.existence.length;
 		for (var i = 0; i < AEL; i++) {
 			if (ALIENS.existence[i].stage != "waiting") ALIENS.chargers.push(i);
 		}
 	},
-	releaseCharger: function () {
+	releaseCharger() {
 		var find = ALIENS.findChargers();
 		if (find.length === 0) return;
 		var select = find[RND(0, find.length - 1)];
 		ALIENS.chargers.push(select);
 		ALIENS.existence[select].stage = "rotate";
 	},
-	move: function () {
+	move() {
 		ALIENS.findActiveChargers();
 		var AC = ALIENS.chargers.length;
 		if (ALIENS.chargerReady) {
@@ -1293,7 +1308,7 @@ var ALIENS = {
 			}
 		}
 	},
-	draw: function () {
+	draw() {
 		ENGINE.clearLayer("aliens");
 		var LN = ALIENS.existence.length;
 		var ix;
@@ -1315,7 +1330,7 @@ var ALIENS = {
 			);
 		}
 	},
-	shoot: function () {
+	shoot() {
 		if (SHIP.dead) return;
 		if (!ALIENS.ready) return;
 		var ABP = ALIENS.bullet.arsenal.length;
@@ -1364,7 +1379,7 @@ var ALIENS = {
 };
 var EXPLOSIONS = {
 	pool: [],
-	draw: function () {
+	draw() {
 		ENGINE.clearLayer("explosion");
 		var PL = EXPLOSIONS.pool.length;
 		if (PL === 0) return;
@@ -1388,7 +1403,7 @@ var MeteorClass = function (actor, lives) {
 };
 var RUBBLE = {
 	pool: [],
-	purge: function (score) {
+	purge(score) {
 		var RPL = RUBBLE.pool.length;
 		if (RPL === 0) return;
 		for (var i = RPL - 1; i >= 0; i--) {
@@ -1397,7 +1412,7 @@ var RUBBLE = {
 		}
 		TEXT.score();
 	},
-	kill: function (x) {
+	kill(x) {
 		EXPLOSIONS.pool.push(
 			new AnimationSPRITE(
 				RUBBLE.pool[x].actor.x,
@@ -1408,7 +1423,7 @@ var RUBBLE = {
 		);
 		RUBBLE.pool.splice(x, 1);
 	},
-	draw: function () {
+	draw() {
 		var CTX = LAYER["rubble"];
 		CTX.clearRect(0, INI.RUBBLE_Y - 64, ENGINE.gameWIDTH, 128);
 		var PL = RUBBLE.pool.length;
@@ -1422,7 +1437,7 @@ var RUBBLE = {
 			);
 		}
 	},
-	set: function (num) {
+	set(num) {
 		var width = parseInt((SHIP.maxX - SHIP.minX) / (num - 1), 10);
 		var graphics = [
 			"Asteroid1",
@@ -1464,7 +1479,7 @@ var RUBBLE = {
 			}
 		}
 	},
-	move: function () {
+	move() {
 		var PL = RUBBLE.pool.length;
 		var i;
 		for (i = 0; i < PL; i++) {
@@ -1479,9 +1494,10 @@ var RUBBLE = {
 		}
 	}
 };
+*/
 //////////////
-var GAME = {
-	start: function () {
+const GAME = {
+	start() {
 		$("#bottom")[0].scrollIntoView();
 		$(document).keydown(GAME.checkKey);
 		$(document).keyup(GAME.clearKey);
@@ -1505,14 +1521,17 @@ var GAME = {
 		GAME.firstFrameDraw();
 		GAME.run();
 	},
-	stop: function () {
+	setup() {
+		console.info("GAME SETUP");
+	},
+	stop() {
 		console.log(PRG.NAME, " is stopping.");
 		GAME.stopAnimation = true;
 		$(document).off("keyup", GAME.clearKey);
 		$(document).off("keydown", GAME.checkKey);
 		GAME.end();
 	},
-	over: function () {
+	over() {
 		if (SHIP.dead) return;
 		RUBBLE.purge(false);
 		console.log("GAME OVER");
@@ -1521,7 +1540,7 @@ var GAME = {
 		TITLE.gameOver();
 		setTimeout(GAME.stop, 2000);
 	},
-	end: function () {
+	end() {
 		TITLE.render();
 		console.log(PRG.NAME, " ended.");
 		SCORE.checkScore(GAME.score);
@@ -1529,7 +1548,7 @@ var GAME = {
 		TEXT.score();
 		$("#startGame").removeClass("hidden");
 	},
-	run: function () {
+	run() {
 		if (!GAME.frame.start) GAME.frame.start = Date.now();
 		var current = Date.now();
 		GAME.frame.delta = current - GAME.frame.start;
@@ -1552,7 +1571,7 @@ var GAME = {
 			return;
 		} else requestAnimationFrame(GAME.run);
 	},
-	firstFrameDraw: function () {
+	firstFrameDraw() {
 		TITLE.render();
 		BACKGROUND.render();
 		TEXT.ships();
@@ -1561,7 +1580,7 @@ var GAME = {
 		ALIENS.draw();
 		RUBBLE.draw();
 	},
-	frameDraw: function () {
+	frameDraw() {
 		SHIP.draw();
 		ENGINE.clearLayer("bullets");
 		SHIP.bullet.draw();
@@ -1570,7 +1589,7 @@ var GAME = {
 		RUBBLE.draw();
 		EXPLOSIONS.draw();
 	},
-	endLevel: function () {
+	endLevel() {
 		GAME.levelComplete = true;
 		ALIENS.bullet.killAll();
 		var RPL = RUBBLE.pool.length;
@@ -1594,14 +1613,14 @@ var GAME = {
 			GAME.nextLevel();
 		}, INI.LEVEL_DELAY);
 	},
-	nextLevel: function () {
+	nextLevel() {
 		ENGINE.clearLayer("text");
 		GAME.level++;
 		console.log("Ascending to level ", GAME.level);
 		ALIENS.ready = false;
 		GAME.initLevel(GAME.level);
 	},
-	createLevel: function (level) {
+	createLevel(level) {
 		GAME.levels[level] = $.extend(true, {}, GAME.levels[level - 1]);
 		var layout = GAME.levels[level].layout;
 		for (var row in layout) {
@@ -1612,7 +1631,7 @@ var GAME = {
 		GAME.levels[level].AXS++;
 		GAME.levels[level].chargerDescent;
 	},
-	initLevel: function (level) {
+	initLevel(level) {
 		if (level > INI.LAST_LEVEL) {
 			GAME.createLevel(level);
 		}
@@ -1667,7 +1686,7 @@ var GAME = {
 		}
 		RUBBLE.set(GAME.levels[level].asteroids);
 	},
-	respond: function () {
+	respond() {
 		if (map[17]) {
 			SHIP.shoot();
 		}
@@ -1688,13 +1707,13 @@ var GAME = {
 			return;
 		}
 	},
-	clearKey: function (e) {
+	clearKey(e) {
 		e = e || window.event;
 		if (e.keyCode in map) {
 			map[e.keyCode] = false;
 		}
 	},
-	checkKey: function (e) {
+	checkKey(e) {
 		e = e || window.event;
 		if (e.keyCode in map) {
 			map[e.keyCode] = true;
@@ -2139,7 +2158,7 @@ var GAME = {
 		}
 	}
 };
-var BulletClass = function (x, y) {
+/*var BulletClass = function (x, y) {
 	this.x = x;
 	this.y = y;
 };
@@ -2147,11 +2166,11 @@ var SHIP = {
 	bullet: {
 		max: 1,
 		speed: 24,
-		init: function () {
+		init() {
 			SHIP.bullet.sprite = SPRITE.bullet;
 			SHIP.bullet.arsenal = [];
 		},
-		shoot: function () {
+		shoot() {
 			SHIP.cannonHot = true;
 			SHIP.shots += 1;
 			SHIP.bullet.arsenal.push(
@@ -2168,11 +2187,11 @@ var SHIP = {
 				SHIP.cannonHot = false;
 			}, INI.BULLET_TIMEOUT);
 		},
-		kill: function (i) {
+		kill(i) {
 			SHIP.bullet.arsenal.splice(i, 1);
 			if (SHIP.bullet.arsenal.length < SHIP.bullet.max) SHIP.loaded = true;
 		},
-		draw: function () {
+		draw() {
 			var LN = SHIP.bullet.arsenal.length;
 			for (var i = 0; i < LN; i++) {
 				ENGINE.spriteDraw(
@@ -2183,7 +2202,7 @@ var SHIP = {
 				);
 			}
 		},
-		move: function () {
+		move() {
 			var LN = SHIP.bullet.arsenal.length;
 			if (LN < 1) return;
 			for (var i = LN - 1; i >= 0; i--) {
@@ -2192,7 +2211,7 @@ var SHIP = {
 			}
 		}
 	},
-	firstInit: function () {
+	firstInit() {
 		SHIP.live = false;
 		SHIP.maxX = ENGINE.gameWIDTH - INI.BORDER_PADDING;
 		SHIP.minX = INI.BORDER_PADDING;
@@ -2203,7 +2222,7 @@ var SHIP = {
 		SHIP.y = parseInt((SHIP.maxY - SHIP.minY) / 2) + SHIP.minY;
 		SHIP.speed = 10;
 	},
-	init: function () {
+	init() {
 		if (SHIP.dead) return;
 		if (GAME.levelComplete) GAME.endLevel();
 		TITLE.getReady();
@@ -2220,14 +2239,14 @@ var SHIP = {
 			}, INI.ALIEN_DELAY_TIMEOUT);
 		}, INI.START_TIMEOUT);
 	},
-	draw: function () {
+	draw() {
 		var CTX = LAYER["ship"];
 		CTX.clearRect(0, SHIP.minY - 24, CTX.canvas.width, INI.SHIPS_SPACE + 48);
 		if (!SHIP.live) return;
 		if (SHIP.dead) return;
 		ENGINE.spriteDraw("ship", SHIP.x, SHIP.y, SHIP.sprite);
 	},
-	move: function (dir) {
+	move(dir) {
 		SHIP.x += SHIP.speed * dir.x;
 		SHIP.y += SHIP.speed * dir.y;
 		if (SHIP.x < SHIP.minX) {
@@ -2247,22 +2266,24 @@ var SHIP = {
 			return;
 		}
 	},
-	shoot: function () {
+	shoot() {
 		if (!SHIP.loaded) return;
 		if (SHIP.cannonHot) return;
 		if (!SHIP.live) return;
 		SHIP.bullet.shoot();
 		return;
 	}
-};
-var BACKGROUND = {
-	render: function () {
+};*/
+
+const BACKGROUND = {
+	render() {
 		ENGINE.draw("background", 0, 0, SPRITE.stars);
 	}
 };
-var TEXT = {
-	render: function () { },
-	ships: function () {
+
+const TEXT = {
+	render() { },
+	ships() {
 		var x = 0;
 		var y = INI.GAME_HEIGHT - 20;
 		TEXT.clearSign(x, y, ENGINE.gameWIDTH, 20);
@@ -2271,11 +2292,11 @@ var TEXT = {
 			ENGINE.draw("sign", x + i * 16, y, SPRITE.smallship);
 		}
 	},
-	clearSign: function (x, y, w, h) {
+	clearSign(x, y, w, h) {
 		var CTX = LAYER["sign"];
 		CTX.clearRect(x, y, w, h);
 	},
-	score: function () {
+	score() {
 		var EL = GAME.extraLife[0];
 		if (GAME.score >= EL) {
 			GAME.lives++;
@@ -2310,21 +2331,25 @@ var TEXT = {
 		CTX.fillText("HISCORE: " + SCORE.SCORE.value[0] + " by " + HS, x, y);
 	}
 };
-var TITLE = {
-	render: function () {
+
+const TITLE = {
+	startTitle() {
+		console.info(" - start title -");
+	},
+	render() {
 		TITLE.background();
 		TITLE.title();
 	},
-	bigText: function (text, fs) {
+	bigText(text, fs) {
 		var x = ENGINE.gameWIDTH / 2;
 		var y = INI.GAME_HEIGHT / 2;
 		TITLE.text(text, fs, x, y);
 	},
-	centeredText: function (text, fs, y) {
+	centeredText(text, fs, y) {
 		var x = ENGINE.gameWIDTH / 2;
 		TITLE.text(text, fs, x, y);
 	},
-	text: function (text, fs, x, y) {
+	text(text, fs, x, y) {
 		var CTX = LAYER["text"];
 		CTX.fillStyle = "#FFF";
 		//CTX.font = fs + "px Consolas";
@@ -2336,15 +2361,15 @@ var TITLE = {
 		CTX.textAlign = "center";
 		CTX.fillText(text, x, y);
 	},
-	gameOver: function () {
+	gameOver() {
 		TITLE.bigText("GAME OVER", 120);
 	},
-	getReady: function () {
+	getReady() {
 		if (GAME.levelComplete) return;
 		ENGINE.clearLayer("text");
 		TITLE.bigText("GET READY FOR WAVE " + GAME.level, 60);
 	},
-	title: function () {
+	title() {
 		var CTX = LAYER.title;
 		var grad = CTX.createLinearGradient(8, 100, 128, 128);
 		grad.addColorStop("0", "#000000");
@@ -2353,7 +2378,6 @@ var TITLE = {
 		grad.addColorStop("0.8", "#eef442");
 		grad.addColorStop("1.0", "#b2f441");
 		CTX.fillStyle = grad;
-		//CTX.font = "40px Consolas";
 		CTX.font = "40px Arcade";
 		CTX.shadowColor = "#ccff66";
 		CTX.shadowOffsetX = 1;
@@ -2363,7 +2387,6 @@ var TITLE = {
 		var y = 48;
 		CTX.fillText(PRG.NAME, x, y);
 		CTX.font = "12px Consolas";
-		//CTX.font = "12px Arcade";
 		CTX.shadowOffsetX = 1;
 		CTX.shadowOffsetY = 1;
 		CTX.shadowBlur = 1;
@@ -2375,10 +2398,9 @@ var TITLE = {
 		y = 48;
 		x = 400;
 		CTX.font = "14px Consolas";
-		//CTX.font = "14px Arcade";
 		CTX.fillText(String.fromCharCode(169) + " LaughingSkull 2017", x, y);
 	},
-	background: function () {
+	background() {
 		var CTX = LAYER.title;
 		CTX.fillStyle = "#000";
 		CTX.roundRect(
@@ -2401,7 +2423,8 @@ var TITLE = {
 $(document).ready(function () {
 	PRG.INIT();
 	PRG.setup();
-	PRG.preLoadImages();
+	//PRG.preLoadImages();
+	ENGINE.LOAD.preload();
 	SCORE.init("SC", "Galactix", 10, 2500);
 	SCORE.loadHS();
 	SCORE.hiScore();
