@@ -9,15 +9,18 @@
 /////////////////////misc/////////////////////////
 
 
-/////////////debug vars: remove all in production/////////////////////
-const DEBUG = {};
+
+
+const DEBUG = {
+	FPS: true,
+};
 //DEBUG.CHEAT = true;
 //DEBUG.ENDLESS_LIFE = true;
 //DEBUG.INVINCIBLE = true;
 //DEBUG.INVINCIBLE = false;
 //DEBUG.CHEAT = false;
 //DEBUG.LEVEL = 10;
-////////////////////////////////////////////////////////////////////
+
 
 const CONST = {
 	SPACE: "\u0020",
@@ -53,7 +56,7 @@ const INI = {
 };
 
 const PRG = {
-	VERSION: "1.05.04",
+	VERSION: "1.05.05",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -796,7 +799,8 @@ const GAME = {
 		GAME.fps = new FPS_short_term_measurement(300);
 		GAME.ended = false;
 
-		//SHIP.firstInit(); //
+		SHIP.dead = false;
+		SHIP.firstInit();
 		GAME.levelStart(GAME.level);
 
 		/*
@@ -812,7 +816,7 @@ const GAME = {
 		GAME.run();*/
 
 		/** DEBUG */
-		ENGINE.GAME.ANIMATION.stop();
+		//ENGINE.GAME.ANIMATION.stop();
 	},
 	setup() {
 		console.info("GAME SETUP");
@@ -834,6 +838,15 @@ const GAME = {
 	initLevel(level) {
 		console.info("init level", level);
 		GAME.levelComplete = false;
+
+		SHIP.shots = 0;
+		SHIP.killShots = 0;
+		SHIP.ship = MAP[level].ship;
+		SHIP.init();
+		SHIP.bullet.init();
+		SHIP.bullet.max = MAP[level].maxBullets;
+
+		/** */
 	},
 	/*
 initLevel(level) {
@@ -894,14 +907,13 @@ initLevel(level) {
 	*/
 
 	continueLevel(level) {
-        console.log("game continues on level", level);
-        GAME.levelExecute(level);
-    },
-	levelExecute(level){
+		console.log("game continues on level", level);
+		GAME.levelExecute(level);
+	},
+	levelExecute(level) {
 		console.log("level", level, "executes");
-        GAME.firstFrameDraw(); 
-
-		//GAME.resume();
+		GAME.firstFrameDraw();
+		GAME.resume();
 	},
 	stop() {
 		console.log(PRG.NAME, " is stopping.");
@@ -927,7 +939,16 @@ initLevel(level) {
 		TEXT.score();
 		$("#startGame").removeClass("hidden");
 	},
-	run() {
+	run(lapsedTime) {
+		if (ENGINE.GAME.stopAnimation) return;
+
+
+		GAME.respond(lapsedTime);
+		GAME.frameDraw(lapsedTime);
+		/*
+
+
+		
 		if (!GAME.frame.start) GAME.frame.start = Date.now();
 		var current = Date.now();
 		GAME.frame.delta = current - GAME.frame.start;
@@ -949,24 +970,29 @@ initLevel(level) {
 		if (GAME.stopAnimation) {
 			return;
 		} else requestAnimationFrame(GAME.run);
+		*/
 	},
 	firstFrameDraw() {
 		TITLE.render();
 		BACKGROUND.render();
-		//TEXT.ships();
-		//TEXT.score();
-		//SHIP.draw();
+		TEXT.ships();
+		TEXT.score();
+		SHIP.draw();
 		//ALIENS.draw();
 		//RUBBLE.draw();
 	},
-	frameDraw() {
+	frameDraw(lapsedTime) {
+		//ENGINE.clearLayerStack();
 		SHIP.draw();
-		ENGINE.clearLayer("bullets");
-		SHIP.bullet.draw();
-		ALIENS.bullet.draw();
-		ALIENS.draw();
-		RUBBLE.draw();
-		EXPLOSIONS.draw();
+
+		if (DEBUG.FPS) GAME.FPS(lapsedTime);
+		//SHIP.draw();
+		//ENGINE.clearLayer("bullets");
+		//SHIP.bullet.draw();
+		//ALIENS.bullet.draw();
+		//ALIENS.draw();
+		//RUBBLE.draw();
+		//EXPLOSIONS.draw();
 	},
 	endLevel() {
 		GAME.levelComplete = true;
@@ -1011,7 +1037,16 @@ initLevel(level) {
 		GAME.levels[level].chargerDescent;
 	},
 
-	respond() {
+	respond(lapsedTime) {
+		if (SHIP.dead) return;
+		const map = ENGINE.GAME.keymap;
+
+		if (map[ENGINE.KEY.map.F4]) {
+			$("#pause").trigger("click");
+			map[ENGINE.KEY.map.F4] = false;
+		}
+
+		/*
 		if (map[17]) {
 			SHIP.shoot();
 		}
@@ -1031,6 +1066,7 @@ initLevel(level) {
 			SHIP.move(DOWN);
 			return;
 		}
+		*/
 	},
 	/*clearKey(e) {
 		e = e || window.event;
@@ -1045,443 +1081,8 @@ initLevel(level) {
 			e.preventDefault();
 		}
 	},*/
-	levels: {
-		1: {
-			maxBullets: 1,
-			chargers: 0,
-			CD: 9999,
-			chargerDescent: 4,
-			alienBullets: 2,
-			AXS: 2,
-			AYS: 24,
-			asteroids: 10,
-			ship: "whiteship",
-			layout: {
-				1: {
-					num: 8,
-					actor: "redinvader",
-					score: 30,
-					probable: 50
-				},
-				2: {
-					num: 9,
-					actor: "greeninvader",
-					score: 20,
-					probable: 40
-				},
-				3: {
-					num: 8,
-					actor: "invader",
-					score: 10,
-					probable: 30
-				},
-				4: {
-					num: 6,
-					actor: "invader",
-					score: 10,
-					probable: 30
-				}
-			}
-		},
-		2: {
-			maxBullets: 2,
-			chargers: 1,
-			CD: 9999,
-			chargerDescent: 4,
-			alienBullets: 3,
-			AXS: 3,
-			AYS: 26,
-			asteroids: 9,
-			ship: "redship",
-			layout: {
-				1: {
-					num: 3,
-					actor: "basic1Charger",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 8,
-					actor: "basic1Attacker",
-					score: 75,
-					probable: 40
-				},
-				3: {
-					num: 8,
-					actor: "basic2Attacker",
-					score: 40,
-					probable: 35
-				},
-				4: {
-					num: 7,
-					actor: "basic1Fighter",
-					score: 40,
-					probable: 35
-				}
-			}
-		},
-		3: {
-			maxBullets: 2,
-			chargers: 2,
-			CD: 8000,
-			chargerDescent: 4,
-			alienBullets: 4,
-			AXS: 3,
-			AYS: 26,
-			asteroids: 9,
-			ship: "redship",
-			layout: {
-				1: {
-					num: 3,
-					actor: "basic1Charger",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 5,
-					actor: "basic1Charger",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				3: {
-					num: 8,
-					actor: "basic2Attacker",
-					score: 40,
-					probable: 35
-				},
-				4: {
-					num: 7,
-					actor: "basic3Attacker",
-					score: 40,
-					probable: 35
-				}
-			}
-		},
-		4: {
-			maxBullets: 2,
-			chargers: 4,
-			CD: 4000,
-			chargerDescent: 4,
-			alienBullets: 4,
-			AXS: 3,
-			AYS: 26,
-			asteroids: 8,
-			ship: "redship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "basic2Charger",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 5,
-					actor: "basic4Attacker",
-					score: 50,
-					probable: 40,
-					type: "charger"
-				},
-				3: {
-					num: 8,
-					actor: "basic2Fighter",
-					score: 40,
-					probable: 40
-				},
-				4: {
-					num: 7,
-					actor: "basic4Attacker",
-					score: 25,
-					probable: 40
-				}
-			}
-		},
-		5: {
-			maxBullets: 3,
-			chargers: 4,
-			CD: 2000,
-			chargerDescent: 4,
-			alienBullets: 4,
-			AXS: 3,
-			AYS: 26,
-			asteroids: 8,
-			ship: "darkship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "basic4Charger",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 5,
-					actor: "basic3Charger",
-					score: 50,
-					probable: 40,
-					type: "charger"
-				},
-				3: {
-					num: 7,
-					actor: "basic3Fighter",
-					score: 40,
-					probable: 40
-				},
-				4: {
-					num: 8,
-					actor: "basic5Attacker",
-					score: 50,
-					probable: 45
-				}
-			}
-		},
-		6: {
-			maxBullets: 3,
-			chargers: 4,
-			CD: 2000,
-			chargerDescent: 5,
-			alienBullets: 4,
-			AXS: 4,
-			AYS: 26,
-			asteroids: 8,
-			ship: "darkship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "basic6Fighter",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 8,
-					actor: "basic5Fighter",
-					score: 50,
-					probable: 40,
-					type: "charger"
-				},
-				3: {
-					num: 7,
-					actor: "basic7Attacker",
-					score: 40,
-					probable: 35,
-					type: "charger"
-				},
-				4: {
-					num: 8,
-					actor: "basic4Fighter",
-					score: 25,
-					probable: 30
-				}
-			}
-		},
-		7: {
-			maxBullets: 4,
-			chargers: 4,
-			CD: 2000,
-			chargerDescent: 6,
-			alienBullets: 5,
-			AXS: 4,
-			AYS: 26,
-			asteroids: 7,
-			ship: "slimship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "basic7Fighter",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 8,
-					actor: "basic8Fighter",
-					score: 50,
-					probable: 40,
-					type: "charger"
-				},
-				3: {
-					num: 7,
-					actor: "basic4Fighter",
-					score: 40,
-					probable: 35,
-					type: "charger"
-				},
-				4: {
-					num: 5,
-					actor: "basic7Attacker",
-					score: 25,
-					probable: 30
-				}
-			}
-		},
-		8: {
-			maxBullets: 4,
-			chargers: 5,
-			CD: 2000,
-			chargerDescent: 7,
-			alienBullets: 5,
-			AXS: 4,
-			AYS: 26,
-			asteroids: 7,
-			ship: "slimship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "basic6Attacker",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 8,
-					actor: "basic5Attacker",
-					score: 50,
-					probable: 40,
-					type: "charger"
-				},
-				3: {
-					num: 9,
-					actor: "basic1Charger",
-					score: 40,
-					probable: 35,
-					type: "charger"
-				},
-				4: {
-					num: 7,
-					actor: "basic2Charger",
-					score: 25,
-					probable: 30,
-					type: "charger"
-				}
-			}
-		},
-		9: {
-			maxBullets: 4,
-			chargers: 5,
-			CD: 1750,
-			chargerDescent: 8,
-			alienBullets: 5,
-			AXS: 4,
-			AYS: 26,
-			asteroids: 7,
-			ship: "slimship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "basic5Fighter",
-					score: 100,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 8,
-					actor: "basic2Attacker",
-					score: 50,
-					probable: 40,
-					type: "charger"
-				},
-				3: {
-					num: 9,
-					actor: "basic2Fighter",
-					score: 40,
-					probable: 35,
-					type: "charger"
-				},
-				4: {
-					num: 7,
-					actor: "basic1Charger",
-					score: 25,
-					probable: 30,
-					type: "charger"
-				}
-			}
-		},
-		10: {
-			maxBullets: 4,
-			chargers: 5,
-			CD: 1750,
-			chargerDescent: 8,
-			alienBullets: 5,
-			AXS: 4,
-			AYS: 26,
-			asteroids: 7,
-			ship: "slimship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "basic8Fighter",
-					score: 66,
-					probable: 70,
-					type: "charger"
-				},
-				2: {
-					num: 2,
-					actor: "alienMother",
-					score: 1000,
-					probable: 99
-				},
-				3: {
-					num: 9,
-					actor: "basic3Attacker",
-					score: 40,
-					probable: 50,
-					type: "charger"
-				},
-				4: {
-					num: 10,
-					actor: "basic1Charger",
-					score: 50,
-					probable: 60,
-					type: "charger"
-				}
-			}
-		},
-		11: {
-			maxBullets: 4,
-			chargers: 6,
-			CD: 1500,
-			chargerDescent: 9,
-			alienBullets: 6,
-			AXS: 5,
-			AYS: 26,
-			asteroids: 7,
-			ship: "slimship",
-			layout: {
-				1: {
-					num: 7,
-					actor: "random",
-					sscore: 50,
-					probable: 50,
-					type: "charger"
-				},
-				2: {
-					num: 8,
-					actor: "random",
-					score: 50,
-					probable: 50,
-					type: "charger"
-				},
-				3: {
-					num: 9,
-					actor: "random",
-					score: 50,
-					probable: 50,
-					type: "charger"
-				},
-				4: {
-					num: 7,
-					actor: "random",
-					score: 50,
-					probable: 50,
-					type: "charger"
-				}
-			}
-		}
-	},
+
+
 	setTitle() {
 		const text = GAME.generateTitleText();
 		const RD = new RenderData("Annie", 16, "#0E0", "bottomText");
@@ -1513,46 +1114,59 @@ initLevel(level) {
 		TEXT.score();
 	},
 	lostFocus() {
-        if (GAME.paused) return;
-        GAME.clickPause();
-    },
-    clickPause() {
-        if (GAME.levelCompleted) return;
-        $("#pause").trigger("click");
-        ENGINE.GAME.keymap[ENGINE.KEY.map.F4] = false;
-    },
-    pause() {
-        if (GAME.paused) return;
-        if (GAME.levelFinished) return;
-        if (PLANE.dead) return;
-        console.log("%cGAME paused.", PRG.CSS);
-        let GameRD = new RenderData("Arcade", 48, "#DDD", "text", "#000", 2, 2, 2);
-        ENGINE.TEXT.setRD(GameRD);
-        $("#pause").prop("value", "Resume Game [F4]");
-        $("#pause").off("click", GAME.pause);
-        $("#pause").on("click", GAME.resume);
-        ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.clickPause, "F4"));
-        ENGINE.TEXT.centeredText("Game Paused", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
-        GAME.paused = true;
-    },
-    resume() {
-        console.log("%cGAME resumed.", PRG.CSS);
-
-        $("#pause").prop("value", "Pause Game [F4]");
-        $("#pause").off("click", GAME.resume);
-        $("#pause").on("click", GAME.pause);
-        ENGINE.clearLayer("text");
-        ENGINE.GAME.ANIMATION.resetTimer();
-        ENGINE.GAME.ANIMATION.next(GAME.run);
-        GAME.paused = false;
-    },
-
+		if (GAME.paused) return;
+		GAME.clickPause();
+	},
+	clickPause() {
+		if (GAME.levelCompleted) return;
+		$("#pause").trigger("click");
+		ENGINE.GAME.keymap[ENGINE.KEY.map.F4] = false;
+	},
+	pause() {
+		if (GAME.paused) return;
+		if (GAME.levelFinished) return;
+		if (SHIP.dead) return;
+		if (!SHIP.live) return;
+		console.log("%cGAME paused.", PRG.CSS);
+		let GameRD = new RenderData("Arcade", 48, "#DDD", "text", "#000", 2, 2, 2);
+		ENGINE.TEXT.setRD(GameRD);
+		$("#pause").prop("value", "Resume Game [F4]");
+		$("#pause").off("click", GAME.pause);
+		$("#pause").on("click", GAME.resume);
+		ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.clickPause, "F4"));
+		ENGINE.TEXT.centeredText("Game Paused", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
+		GAME.paused = true;
+	},
+	resume() {
+		console.log("%cGAME resumed.", PRG.CSS);
+		$("#pause").prop("value", "Pause Game [F4]");
+		$("#pause").off("click", GAME.resume);
+		$("#pause").on("click", GAME.pause);
+		if (SHIP.live) ENGINE.clearLayer("text");
+		ENGINE.GAME.ANIMATION.resetTimer();
+		ENGINE.GAME.ANIMATION.next(GAME.run);
+		GAME.paused = false;
+	},
+	FPS(lapsedTime) {
+		let CTX = LAYER.FPS;
+		CTX.fillStyle = "white";
+		ENGINE.clearLayer("FPS");
+		let fps = 1000 / lapsedTime || 0;
+		GAME.fps.update(fps);
+		CTX.fillText(GAME.fps.getFps(), 5, 10);
+	},
 };
-/*var BulletClass = function (x, y) {
-	this.x = x;
-	this.y = y;
-};
-var SHIP = {
+
+
+class Bullet {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+}
+
+const SHIP = {
+	ship: null,
 	bullet: {
 		max: 1,
 		speed: 24,
@@ -1563,16 +1177,9 @@ var SHIP = {
 		shoot() {
 			SHIP.cannonHot = true;
 			SHIP.shots += 1;
-			SHIP.bullet.arsenal.push(
-				new BulletClass(
-					SHIP.x,
-					parseInt(
-						SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height / 2,
-						10
-					)
-				)
-			);
+			SHIP.bullet.arsenal.push(new Bullet(SHIP.x, parseInt(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height / 2, 10)));
 			if (SHIP.bullet.arsenal.length >= SHIP.bullet.max) SHIP.loaded = false;
+
 			setTimeout(function () {
 				SHIP.cannonHot = false;
 			}, INI.BULLET_TIMEOUT);
@@ -1582,20 +1189,14 @@ var SHIP = {
 			if (SHIP.bullet.arsenal.length < SHIP.bullet.max) SHIP.loaded = true;
 		},
 		draw() {
-			var LN = SHIP.bullet.arsenal.length;
-			for (var i = 0; i < LN; i++) {
-				ENGINE.spriteDraw(
-					"bullets",
-					SHIP.bullet.arsenal[i].x,
-					SHIP.bullet.arsenal[i].y,
-					SHIP.bullet.sprite
-				);
+			for (let i = 0; i < SHIP.bullet.arsenal.length; i++) {
+				ENGINE.spriteDraw("bullets", SHIP.bullet.arsenal[i].x, SHIP.bullet.arsenal[i].y, SHIP.bullet.sprite);
 			}
 		},
 		move() {
-			var LN = SHIP.bullet.arsenal.length;
+			const LN = SHIP.bullet.arsenal.length;
 			if (LN < 1) return;
-			for (var i = LN - 1; i >= 0; i--) {
+			for (let i = LN - 1; i >= 0; i--) {
 				SHIP.bullet.arsenal[i].y -= SHIP.bullet.speed;
 				if (SHIP.bullet.arsenal[i].y < 0) SHIP.bullet.kill(i);
 			}
@@ -1619,18 +1220,24 @@ var SHIP = {
 		SHIP.sprite = SPRITE[SHIP.ship];
 		SHIP.loaded = true;
 		SHIP.cannonHot = false;
+
 		setTimeout(function () {
 			SHIP.live = true;
 		}, INI.SHIP_TIMEOUT);
+
 		setTimeout(function () {
 			if (!SHIP.dead) ENGINE.clearLayer("text");
+
 			setTimeout(function () {
-				ALIENS.ready = true;
+				//ALIENS.ready = true;
+				console.warn("ALIENS.ready = true;");
 			}, INI.ALIEN_DELAY_TIMEOUT);
+
 		}, INI.START_TIMEOUT);
 	},
 	draw() {
-		var CTX = LAYER["ship"];
+		console.warn("SHIP", SHIP.live, SHIP.dead);
+		const CTX = LAYER["ship"];
 		CTX.clearRect(0, SHIP.minY - 24, CTX.canvas.width, INI.SHIPS_SPACE + 48);
 		if (!SHIP.live) return;
 		if (SHIP.dead) return;
@@ -1639,23 +1246,10 @@ var SHIP = {
 	move(dir) {
 		SHIP.x += SHIP.speed * dir.x;
 		SHIP.y += SHIP.speed * dir.y;
-		if (SHIP.x < SHIP.minX) {
-			SHIP.x = SHIP.minX;
-			return;
-		}
-		if (SHIP.x > SHIP.maxX) {
-			SHIP.x = SHIP.maxX;
-			return;
-		}
-		if (SHIP.y < SHIP.minY) {
-			SHIP.y = SHIP.minY;
-			return;
-		}
-		if (SHIP.y > SHIP.maxY) {
-			SHIP.y = SHIP.maxY;
-			return;
-		}
+		SHIP.x = Math.max(SHIP.minX, Math.min(SHIP.x, SHIP.maxX));
+		SHIP.y = Math.max(SHIP.minY, Math.min(SHIP.y, SHIP.maxY));
 	},
+
 	shoot() {
 		if (!SHIP.loaded) return;
 		if (SHIP.cannonHot) return;
@@ -1663,7 +1257,7 @@ var SHIP = {
 		SHIP.bullet.shoot();
 		return;
 	}
-};*/
+};
 
 const BACKGROUND = {
 	render() {
@@ -1765,16 +1359,21 @@ const TITLE = {
 		BACKGROUND.black();
 		TITLE.bottomBackground();
 	},
+	/*
 	bigText(text, fs) {
 		var x = ENGINE.gameWIDTH / 2;
 		var y = INI.GAME_HEIGHT / 2;
 		TITLE.text(text, fs, x, y);
 	},
-	centeredText(text, fs, y) {
-		var x = ENGINE.gameWIDTH / 2;
-		TITLE.text(text, fs, x, y);
+	*/
+	centeredText(text, fs = 48) {
+		let GameRD = new RenderData("Arcade", fs, "#DDD", "text", "#000", 2, 2, 2);
+		ENGINE.TEXT.setRD(GameRD);
+		ENGINE.TEXT.centeredText(text, ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
 	},
+	/*
 	text(text, fs, x, y) {
+		console.warn(text, fs, x, y);
 		var CTX = LAYER["text"];
 		CTX.fillStyle = "#FFF";
 		CTX.font = fs + "px Arcade";
@@ -1785,13 +1384,16 @@ const TITLE = {
 		CTX.textAlign = "center";
 		CTX.fillText(text, x, y);
 	},
+	*/
 	gameOver() {
-		TITLE.bigText("GAME OVER", 120);
+		TITLE.centeredText("GAME OVER", 120);
+		//TITLE.bigText("GAME OVER", 120);
 	},
 	getReady() {
 		if (GAME.levelComplete) return;
 		ENGINE.clearLayer("text");
-		TITLE.bigText("GET READY FOR WAVE " + GAME.level, 60);
+		TITLE.centeredText("GET READY FOR WAVE " + GAME.level);
+		console.log("GET READY FOR WAVE " + GAME.level);
 	},
 	title() {
 		var CTX = LAYER.title;
