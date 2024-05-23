@@ -20,7 +20,7 @@ LoadTextures = [
 LoadAudio = [
   { srcName: "Explosion1.mp3", name: "Explosion" },
   { srcName: "Dance in the Rain - LaughingSkull.mp3", name: "Title" },
-
+  { srcName: "Shoot.mp3", name: "Shoot" },
 ];
 
 LoadSequences = [

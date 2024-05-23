@@ -56,7 +56,7 @@ const INI = {
 };
 
 const PRG = {
-	VERSION: "1.05.05",
+	VERSION: "1.06.00",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -941,7 +941,7 @@ initLevel(level) {
 	},
 	run(lapsedTime) {
 		if (ENGINE.GAME.stopAnimation) return;
-
+		SHIP.bullet.move(lapsedTime);
 
 		GAME.respond(lapsedTime);
 		GAME.frameDraw(lapsedTime);
@@ -955,7 +955,7 @@ initLevel(level) {
 		if (GAME.frame.delta > INI.ANIMATION_INTERVAL) {
 			ALIENS.move();
 			ALIENS.shoot();
-			SHIP.bullet.move();
+			
 			ALIENS.bullet.move();
 			RUBBLE.move();
 			GAME.respond();
@@ -982,13 +982,11 @@ initLevel(level) {
 		//RUBBLE.draw();
 	},
 	frameDraw(lapsedTime) {
-		//ENGINE.clearLayerStack();
+		ENGINE.clearLayerStack();
 		SHIP.draw();
+		SHIP.bullet.draw();
 
 		if (DEBUG.FPS) GAME.FPS(lapsedTime);
-		//SHIP.draw();
-		//ENGINE.clearLayer("bullets");
-		//SHIP.bullet.draw();
 		//ALIENS.bullet.draw();
 		//ALIENS.draw();
 		//RUBBLE.draw();
@@ -1039,6 +1037,7 @@ initLevel(level) {
 
 	respond(lapsedTime) {
 		if (SHIP.dead) return;
+		if (!SHIP.live) return;
 		const map = ENGINE.GAME.keymap;
 
 		if (map[ENGINE.KEY.map.F4]) {
@@ -1046,43 +1045,27 @@ initLevel(level) {
 			map[ENGINE.KEY.map.F4] = false;
 		}
 
-		/*
-		if (map[17]) {
+		if (map[ENGINE.KEY.map.ctrl]) {
 			SHIP.shoot();
 		}
-		if (map[37]) {
-			SHIP.move(LEFT);
+
+		if (map[ENGINE.KEY.map.right]) {
+			SHIP.move(RIGHT, lapsedTime);
 			return;
 		}
-		if (map[39]) {
-			SHIP.move(RIGHT);
+		if (map[ENGINE.KEY.map.left]) {
+			SHIP.move(LEFT, lapsedTime);
 			return;
 		}
-		if (map[38]) {
-			SHIP.move(UP);
+		if (map[ENGINE.KEY.map.up]) {
+			SHIP.move(UP, lapsedTime);
 			return;
 		}
-		if (map[40]) {
-			SHIP.move(DOWN);
+		if (map[ENGINE.KEY.map.down]) {
+			SHIP.move(DOWN, lapsedTime);
 			return;
-		}
-		*/
-	},
-	/*clearKey(e) {
-		e = e || window.event;
-		if (e.keyCode in map) {
-			map[e.keyCode] = false;
 		}
 	},
-	checkKey(e) {
-		e = e || window.event;
-		if (e.keyCode in map) {
-			map[e.keyCode] = true;
-			e.preventDefault();
-		}
-	},*/
-
-
 	setTitle() {
 		const text = GAME.generateTitleText();
 		const RD = new RenderData("Annie", 16, "#0E0", "bottomText");
@@ -1157,7 +1140,6 @@ initLevel(level) {
 	},
 };
 
-
 class Bullet {
 	constructor(x, y) {
 		this.x = x;
@@ -1169,15 +1151,17 @@ const SHIP = {
 	ship: null,
 	bullet: {
 		max: 1,
-		speed: 24,
+		speed: 1400,//24
 		init() {
 			SHIP.bullet.sprite = SPRITE.bullet;
 			SHIP.bullet.arsenal = [];
 		},
 		shoot() {
+			console.log("shooting ...");
 			SHIP.cannonHot = true;
 			SHIP.shots += 1;
 			SHIP.bullet.arsenal.push(new Bullet(SHIP.x, parseInt(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height / 2, 10)));
+			AUDIO.Shoot.play();
 			if (SHIP.bullet.arsenal.length >= SHIP.bullet.max) SHIP.loaded = false;
 
 			setTimeout(function () {
@@ -1189,15 +1173,18 @@ const SHIP = {
 			if (SHIP.bullet.arsenal.length < SHIP.bullet.max) SHIP.loaded = true;
 		},
 		draw() {
+			ENGINE.layersToClear.add("bullets");
 			for (let i = 0; i < SHIP.bullet.arsenal.length; i++) {
 				ENGINE.spriteDraw("bullets", SHIP.bullet.arsenal[i].x, SHIP.bullet.arsenal[i].y, SHIP.bullet.sprite);
 			}
 		},
-		move() {
+		move(lapsedTime) {
 			const LN = SHIP.bullet.arsenal.length;
 			if (LN < 1) return;
+			let timeDelta = lapsedTime / 1000;
+			const delta = Math.round(SHIP.bullet.speed * timeDelta);
 			for (let i = LN - 1; i >= 0; i--) {
-				SHIP.bullet.arsenal[i].y -= SHIP.bullet.speed;
+				SHIP.bullet.arsenal[i].y -= delta;
 				if (SHIP.bullet.arsenal[i].y < 0) SHIP.bullet.kill(i);
 			}
 		}
@@ -1211,7 +1198,7 @@ const SHIP = {
 		SHIP.maxY = INI.GAME_HEIGHT - INI.BOTTOM_PADDING;
 		SHIP.x = parseInt(ENGINE.gameWIDTH / 2, 10);
 		SHIP.y = parseInt((SHIP.maxY - SHIP.minY) / 2) + SHIP.minY;
-		SHIP.speed = 10;
+		SHIP.speed = 500;
 	},
 	init() {
 		if (SHIP.dead) return;
@@ -1236,16 +1223,16 @@ const SHIP = {
 		}, INI.START_TIMEOUT);
 	},
 	draw() {
-		console.warn("SHIP", SHIP.live, SHIP.dead);
 		const CTX = LAYER["ship"];
 		CTX.clearRect(0, SHIP.minY - 24, CTX.canvas.width, INI.SHIPS_SPACE + 48);
 		if (!SHIP.live) return;
 		if (SHIP.dead) return;
 		ENGINE.spriteDraw("ship", SHIP.x, SHIP.y, SHIP.sprite);
 	},
-	move(dir) {
-		SHIP.x += SHIP.speed * dir.x;
-		SHIP.y += SHIP.speed * dir.y;
+	move(dir, lapsedTime) {
+		let timeDelta = lapsedTime / 1000;
+		SHIP.x += Math.round(SHIP.speed * dir.x * timeDelta);
+		SHIP.y += Math.round(SHIP.speed * dir.y * timeDelta);
 		SHIP.x = Math.max(SHIP.minX, Math.min(SHIP.x, SHIP.maxX));
 		SHIP.y = Math.max(SHIP.minY, Math.min(SHIP.y, SHIP.maxY));
 	},
