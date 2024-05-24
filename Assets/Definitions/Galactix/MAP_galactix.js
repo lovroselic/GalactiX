@@ -1,4 +1,14 @@
 const MAP = {
+    CSS: "color: #F00",
+    init() {
+        Object.keys(MAP).forEach(key => {
+            let numericKey = Number(key);
+            if (Number.isFinite(numericKey) && Number.isInteger(numericKey)) {
+                MAP[key].planeLimits = { width: ENGINE.gameWIDTH, height:ENGINE.gameHEIGHT };
+            }
+        });
+        console.info("init map", MAP);
+    },
     1: {
         maxBullets: 1,
         chargers: 0,
@@ -435,3 +445,29 @@ const MAP = {
         }
     }
 }
+
+const SPAWN = {
+    meteors() {
+        const num = MAP[GAME.getRealLevel()].asteroids;
+        const width = parseInt((SHIP.maxX - SHIP.minX) / (num - 1), 10);
+        let assetnames = [];
+        for (let a = 0; a < INI.NMETEORS; a++) {
+            assetnames.push(`Asteroid_${a + 1}`);
+        }
+        while (assetnames.length < num) {
+            assetnames = assetnames.concat(assetnames);
+        }
+
+        for (let m = 0; m < num; m++) {
+            const assetName = assetnames.removeRandom();
+            console.info("...", m, assetName);
+            let x = SHIP.minX + m * width;
+            let y = INI.RUBBLE_Y + RND(-24, 24);
+            let angle = RND(0, 35) * 10;
+            const asteroid = new Meteor(new Grid(x, y), assetName, angle);
+            PIXEL_ACTORS.add(asteroid);
+        }
+
+        console.log("PIXEL_ACTORS", PIXEL_ACTORS.POOL);
+    }
+};

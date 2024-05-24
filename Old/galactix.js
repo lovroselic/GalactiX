@@ -1721,6 +1721,7 @@ var MeteorClass = function(actor, lives) {
 	this.actor = actor;
 	this.lives = lives;
 };
+
 var RUBBLE = {
 	pool: [],
 	purge: function(score) {

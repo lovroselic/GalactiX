@@ -12,7 +12,7 @@ TODO:
 */
 
 const IndexArrayManagers = {
-    VERSION: "3.06",
+    VERSION: "3.07",
     VERBOSE: false,
     DEAD_LAPSED_TIME: 5,
 };
@@ -174,6 +174,36 @@ class Profile_Actors extends IAM {
         }
     }
 }
+
+/** Pixel (PX) IA Managers */
+
+class Pixel_Actors extends IAM {
+    constructor() {
+        super();
+        this.IA = "pixel_actor_IA";
+        this.reIndexRequired = true;
+    }
+    manage(lapsedTime) {
+        let map = this.map;
+        this.reIndex();
+        map[this.IA] = new IndexArray(map.planeLimits.width, map.planeLimits.height, 4, 4);
+        this.poolToIA(map[this.IA]);
+        for (let obj of this.POOL) {
+            if (obj && !obj.ignoreByManager){
+                obj.collisionToActors(this.map);
+                if (obj === null) continue;
+                obj.move(lapsedTime);
+            }
+        }
+    }
+    poolToIA(IA) {
+        for (const obj of this.POOL) {
+
+        }
+    }
+}
+
+
 
 /** Texture grid IA Managers */
 class Enemy_TG extends IAM {
@@ -929,6 +959,7 @@ class Store {
 const DECOR = new Decor();
 const PROFILE_BALLISTIC = new Profile_Ballistic();
 const PROFILE_ACTORS = new Profile_Actors();
+const PIXEL_ACTORS = new Pixel_Actors();
 const ENEMY_TG = new Enemy_TG();
 const ENEMY_RC = new Enemy_RC();
 const VANISHING = new Vanishing();

@@ -8,19 +8,9 @@
  */
 /////////////////////misc/////////////////////////
 
-
-
-
 const DEBUG = {
 	FPS: true,
 };
-//DEBUG.CHEAT = true;
-//DEBUG.ENDLESS_LIFE = true;
-//DEBUG.INVINCIBLE = true;
-//DEBUG.INVINCIBLE = false;
-//DEBUG.CHEAT = false;
-//DEBUG.LEVEL = 10;
-
 
 const CONST = {
 	SPACE: "\u0020",
@@ -52,17 +42,70 @@ const INI = {
 	LAST_LEVEL: 11,
 	ATTACK: 420,
 	sprite_maxW: 64,
-	sprite_maxH: 64
+	sprite_maxH: 64,
+	NMETEORS: 6,
+	METEOR_LIVES: 4,
+	METEOR_SPEED: 25,
+	METEOR_ROTATION_SPEED: 25,
 };
 
+/** */
+
+class Bullet {
+	constructor(x, y) {
+		this.x = x;
+		this.y = y;
+	}
+}
+
+class Meteor {
+	constructor(position, assetName, angle) {
+		this.position = position;
+		this.assetNAme = assetName;
+		this.rotSpeedFactor = RND(1, 3);
+		this.actor = new Rotating_ACTOR(assetName, position.x, position.y);
+		this.moveState = new PX_MoveState(position);
+		this.setAngle(angle);
+		this.lives = INI.METEOR_LIVES;
+	}
+	setAngle(a) {
+		this.angle = a % 360;
+		this.actor.setAngle(Math.round(this.angle) % 360);
+	}
+	addAngle(a) {
+		this.setAngle(this.angle + a);
+	}
+	rotate(lapsedTime) {
+		this.addAngle(lapsedTime * this.rotSpeed);
+	}
+	getSprite() {
+		return this.actor.sprite();
+	}
+	draw() {
+		ENGINE.spriteDraw('rubble', this.actor.x, this.actor.y, this.getSprite());
+		ENGINE.layersToClear.add("rubble");
+	}
+	move(lapsedTime) {
+		let timeDelta = lapsedTime / 1000;
+		let delta = INI.METEOR_SPEED * timeDelta;
+		this.moveState.pos = this.moveState.pos.add(RIGHT, delta);
+		this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+		if (this.moveState.pos.x > ENGINE.gameWIDTH + INI.METEOR_OUT) {
+			this.moveState.pos.x = -INI.METEOR_OUT;
+		}
+		let angleDelta = INI.METEOR_ROTATION_SPEED * timeDelta * this.rotSpeedFactor;
+		this.addAngle(angleDelta);
+	}
+	explode() { }
+	collisionToActors(map) { }
+}
+/** */
+
 const PRG = {
-	VERSION: "1.06.00",
+	VERSION: "1.06.01",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
-	//SOURCE: "https://www.c00lsch00l.eu/Games/AA/",
-	//SRC_rel: "/Games/AA/",
-	//tileGraphics: [],
 	INIT() {
 		console.clear();
 		console.log("%c**************************************************************************************************************************************", PRG.CSS);
@@ -76,14 +119,13 @@ const PRG = {
 		ENGINE.autostart = true;
 		ENGINE.start = PRG.start;
 		ENGINE.readyCall = GAME.setup;
+		ENGINE.setSpriteSheetSize(100);
 		ENGINE.init();
-
-		//$("#temp").append("<canvas id ='temp_canvas'></canvas>");
 	},
 	setup() {
 		$("#engine_version").html(ENGINE.VERSION);
-		//$("#grid_version").html(GRID.VERSION);
-		//$("#iam_version").html(IndexArrayManagers.VERSION);
+		$("#grid_version").html(GRID.VERSION);
+		$("#iam_version").html(IndexArrayManagers.VERSION);
 		$("#lib_version").html(LIB.VERSION);
 
 		$("#toggleHelp").click(function () {
@@ -108,6 +150,7 @@ const PRG = {
 		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "text", "FPS", "button"]);
 		ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
 
+		MAP.init();
 	},
 	start() {
 		console.log(PRG.NAME + " started.");
@@ -119,13 +162,10 @@ const PRG = {
 			}
 		});
 
-		//GAME.start();
-
 		TITLE.startTitle();
 	},
 };
 
-//const map = { 17: false, 37: false, 38: false, 39: false, 40: false };
 
 /*
 var Tile = function (id, x, y, type, name) {
@@ -778,11 +818,6 @@ const GAME = {
 		ENGINE.watchVisibility(GAME.lostFocus);
 		ENGINE.GAME.start(16);
 
-		//$(document).keyup(GAME.clearKey);
-
-		//$("#bottom")[0].scrollIntoView();
-		//$(document).keydown(GAME.checkKey);
-		//$(document).keyup(GAME.clearKey);
 		GAME.level = 1;
 
 		/****************/
@@ -820,6 +855,7 @@ const GAME = {
 	},
 	setup() {
 		console.info("GAME SETUP");
+		$("#conv").remove();
 	},
 	prepareForRestart() {
 		let clear = ["background", "text", "FPS", "button", "bottomText"];
@@ -828,10 +864,9 @@ const GAME = {
 	levelStart(level) {
 		console.info(" - start -", GAME.level);
 		GAME.prepareForRestart();
-		//DESTRUCTION_ANIMATION.init(null);
+		DESTRUCTION_ANIMATION.init(null);
 		//PROFILE_BALLISTIC.init(MAP[GAME.getRealLevel()]);
-		//PROFILE_ACTORS.init(MAP[GAME.getRealLevel()]);
-		//GAME.initLevel(GAME.getRealLevel());
+		PIXEL_ACTORS.init(MAP[GAME.getRealLevel()]);
 		GAME.initLevel(level);
 		GAME.continueLevel(level);
 	},
@@ -846,6 +881,7 @@ const GAME = {
 		SHIP.bullet.init();
 		SHIP.bullet.max = MAP[level].maxBullets;
 
+		SPAWN.meteors();
 		/** */
 	},
 	/*
@@ -862,7 +898,6 @@ initLevel(level) {
 		SHIP.bullet.max = GAME.levels[level].maxBullets;
 		ALIENS.speed = GAME.levels[level].AXS;
 		ALIENS.Dspeed = GAME.levels[level].AYS;
-		console.log("initlevel ", level);
 		var layout = GAME.levels[level].layout;
 		var center = parseInt(ENGINE.gameWIDTH / 2, 10);
 		for (var row in layout) {
@@ -942,6 +977,7 @@ initLevel(level) {
 	run(lapsedTime) {
 		if (ENGINE.GAME.stopAnimation) return;
 		SHIP.bullet.move(lapsedTime);
+		PIXEL_ACTORS.manage(lapsedTime);
 
 		GAME.respond(lapsedTime);
 		GAME.frameDraw(lapsedTime);
@@ -985,6 +1021,7 @@ initLevel(level) {
 		ENGINE.clearLayerStack();
 		SHIP.draw();
 		SHIP.bullet.draw();
+		PIXEL_ACTORS.draw(lapsedTime);
 
 		if (DEBUG.FPS) GAME.FPS(lapsedTime);
 		//ALIENS.bullet.draw();
@@ -1140,13 +1177,6 @@ initLevel(level) {
 	},
 };
 
-class Bullet {
-	constructor(x, y) {
-		this.x = x;
-		this.y = y;
-	}
-}
-
 const SHIP = {
 	ship: null,
 	bullet: {
@@ -1204,6 +1234,7 @@ const SHIP = {
 		if (SHIP.dead) return;
 		if (GAME.levelComplete) GAME.endLevel();
 		TITLE.getReady();
+		AUDIO.Ufo.play();
 		SHIP.sprite = SPRITE[SHIP.ship];
 		SHIP.loaded = true;
 		SHIP.cannonHot = false;

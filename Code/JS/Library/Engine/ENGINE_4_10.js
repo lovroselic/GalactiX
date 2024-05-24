@@ -43,7 +43,7 @@ const DownRight = new Vector(1, 1);
 const DownLeft = new Vector(-1, 1);
 
 const ENGINE = {
-  VERSION: "4.09",
+  VERSION: "4.10",
   CSS: "color: #0FA",
   INI: {
     ANIMATION_INTERVAL: 16,
@@ -504,7 +504,7 @@ const ENGINE = {
       return new RectArea(x, y, W, H);
     } else return null;
   },
-  
+
   /** obsolete */
   /*
   collisionToBackground(actor, layer) {
@@ -3009,10 +3009,15 @@ class Rotating_ACTOR extends ACTOR {
     this.x = x;
     this.y = y;
   }
+  setPositionFromMoveStatePos(pos) {
+    this.x = Math.round(pos.x);
+    this.y = Math.round(pos.y);
+  }
   setAngle(angle) {
     this.angle = angle;
   }
   sprite() {
+    //console.log(`${this.name}_${this.angle}`);
     return SPRITE[`${this.name}_${this.angle}`];
   }
 }
@@ -3400,7 +3405,12 @@ class _3D_MoveState {
     this.moving = false;
   }
 }
-var VIEW = {
+class PX_MoveState {
+  constructor(pos) {
+    this.pos = FP_Grid.toClass(pos);
+  }
+}
+const VIEW = {
   init() {
     VIEW.x = 0;
     VIEW.y = 0;
@@ -3418,7 +3428,7 @@ var VIEW = {
     ENGINE.VIEWPORT.alignTo(VIEW.actor);
   }
 };
-var FORM = {
+const FORM = {
   INI: {
     DIV: "#ROOM",
     FONT: "Consolas",
@@ -3671,7 +3681,7 @@ class CountDown extends Timer {
     return this.value - this.now;
   }
 }
-var CONSOLE = {
+const CONSOLE = {
   id: "Console",
   set(id) {
     CONSOLE.id = id;
