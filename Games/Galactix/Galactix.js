@@ -10,6 +10,7 @@
 
 const DEBUG = {
 	FPS: true,
+	grid: true,
 };
 
 const CONST = {
@@ -19,8 +20,6 @@ const CONST = {
 };
 
 const INI = {
-	LOAD_W: 202,
-	LOAD_H: 22,
 	TITLE_HEIGHT: 72,
 	GAME_HEIGHT: 768,
 	ANIMATION_INTERVAL: 17,
@@ -37,7 +36,6 @@ const INI = {
 	ALIEN_DELAY_TIMEOUT: 600,
 	RUBBLE_Y: 540,
 	METEOR_OUT: 30,
-	METEOR_ROTATION_PROBABILITY: 15,
 	LEVEL_DELAY: 5000,
 	LAST_LEVEL: 11,
 	ATTACK: 420,
@@ -59,12 +57,13 @@ class Bullet {
 }
 
 class Meteor {
-	constructor(position, assetName, angle) {
+	constructor(position, assetName, angle, limits) {
 		this.position = position;
 		this.assetNAme = assetName;
+		this.limits = limits;
 		this.rotSpeedFactor = RND(1, 3);
 		this.actor = new Rotating_ACTOR(assetName, position.x, position.y);
-		this.moveState = new PX_MoveState(position);
+		this.moveState = new PX_MoveState(position, this);
 		this.setAngle(angle);
 		this.lives = INI.METEOR_LIVES;
 	}
@@ -102,7 +101,7 @@ class Meteor {
 /** */
 
 const PRG = {
-	VERSION: "1.06.01",
+	VERSION: "1.06.02",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -120,6 +119,7 @@ const PRG = {
 		ENGINE.start = PRG.start;
 		ENGINE.readyCall = GAME.setup;
 		ENGINE.setSpriteSheetSize(100);
+		ENGINE.setGridSize(64);
 		ENGINE.init();
 	},
 	setup() {
@@ -147,7 +147,7 @@ const PRG = {
 		$(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
 
 		ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
-		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "text", "FPS", "button"]);
+		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "grid", "text", "FPS", "button"]);
 		ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
 
 		MAP.init();
@@ -1015,7 +1015,8 @@ initLevel(level) {
 		TEXT.score();
 		SHIP.draw();
 		//ALIENS.draw();
-		//RUBBLE.draw();
+
+		if (DEBUG.grid) GRID.grid();
 	},
 	frameDraw(lapsedTime) {
 		ENGINE.clearLayerStack();
@@ -1377,32 +1378,13 @@ const TITLE = {
 		BACKGROUND.black();
 		TITLE.bottomBackground();
 	},
-	/*
-	bigText(text, fs) {
-		var x = ENGINE.gameWIDTH / 2;
-		var y = INI.GAME_HEIGHT / 2;
-		TITLE.text(text, fs, x, y);
-	},
-	*/
+
 	centeredText(text, fs = 48) {
 		let GameRD = new RenderData("Arcade", fs, "#DDD", "text", "#000", 2, 2, 2);
 		ENGINE.TEXT.setRD(GameRD);
 		ENGINE.TEXT.centeredText(text, ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
 	},
-	/*
-	text(text, fs, x, y) {
-		console.warn(text, fs, x, y);
-		var CTX = LAYER["text"];
-		CTX.fillStyle = "#FFF";
-		CTX.font = fs + "px Arcade";
-		CTX.shadowColor = "#333333";
-		CTX.shadowOffsetX = 3;
-		CTX.shadowOffsetY = 3;
-		CTX.shadowBlur = 3;
-		CTX.textAlign = "center";
-		CTX.fillText(text, x, y);
-	},
-	*/
+
 	gameOver() {
 		TITLE.centeredText("GAME OVER", 120);
 		//TITLE.bigText("GAME OVER", 120);
@@ -1411,7 +1393,6 @@ const TITLE = {
 		if (GAME.levelComplete) return;
 		ENGINE.clearLayer("text");
 		TITLE.centeredText("GET READY FOR WAVE " + GAME.level);
-		console.log("GET READY FOR WAVE " + GAME.level);
 	},
 	title() {
 		var CTX = LAYER.title;

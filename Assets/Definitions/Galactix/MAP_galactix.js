@@ -4,7 +4,7 @@ const MAP = {
         Object.keys(MAP).forEach(key => {
             let numericKey = Number(key);
             if (Number.isFinite(numericKey) && Number.isInteger(numericKey)) {
-                MAP[key].planeLimits = { width: ENGINE.gameWIDTH, height:ENGINE.gameHEIGHT };
+                MAP[key].planeLimits = { width: ENGINE.gameWIDTH / ENGINE.INI.GRIDPIX, height: ENGINE.gameHEIGHT / ENGINE.INI.GRIDPIX };
             }
         });
         console.info("init map", MAP);
@@ -460,11 +460,11 @@ const SPAWN = {
 
         for (let m = 0; m < num; m++) {
             const assetName = assetnames.removeRandom();
-            console.info("...", m, assetName);
             let x = SHIP.minX + m * width;
             let y = INI.RUBBLE_Y + RND(-24, 24);
             let angle = RND(0, 35) * 10;
-            const asteroid = new Meteor(new Grid(x, y), assetName, angle);
+            const mapLimits = MAP[GAME.getRealLevel()].planeLimits;
+            const asteroid = new Meteor(new Grid(x, y), assetName, angle, mapLimits);
             PIXEL_ACTORS.add(asteroid);
         }
 

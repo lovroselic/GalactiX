@@ -504,61 +504,6 @@ const ENGINE = {
       return new RectArea(x, y, W, H);
     } else return null;
   },
-
-  /** obsolete */
-  /*
-  collisionToBackground(actor, layer) {
-
-    var CTX = layer;
-    var maxSq = Math.max(actor.width, actor.height);
-    var R = Math.ceil(0.5 * Math.sqrt(2 * Math.pow(maxSq, 2)));
-    var X = actor.x;
-    var Y = actor.y;
-    var proximity = false;
-    if (ENGINE.checkProximity) {
-      var imgDATA = CTX.getImageData(X - R, Y - R, 2 * R, 2 * R);
-      var check = 1;
-      var left, right, down, top;
-      while (check < R) {
-        left = imgDATA.data[toIndex(X - check, Y)];
-        right = imgDATA.data[toIndex(X + check, Y)];
-        down = imgDATA.data[toIndex(X, Y + check)];
-        top = imgDATA.data[toIndex(X, Y - check)];
-        if (left || right || down || top) {
-          proximity = true;
-          break;
-        }
-        check++;
-      }
-    } else proximity = true;
-    if (!proximity) {
-      return false;
-    } else {
-      var CX = Math.floor(X - actor.width / 2);
-      var CY = Math.floor(Y - actor.height / 2);
-      var CTX1 = LAYER.temp;
-      CTX1.canvas.width = actor.width;
-      CTX1.canvas.height = actor.height;
-      ENGINE.draw("temp", 0, 0, SPRITE[actor.name]);
-      var data1 = CTX1.getImageData(0, 0, actor.width, actor.height); //actor data
-      var data2 = CTX.getImageData(CX, CY, actor.width, actor.height); //layer data
-      var DL = data1.data.length;
-      var index;
-      for (index = 3; index < DL; index += 4) {
-        if (data1.data[index] > 0 && data2.data[index] > 0) {
-          return true;
-        }
-      }
-      return false;
-    }
-
-    function toIndex(x, y) {
-      var index = (y - Y) * 4 * (2 * R) + (x - (X - R)) * 4 + 3;
-      return index;
-    }
-  },
-  */
-
   drawLoadingGraph(counter) {
     var count = ENGINE.LOAD[counter];
     var HMI = ENGINE.LOAD["HM" + counter];
@@ -2821,7 +2766,7 @@ const LAYER = {
 const BITMAP = {};
 const SPRITE = {};
 const AUDIO = {};
-const TILE = {};    //obsolete
+//const TILE = {};    //obsolete
 const ASSET = {
   convertToGrayScale(original, target, howmany = 1) {
     ASSET[target] = {};
@@ -3406,8 +3351,25 @@ class _3D_MoveState {
   }
 }
 class PX_MoveState {
-  constructor(pos) {
+  constructor(pos, parent) {
     this.pos = FP_Grid.toClass(pos);
+    this.parent = parent;
+    this.refresh();
+  }
+  refresh() {
+    this.homeGrid = GRID.pointToGrid(this.pos);
+
+    const left = Math.max(0, -this.parent.actor.width / 2);
+    const right = Math.min(this.parent.limits.width - 1, -this.parent.actor.width / 2);
+    const top = Math.max(0, this.parent.actor.height / 2);
+    const bottom = Math.min(this.parent.limits.height - 1, this.parent.actor.height / 2);
+
+    this.useGrids = [
+      GRID.pointToGrid(this.pos.add(new Vector(left, top))),
+      GRID.pointToGrid(this.pos.add(new Vector(right, top))),
+      GRID.pointToGrid(this.pos.add(new Vector(left, bottom))),
+      GRID.pointToGrid(this.pos.add(new Vector(right, bottom))),
+    ];
   }
 }
 const VIEW = {
