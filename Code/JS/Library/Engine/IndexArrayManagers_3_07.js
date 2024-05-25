@@ -189,7 +189,7 @@ class Pixel_Actors extends IAM {
         map[this.IA] = new IndexArray(map.planeLimits.width, map.planeLimits.height, 4, 4);
         this.poolToIA(map[this.IA]);
         for (let obj of this.POOL) {
-            if (obj && !obj.ignoreByManager){
+            if (obj && !obj.ignoreByManager) {
                 obj.collisionToActors(this.map);
                 if (obj === null) continue;
                 obj.move(lapsedTime);
@@ -198,7 +198,9 @@ class Pixel_Actors extends IAM {
     }
     poolToIA(IA) {
         for (const obj of this.POOL) {
-
+            for (const grid of obj.moveState.useGrids) {
+                //CONT HERE
+            }
         }
     }
 }
