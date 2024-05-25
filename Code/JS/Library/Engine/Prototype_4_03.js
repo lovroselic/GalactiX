@@ -6,7 +6,7 @@
 console.clear();
 
 const LIB = {
-  VERSION: "4.02",
+  VERSION: "4.03",
   CSS: "color: #EFE",
   log: function () {
     console.log(`%cPrototype LIB ${LIB.VERSION} loaded`, LIB.CSS);
@@ -25,6 +25,7 @@ changelog:
       Angle.getDirectionVector
       Vector.mul bug corrected
       AUDIO.isPlaying
+4.03: .limit on master grid
 
 */
 
@@ -534,6 +535,11 @@ class MasterGridClass {
   }
   same(grid) {
     return (grid.x === this.x) && (grid.y === this.y);
+  }
+  limit(maxX, maxY){
+    this.x = Math.min(maxX, Math.max(0, this.x));
+    this.y = Math.min(maxY, Math.max(0, this.y));
+    return new this.constructor(this.x, this.y);
   }
 }
 

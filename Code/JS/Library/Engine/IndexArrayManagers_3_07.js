@@ -199,7 +199,9 @@ class Pixel_Actors extends IAM {
     poolToIA(IA) {
         for (const obj of this.POOL) {
             for (const grid of obj.moveState.useGrids) {
-                //CONT HERE
+                if (!IA.has(grid, obj.id)) {
+                    IA.next(grid, obj.id);
+                }
             }
         }
     }

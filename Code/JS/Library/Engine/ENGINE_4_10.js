@@ -3359,16 +3359,18 @@ class PX_MoveState {
   refresh() {
     this.homeGrid = GRID.pointToGrid(this.pos);
 
-    const left = Math.max(0, -this.parent.actor.width / 2);
-    const right = Math.min(this.parent.limits.width - 1, -this.parent.actor.width / 2);
-    const top = Math.max(0, this.parent.actor.height / 2);
-    const bottom = Math.min(this.parent.limits.height - 1, this.parent.actor.height / 2);
+    const left = -this.parent.actor.width / 2;
+    const right = this.parent.actor.width / 2;
+    const top = -this.parent.actor.height / 2;
+    const bottom = this.parent.actor.height / 2;
+    const rightLimit = (this.parent.limits.width * ENGINE.INI.GRIDPIX) - 1;
+    const bottomLimit = (this.parent.limits.height * ENGINE.INI.GRIDPIX) - 1;
 
     this.useGrids = [
-      GRID.pointToGrid(this.pos.add(new Vector(left, top))),
-      GRID.pointToGrid(this.pos.add(new Vector(right, top))),
-      GRID.pointToGrid(this.pos.add(new Vector(left, bottom))),
-      GRID.pointToGrid(this.pos.add(new Vector(right, bottom))),
+      GRID.pointToGrid(this.pos.add(new Vector(left, top)).limit(rightLimit, bottomLimit)),
+      GRID.pointToGrid(this.pos.add(new Vector(right, top)).limit(rightLimit, bottomLimit)),
+      GRID.pointToGrid(this.pos.add(new Vector(left, bottom)).limit(rightLimit, bottomLimit)),
+      GRID.pointToGrid(this.pos.add(new Vector(right, bottom)).limit(rightLimit, bottomLimit)),
     ];
   }
 }

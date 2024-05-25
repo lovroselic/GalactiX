@@ -95,8 +95,11 @@ class Meteor {
 		let angleDelta = INI.METEOR_ROTATION_SPEED * timeDelta * this.rotSpeedFactor;
 		this.addAngle(angleDelta);
 	}
+	hit(){}
 	explode() { }
-	collisionToActors(map) { }
+	collisionToActors(map) { 
+		return;
+	}
 }
 /** */
 
@@ -167,196 +170,8 @@ const PRG = {
 };
 
 
-/*
-var Tile = function (id, x, y, type, name) {
-	this.id = id;
-	this.x = x;
-	this.y = y;
-	this.type = type;
-	this.name = name;
-};
-
-var Invader = new Tile("invader", 48, 38, "png", "invader");
-var RedInvader = new Tile("redinvader", 44, 40, "png", "redinvader");
-var GreenInvader = new Tile("greeninvader", 48, 35, "png", "greeninvader");
-var RedShip = new Tile("redship", 43, 48, "png", "redship");
-var DarkShip = new Tile("motherShip4", 48, 47, "png", "darkship");
-var SlimShip = new Tile("motherShip3", 48, 46, "png", "slimship");
-var WhiteShip = new Tile("ship", 43, 48, "png", "whiteship");
-var SmallShip = new Tile("smallship", 14, 16, "png", "smallship");
-var Stars = new Tile("stars", 960, 768, "png", "stars");
-var AExp1 = new Tile("ALIEN_exp_01", 48, 51, "png", "AlienExp1");
-var AExp2 = new Tile("ALIEN_exp_02", 58, 57, "png", "AlienExp2");
-var AExp3 = new Tile("ALIEN_exp_03", 58, 58, "png", "AlienExp3");
-var AExp4 = new Tile("ALIEN_exp_04", 55, 54, "png", "AlienExp4");
-var AExp5 = new Tile("ALIEN_exp_05", 49, 46, "png", "AlienExp5");
-var AExp6 = new Tile("ALIEN_exp_06", 42, 38, "png", "AlienExp6");
-var Bullet1 = new Tile("bullet1", 5, 16, "png", "bullet");
-var AlienBullet = new Tile("alienBullet01", 4, 12, "png", "alienbullet");
-var SExp1 = new Tile("SHIP_exp_01", 42, 53, "png", "ShipExp1");
-var SExp2 = new Tile("SHIP_exp_02", 95, 90, "png", "ShipExp2");
-var SExp3 = new Tile("SHIP_exp_03", 118, 111, "png", "ShipExp3");
-var SExp4 = new Tile("SHIP_exp_04", 130, 125, "png", "ShipExp4");
-var SExp5 = new Tile("SHIP_exp_05", 156, 146, "png", "ShipExp5");
-var SExp6 = new Tile("SHIP_exp_06", 186, 167, "png", "ShipExp6");
-var SExp7 = new Tile("SHIP_exp_07", 148, 131, "png", "ShipExp7");
-var SExp8 = new Tile("SHIP_exp_08", 123, 100, "png", "ShipExp8");
-var Ast1 = new Tile("Asteroid_1", 60, 61, "png", "Asteroid1");
-var Ast2 = new Tile("Asteroid_2", 50, 55, "png", "Asteroid2");
-var Ast3 = new Tile("Asteroid_3", 43, 40, "png", "Asteroid3");
-var Ast4 = new Tile("Asteroid_4", 54, 39, "png", "Asteroid4");
-var Ast5 = new Tile("Asteroid_5", 60, 68, "png", "Asteroid5");
-var Ast6 = new Tile("Asteroid_6", 48, 47, "png", "Asteroid6");
-var AstExp1 = new Tile("ASTEROID_exp_01", 48, 37, "png", "AstExp1");
-var AstExp2 = new Tile("ASTEROID_exp_02", 56, 39, "png", "AstExp2");
-var AstExp3 = new Tile("ASTEROID_exp_03", 64, 45, "png", "AstExp3");
-var AstExp4 = new Tile("ASTEROID_exp_04", 72, 47, "png", "AstExp4");
-var AstExp5 = new Tile("ASTEROID_exp_05", 80, 50, "png", "AstExp5");
-var AstExp6 = new Tile("ASTEROID_exp_06", 96, 59, "png", "AstExp6");
-var AstExp7 = new Tile("ASTEROID_exp_07", 96, 62, "png", "AstExp7");
-var AstExp8 = new Tile("ASTEROID_exp_08", 80, 49, "png", "AstExp8");
-var AstExp9 = new Tile("ASTEROID_exp_09", 72, 46, "png", "AstExp9");
-var AstExp10 = new Tile("ASTEROID_exp_10", 64, 34, "png", "AstExp10");
-var AstExp11 = new Tile("ASTEROID_exp_11", 56, 32, "png", "AstExp11");
-var AstExp12 = new Tile("ASTEROID_exp_12", 48, 34, "png", "AstExp12");
-var AlienMother = new Tile("alienMother1", 96, 65, "png", "alienMother");
-var AlienShip1 = new Tile("alienShip1", 48, 47, "png", "basic1Fighter");
-var AlienShip2 = new Tile("alienShip2", 48, 41, "png", "basic1Attacker");
-var AlienShip3 = new Tile("alienShip3", 29, 48, "png", "basic2Attacker");
-var AlienShip4 = new Tile("alienShip4", 48, 25, "png", "basic1Charger");
-var AlienShip5 = new Tile("alienShip5", 38, 64, "png", "basic3Attacker");
-var AlienShip6 = new Tile("alienShip6", 46, 48, "png", "basic2Fighter");
-var AlienShip7 = new Tile("alienShip7", 45, 64, "png", "basic3Fighter");
-var AlienShip8 = new Tile("alienShip8", 61, 64, "png", "basic2Charger");
-var AlienShip9 = new Tile("alienShip9", 43, 64, "png", "basic4Fighter");
-var AlienShip10 = new Tile("alienShip10", 48, 49, "png", "basic5Fighter");
-var AlienShip11 = new Tile("alienShip11", 37, 64, "png", "basic3Charger");
-var AlienShip12 = new Tile("alienShip12", 36, 48, "png", "basic6Fighter");
-var AlienShip13 = new Tile("alienShip13", 48, 42, "png", "basic7Fighter");
-var AlienShip14 = new Tile("alienShip14", 37, 64, "png", "basic8Fighter");
-var AlienShip15 = new Tile("alienShip15", 48, 64, "png", "basic4Attacker");
-var AlienShip16 = new Tile("alienShip16", 48, 47, "png", "basic5Attacker");
-var AlienShip17 = new Tile("alienShip17", 46, 48, "png", "basic6Attacker");
-var AlienShip18 = new Tile("alienShip18", 64, 55, "png", "basic4Charger");
-var AlienShip19 = new Tile("alienShip19", 42, 48, "png", "basic7Attacker");
-var AlienShips = [
-	"basic7Attacker",
-	"basic4Charger",
-	"basic6Attacker",
-	"basic5Attacker",
-	"basic4Attacker",
-	"basic8Fighter",
-	"basic7Fighter",
-	"basic6Fighter",
-	"basic3Charger",
-	"basic5Fighter",
-	"basic4Fighter",
-	"basic2Charger",
-	"basic3Fighter",
-	"basic2Fighter",
-	"basic3Attacker",
-	"basic1Charger",
-	"basic2Attacker",
-	"basic1Attacker",
-	"basic1Fighter"
-];
-var World = {
-	sprite: [
-		Invader,
-		RedInvader,
-		GreenInvader,
-		RedShip,
-		WhiteShip,
-		SmallShip,
-		Bullet1,
-		AlienBullet,
-		AlienShip1,
-		AlienShip2,
-		AlienShip3,
-		AlienShip4,
-		DarkShip,
-		SlimShip,
-		AlienShip5,
-		AlienShip6,
-		AlienShip7,
-		AlienShip8,
-		AlienShip9,
-		AlienShip10,
-		AlienShip11,
-		AlienShip12,
-		AlienMother,
-		AlienShip13,
-		AlienShip14,
-		AlienShip15,
-		AlienShip16,
-		AlienShip17,
-		AlienShip18,
-		AlienShip19
-	],
-	rubble: [Ast1, Ast2, Ast3, Ast4, Ast5, Ast6],
-	animation: [
-		AExp1,
-		AExp2,
-		AExp3,
-		AExp4,
-		AExp5,
-		AExp6,
-		SExp1,
-		SExp2,
-		SExp3,
-		SExp4,
-		SExp5,
-		SExp6,
-		SExp7,
-		SExp8,
-		AstExp1,
-		AstExp2,
-		AstExp3,
-		AstExp4,
-		AstExp5,
-		AstExp6,
-		AstExp7,
-		AstExp8,
-		AstExp9,
-		AstExp10,
-		AstExp11,
-		AstExp12
-	],
-	background: [Stars]
-};
-*/
-
-/*var AnimationSPRITE = function (x, y, type, howmany) {
-	this.x = x;
-	this.y = y;
-	this.pool = [];
-	for (var i = 1; i <= howmany; i++) {
-		this.pool.push(type + i);
-	}
-};*/
-//var Creation;
 
 /*
-var ACTOR = function (sprite_class, x, y, angle, score, probable) {
-	this.class = sprite_class;
-	this.x = x || 0;
-	this.y = y || 0;
-	this.angle = angle || 0;
-	this.score = score || 0;
-	this.probable = probable || 33;
-	this.refresh();
-	this.type = "grunt";
-	this.stage = "waiting";
-};
-ACTOR.prototype.sprite = function (sprite_class) {
-	var name = this.class + "_" + this.angle;
-	return SPRITE[name];
-};
-ACTOR.prototype.refresh = function () {
-	this.name = this.class + "_" + this.angle;
-	this.width = SPRITE[this.name].width;
-	this.height = SPRITE[this.name].height;
-};
 var ALIENS = {
 	bullet: {
 		speed: 16,
@@ -794,6 +609,8 @@ var RUBBLE = {
 };
 */
 //////////////
+
+const RUBBLE = {};
 
 const GAME = {
 	getRealLevel() {
