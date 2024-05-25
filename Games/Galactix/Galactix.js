@@ -101,7 +101,7 @@ class Meteor {
 /** */
 
 const PRG = {
-	VERSION: "1.06.03",
+	VERSION: "1.06.04",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
