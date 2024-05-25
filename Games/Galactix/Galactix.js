@@ -104,7 +104,7 @@ class Meteor {
 /** */
 
 const PRG = {
-	VERSION: "1.06.04",
+	VERSION: "1.06.05",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -795,6 +795,7 @@ initLevel(level) {
 		if (ENGINE.GAME.stopAnimation) return;
 		SHIP.bullet.move(lapsedTime);
 		PIXEL_ACTORS.manage(lapsedTime);
+		SHIP.bullet.manage(lapsedTime);
 
 		GAME.respond(lapsedTime);
 		GAME.frameDraw(lapsedTime);
@@ -1035,6 +1036,9 @@ const SHIP = {
 				SHIP.bullet.arsenal[i].y -= delta;
 				if (SHIP.bullet.arsenal[i].y < 0) SHIP.bullet.kill(i);
 			}
+		},
+		manage(lapsedTime){
+			console.log("*********");
 		}
 	},
 	firstInit() {
