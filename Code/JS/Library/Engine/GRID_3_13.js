@@ -16,7 +16,7 @@ known bugs:
 */
 
 const GRID = {
-  VERSION: "3.12",
+  VERSION: "3.13",
   CSS: "color: #0AA",
   SETTING: {
     ALLOW_CROSS: false,
@@ -117,12 +117,12 @@ const GRID = {
       CTX.stroke();
     } while (x <= CTX.canvas.width);
   },
-  paintCoord(layer, dungeon) {
+  paintCoord(layer, dungeon, all = false) {
     ENGINE.clearLayer(layer);
     for (let x = 0; x < dungeon.width; x++) {
       for (let y = 0; y < dungeon.height; y++) {
         let grid = new Grid(x, y);
-        if (!dungeon.GA.check(grid, MAPDICT.WALL)) {
+        if (all || !dungeon.GA.check(grid, MAPDICT.WALL)) {
           let point = GRID.gridToCoord(grid);
           let text = `${x},${y}`;
           GRID.paintText(point, text, layer, "#BBB");

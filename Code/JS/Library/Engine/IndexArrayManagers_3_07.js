@@ -205,6 +205,37 @@ class Pixel_Actors extends IAM {
             }
         }
     }
+    collisionFromExternalPool(pool) {
+        /**
+         * actors in external pool are defined in screen pixel coordinates
+         */
+
+        for (let i = pool.length - 1; i >= 0; i--) {
+            let obj = pool[i];
+            if (obj) {
+                obj.homeGrid = GRID.pointToGrid(new Point(obj.x, obj.y));
+                obj.updateActor();
+                //console.log("Bullet", "hg", obj.homeGrid, "actor", obj.actor, "obj", obj);
+                let ids = this.map[this.IA].unroll(obj.homeGrid);
+                //console.warn("ids", ids);
+                for (const id of ids) {
+                    const actor = PIXEL_ACTORS.show(id);
+                    //console.log("--------------------------------");
+                    //console.log("..meteor", "hg", actor.moveState.homeGrid, "object", actor, "actor", actor.actor, "grids", actor.moveState.useGrids);
+                    let hit = ENGINE.collisionArea(actor.actor, obj.actor);
+                    //console.log("?hit", hit)
+                    //console.info("....", "meteor area", actor.actor.area, "bullet area", obj.actor.area);
+
+                    if (hit) {
+                        //console.error("-------------was hit", actor);
+                        actor.hit();
+                        obj.hit(i);
+                    }
+                    //console.log("--------------------------------\n");
+                }
+            }
+        }
+    }
 }
 
 

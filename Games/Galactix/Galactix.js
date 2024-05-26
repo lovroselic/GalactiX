@@ -10,7 +10,8 @@
 
 const DEBUG = {
 	FPS: true,
-	grid: true,
+	grid: false,
+	coord: false,
 };
 
 const CONST = {
@@ -50,15 +51,25 @@ const INI = {
 /** */
 
 class Bullet {
-	constructor(x, y) {
+	constructor(x, y, sprite) {
 		this.x = x;
 		this.y = y;
+		//this.sprite = sprite;
+		this.actor = new ACTOR(sprite);
+	}
+	updateActor() {
+		this.actor.x = this.x;
+		this.actor.y = this.y;
+	}
+	hit(index) {
+		console.warn("bullet hit", index);
+		SHIP.bullet.kill(index);
 	}
 }
 
 class Meteor {
 	constructor(position, assetName, angle, limits) {
-		this.position = position;
+		//this.position = position;
 		this.assetNAme = assetName;
 		this.limits = limits;
 		this.rotSpeedFactor = RND(1, 3);
@@ -88,23 +99,30 @@ class Meteor {
 		let timeDelta = lapsedTime / 1000;
 		let delta = INI.METEOR_SPEED * timeDelta;
 		this.moveState.pos = this.moveState.pos.add(RIGHT, delta);
-		this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+
 		if (this.moveState.pos.x > ENGINE.gameWIDTH + INI.METEOR_OUT) {
 			this.moveState.pos.x = -INI.METEOR_OUT;
 		}
+		this.moveState.refresh();
+		this.actor.setPositionFromMoveStatePos(this.moveState.pos);
 		let angleDelta = INI.METEOR_ROTATION_SPEED * timeDelta * this.rotSpeedFactor;
 		this.addAngle(angleDelta);
 	}
-	hit(){}
+	hit() {
+		console.log("--------------");
+		console.warn("meteor hit");
+
+		console.log("--------------\n");
+	}
 	explode() { }
-	collisionToActors(map) { 
+	collisionToActors(map) {
 		return;
 	}
 }
 /** */
 
 const PRG = {
-	VERSION: "1.06.05",
+	VERSION: "1.06.06",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -150,7 +168,7 @@ const PRG = {
 		$(ENGINE.gameWindowId).width(ENGINE.gameWIDTH + 4);
 
 		ENGINE.addBOX("TITLE", ENGINE.gameWIDTH, ENGINE.titleHEIGHT, ["title"]);
-		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "grid", "text", "FPS", "button"]);
+		ENGINE.addBOX("ROOM", ENGINE.gameWIDTH, ENGINE.gameHEIGHT, ["background", "sign", "ship", "aliens", "explosion", "rubble", "bullets", "coord", "grid", "text", "FPS", "button"]);
 		ENGINE.addBOX("DOWN", ENGINE.gameWIDTH, ENGINE.bottomHEIGHT, ["bottom", "bottomText"]);
 
 		MAP.init();
@@ -834,6 +852,7 @@ initLevel(level) {
 		SHIP.draw();
 		//ALIENS.draw();
 
+		if (DEBUG.coord) GRID.paintCoord("coord", MAP[GAME.getRealLevel()].planeLimits, true);
 		if (DEBUG.grid) GRID.grid();
 	},
 	frameDraw(lapsedTime) {
@@ -1009,7 +1028,7 @@ const SHIP = {
 			console.log("shooting ...");
 			SHIP.cannonHot = true;
 			SHIP.shots += 1;
-			SHIP.bullet.arsenal.push(new Bullet(SHIP.x, parseInt(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height / 2, 10)));
+			SHIP.bullet.arsenal.push(new Bullet(SHIP.x, parseInt(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height / 2, 10), 'bullet'));
 			AUDIO.Shoot.play();
 			if (SHIP.bullet.arsenal.length >= SHIP.bullet.max) SHIP.loaded = false;
 
@@ -1037,8 +1056,8 @@ const SHIP = {
 				if (SHIP.bullet.arsenal[i].y < 0) SHIP.bullet.kill(i);
 			}
 		},
-		manage(lapsedTime){
-			console.log("*********");
+		manage(lapsedTime) {
+			PIXEL_ACTORS.collisionFromExternalPool(SHIP.bullet.arsenal);
 		}
 	},
 	firstInit() {
