@@ -22,6 +22,7 @@ LoadAudio = [
   { srcName: "Dance in the Rain - LaughingSkull.mp3", name: "Title" },
   { srcName: "Shoot.mp3", name: "Shoot" },
   { srcName: "Ufo.mp3", name: "Ufo" },
+  { srcName: "ClosedDoor.mp3", name: "Hit" },
 ];
 
 LoadSequences = [
@@ -39,13 +40,6 @@ LoadSprites = [
 ];
 
 LoadRotatedSheetSequences = [
-  /* { srcName: "Asteroid_1.png", name: "Asteroid_1", count: 1, rotate: { first: 0, last: 350, step: 10 }  },
-  { srcName: "Asteroid_2.png", name: "Asteroid_2", count: 1, rotate: { first: 0, last: 350, step: 10 }  },
-  { srcName: "Asteroid_3.png", name: "Asteroid_3", count: 1, rotate: { first: 0, last: 350, step: 10 }  },
-  { srcName: "Asteroid_4.png", name: "Asteroid_4", count: 1, rotate: { first: 0, last: 350, step: 10 }  },
-  { srcName: "Asteroid_5.png", name: "Asteroid_5", count: 1, rotate: { first: 0, last: 350, step: 10 }  },
-  { srcName: "Asteroid_6.png", name: "Asteroid_6", count: 1, rotate: { first: 0, last: 350, step: 10 }  }, */
-
   { srcName: "Asteroid_1.png", name: "Asteroid_1", count: 1, rotate: { first: 0, last: 359, step: 1 } },
   { srcName: "Asteroid_2.png", name: "Asteroid_2", count: 1, rotate: { first: 0, last: 359, step: 1 } },
   { srcName: "Asteroid_3.png", name: "Asteroid_3", count: 1, rotate: { first: 0, last: 359, step: 1 } },

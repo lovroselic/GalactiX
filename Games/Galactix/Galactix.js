@@ -54,7 +54,6 @@ class Bullet {
 	constructor(x, y, sprite) {
 		this.x = x;
 		this.y = y;
-		//this.sprite = sprite;
 		this.actor = new ACTOR(sprite);
 	}
 	updateActor() {
@@ -62,14 +61,12 @@ class Bullet {
 		this.actor.y = this.y;
 	}
 	hit(index) {
-		console.warn("bullet hit", index);
 		SHIP.bullet.kill(index);
 	}
 }
 
 class Meteor {
 	constructor(position, assetName, angle, limits) {
-		//this.position = position;
 		this.assetNAme = assetName;
 		this.limits = limits;
 		this.rotSpeedFactor = RND(1, 3);
@@ -109,20 +106,46 @@ class Meteor {
 		this.addAngle(angleDelta);
 	}
 	hit() {
-		console.log("--------------");
-		console.warn("meteor hit");
 
-		console.log("--------------\n");
+		this.lives--;
+		if (this.lives > 0) {
+			AUDIO.Hit.play();
+		} else {
+			this.explode();
+		}
 	}
-	explode() { }
+	explode() {
+		DESTRUCTION_ANIMATION.add(new AsteroidExplosion(this.moveState.pos));
+		AUDIO.Explosion.play();
+		PIXEL_ACTORS.remove(this.id);
+	}
+
 	collisionToActors(map) {
 		return;
+	}
+}
+
+class GeneralDestruction {
+	constructor(grid) {
+		this.grid = grid;
+		this.layer = 'explosion';
+	}
+	draw() {
+		ENGINE.spriteDraw(this.layer, this.grid.x, this.grid.y, this.actor.sprite());
+		ENGINE.layersToClear.add("explosion");
+	}
+}
+
+class AsteroidExplosion extends GeneralDestruction {
+	constructor(grid) {
+		super(grid);
+		this.actor = new ACTOR("AsteroidExp", grid.x, grid.y, "linear", ASSET.AsteroidExp);
 	}
 }
 /** */
 
 const PRG = {
-	VERSION: "1.06.06",
+	VERSION: "1.06.07",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -700,7 +723,6 @@ const GAME = {
 		console.info(" - start -", GAME.level);
 		GAME.prepareForRestart();
 		DESTRUCTION_ANIMATION.init(null);
-		//PROFILE_BALLISTIC.init(MAP[GAME.getRealLevel()]);
 		PIXEL_ACTORS.init(MAP[GAME.getRealLevel()]);
 		GAME.initLevel(level);
 		GAME.continueLevel(level);
@@ -814,9 +836,12 @@ initLevel(level) {
 		SHIP.bullet.move(lapsedTime);
 		PIXEL_ACTORS.manage(lapsedTime);
 		SHIP.bullet.manage(lapsedTime);
+		DESTRUCTION_ANIMATION.manage(lapsedTime);
 
 		GAME.respond(lapsedTime);
 		GAME.frameDraw(lapsedTime);
+
+		if (SHIP.dead) GAME.checkIfProcessesComplete();
 		/*
 
 
@@ -844,6 +869,11 @@ initLevel(level) {
 		} else requestAnimationFrame(GAME.run);
 		*/
 	},
+	checkIfProcessesComplete() {
+		if (DESTRUCTION_ANIMATION.POOL.length !== 0) return;
+		console.log("SCENE completed!");
+		SHIP.death();
+	},
 	firstFrameDraw() {
 		TITLE.render();
 		BACKGROUND.render();
@@ -860,6 +890,7 @@ initLevel(level) {
 		SHIP.draw();
 		SHIP.bullet.draw();
 		PIXEL_ACTORS.draw(lapsedTime);
+		DESTRUCTION_ANIMATION.draw(lapsedTime);
 
 		if (DEBUG.FPS) GAME.FPS(lapsedTime);
 		//ALIENS.bullet.draw();

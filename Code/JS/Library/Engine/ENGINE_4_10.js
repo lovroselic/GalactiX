@@ -1293,8 +1293,8 @@ const ENGINE = {
             ASSET[el.name] = new LiveSPRITE("1D", []);
             for (let i = 1; i <= el.count; i++) {
               toLoad.push({
-                srcName: el.srcName + "_" + i.toString().padStart(2, "0") + "." + el.type,
-                name: el.name + (i - 1).toString().padStart(2, "0"),
+                srcName: `${el.srcName}_${i.toString().padStart(2, "0")}.${el.type}`,
+                name: `${el.name}_${(i - 1).toString().padStart(2, "0")}`,
                 asset: el.name
               });
             }
