@@ -65,15 +65,13 @@ class Bullet {
 	}
 }
 
-class Meteor {
+class GeneralRotatingEntity {
 	constructor(position, assetName, angle, limits) {
 		this.assetNAme = assetName;
 		this.limits = limits;
-		this.rotSpeedFactor = RND(1, 3);
 		this.actor = new Rotating_ACTOR(assetName, position.x, position.y);
 		this.moveState = new PX_MoveState(position, this);
 		this.setAngle(angle);
-		this.lives = INI.METEOR_LIVES;
 	}
 	setAngle(a) {
 		this.angle = a % 360;
@@ -87,6 +85,14 @@ class Meteor {
 	}
 	getSprite() {
 		return this.actor.sprite();
+	}
+}
+
+class Meteor extends GeneralRotatingEntity {
+	constructor(position, assetName, angle, limits) {
+		super(position, assetName, angle, limits);
+		this.rotSpeedFactor = RND(1, 3);
+		this.lives = INI.METEOR_LIVES;
 	}
 	draw() {
 		ENGINE.spriteDraw('rubble', this.actor.x, this.actor.y, this.getSprite());
@@ -106,7 +112,6 @@ class Meteor {
 		this.addAngle(angleDelta);
 	}
 	hit() {
-
 		this.lives--;
 		if (this.lives > 0) {
 			AUDIO.Hit.play();
@@ -122,6 +127,12 @@ class Meteor {
 
 	collisionToActors(map) {
 		return;
+	}
+}
+
+class Alien extends GeneralRotatingEntity {
+	constructor() {
+		super(position, assetName, angle, limits);
 	}
 }
 
@@ -145,7 +156,7 @@ class AsteroidExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.06.07",
+	VERSION: "1.07.00",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
