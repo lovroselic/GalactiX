@@ -2,7 +2,7 @@
 /*
  
  to do:
-
+	* timer for realeasing chargers
  known bugs: 
 
  */
@@ -93,6 +93,7 @@ class Meteor extends GeneralRotatingEntity {
 		super(position, assetName, angle, limits);
 		this.rotSpeedFactor = RND(1, 3);
 		this.lives = INI.METEOR_LIVES;
+		this.name = "Asteroid";
 	}
 	draw() {
 		ENGINE.spriteDraw('rubble', this.actor.x, this.actor.y, this.getSprite());
@@ -131,9 +132,22 @@ class Meteor extends GeneralRotatingEntity {
 }
 
 class Alien extends GeneralRotatingEntity {
-	constructor() {
+	constructor(position, assetName, angle, limits, score, probable) {
 		super(position, assetName, angle, limits);
+		this.score = score;
+		this.probable = probable;
 	}
+	collisionToActors(map) {
+		return;
+	}
+	draw() {
+		ENGINE.spriteDraw('aliens', this.actor.x, this.actor.y, this.getSprite());
+		ENGINE.layersToClear.add("aliens");
+	}
+	move(lapsedTime) {
+		return;
+	}
+	hit(){}
 }
 
 class GeneralDestruction {
@@ -156,7 +170,7 @@ class AsteroidExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.01",
+	VERSION: "1.07.02",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -221,449 +235,6 @@ const PRG = {
 	},
 };
 
-
-
-/*
-var ALIENS = {
-	bullet: {
-		speed: 16,
-		draw() {
-			var LN = ALIENS.bullet.arsenal.length;
-			for (var i = 0; i < LN; i++) {
-				ENGINE.spriteDraw(
-					"bullets",
-					ALIENS.bullet.arsenal[i].x,
-					ALIENS.bullet.arsenal[i].y,
-					ALIENS.bullet.sprite
-				);
-			}
-		},
-		move() {
-			var LN = ALIENS.bullet.arsenal.length;
-			if (LN < 1) return;
-			for (var i = LN - 1; i >= 0; i--) {
-				ALIENS.bullet.arsenal[i].y += ALIENS.bullet.speed;
-				if (ALIENS.bullet.arsenal[i].y > INI.GAME_HEIGHT) ALIENS.bullet.kill(i);
-			}
-		},
-		kill(i) {
-			ALIENS.bullet.arsenal.splice(i, 1);
-		},
-		killAll() {
-			ALIENS.bullet.arsenal.clear();
-		}
-	},
-	init() {
-		ALIENS.existence = [];
-		ALIENS.chargers = [];
-		ALIENS.bullet.arsenal = [];
-		ALIENS.bullet.sprite = SPRITE.alienbullet;
-		ALIENS.moving = false;
-		ALIENS.speed = 2;
-		ALIENS.Dspeed = 24;
-		ALIENS.descent = false;
-		ALIENS.minX = 52;
-		ALIENS.maxX = ENGINE.gameWIDTH - ALIENS.minX;
-		ALIENS.chargerReady = false;
-		setTimeout(function () {
-			ALIENS.chargerReady = true;
-		}, GAME.levels[GAME.level].CD);
-	},
-	findChargers() {
-		var AEL = ALIENS.existence.length;
-		var find = [];
-		for (var i = 0; i < AEL; i++) {
-			if (
-				ALIENS.existence[i].type === "charger" &&
-				ALIENS.existence[i].stage === "waiting"
-			)
-				find.push(i);
-		}
-		return find;
-	},
-	findActiveChargers() {
-		ALIENS.chargers.clear();
-		var AEL = ALIENS.existence.length;
-		for (var i = 0; i < AEL; i++) {
-			if (ALIENS.existence[i].stage != "waiting") ALIENS.chargers.push(i);
-		}
-	},
-	releaseCharger() {
-		var find = ALIENS.findChargers();
-		if (find.length === 0) return;
-		var select = find[RND(0, find.length - 1)];
-		ALIENS.chargers.push(select);
-		ALIENS.existence[select].stage = "rotate";
-	},
-	move() {
-		ALIENS.findActiveChargers();
-		var AC = ALIENS.chargers.length;
-		if (ALIENS.chargerReady) {
-			var allowed = GAME.levels[GAME.level].chargers;
-			if (allowed > AC) {
-				ALIENS.releaseCharger();
-				ALIENS.chargerReady = false;
-				setTimeout(function () {
-					ALIENS.chargerReady = true;
-				}, GAME.levels[GAME.level].CD);
-			}
-		}
-		if (AC > 0) {
-			var whereX, whereY;
-			for (var q = AC - 1; q >= 0; q--) {
-				var angle;
-				var where =
-					(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) /
-					Math.abs(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) || 0;
-				switch (ALIENS.existence[ALIENS.chargers[q]].stage) {
-					case "rotate":
-						var ROTDIR;
-						if (ALIENS.dir.x != 0) {
-							ROTDIR = ALIENS.dir.x;
-						} else ROTDIR = 1;
-						if (angle != 0)
-							angle = ALIENS.existence[ALIENS.chargers[q]].angle + 10 * ROTDIR;
-						if (angle === 360 || angle === 0) {
-							angle = 0;
-							ALIENS.existence[ALIENS.chargers[q]].stage = "descend";
-						}
-						if (angle < 0) angle += 360;
-						ALIENS.existence[ALIENS.chargers[q]].angle = angle;
-						ALIENS.existence[ALIENS.chargers[q]].y -= 1;
-						if (ALIENS.existence[ALIENS.chargers[q]].y <= INI.TOP_Y)
-							ALIENS.existence[ALIENS.chargers[q]].y = INI.TOP_Y;
-						ALIENS.existence[ALIENS.chargers[q]].refresh();
-						break;
-					case "descend":
-						ALIENS.existence[ALIENS.chargers[q]].y +=
-							GAME.levels[GAME.level].chargerDescent;
-						ALIENS.existence[ALIENS.chargers[q]].x += where * ALIENS.speed;
-						if (ALIENS.existence[ALIENS.chargers[q]].x > ENGINE.gameWIDTH)
-							ALIENS.existence[ALIENS.chargers[q]].x = ENGINE.gameWIDTH;
-						if (ALIENS.existence[ALIENS.chargers[q]].x < 0)
-							ALIENS.existence[ALIENS.chargers[q]].x = 0;
-						if (ALIENS.existence[ALIENS.chargers[q]].y >= INI.ATTACK) {
-							ALIENS.existence[ALIENS.chargers[q]].stage = "attack";
-							ALIENS.existence[ALIENS.chargers[q]].score =
-								ALIENS.existence[ALIENS.chargers[q]].score * 2;
-						}
-						break;
-					case "attack":
-						if (!SHIP.live) {
-							ALIENS.existence[ALIENS.chargers[q]].stage = "turn";
-							break;
-						}
-						ALIENS.existence[ALIENS.chargers[q]].probable = 99;
-						whereX = SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x;
-						whereY = SHIP.y - ALIENS.existence[ALIENS.chargers[q]].y;
-						var hyp = Math.sqrt(Math.pow(whereX, 2) + Math.pow(whereY, 2));
-						var cosa = whereY / hyp;
-						var rota = Math.acos(cosa) * (180 / Math.PI);
-						var rot = Math.round(rota / 10) * 10;
-						if (rot > 40) rot = 40;
-						rot = rot * where * -1;
-						var vx = ALIENS.speed * where;
-						var vy = GAME.levels[GAME.level].chargerDescent;
-						ALIENS.existence[ALIENS.chargers[q]].x += vx;
-						ALIENS.existence[ALIENS.chargers[q]].y += vy;
-						if (ALIENS.existence[ALIENS.chargers[q]].x > ENGINE.gameWIDTH)
-							ALIENS.existence[ALIENS.chargers[q]].x = ENGINE.gameWIDTH;
-						if (ALIENS.existence[ALIENS.chargers[q]].x < 0)
-							ALIENS.existence[ALIENS.chargers[q]].x = 0;
-						if (rot < 0) rot += 360;
-						if (rot === -0) rot = 0;
-						ALIENS.existence[ALIENS.chargers[q]].angle = rot;
-						ALIENS.existence[ALIENS.chargers[q]].refresh();
-						if (
-							ALIENS.existence[ALIENS.chargers[q]].y >=
-							INI.GAME_HEIGHT +
-							parseInt(ALIENS.existence[ALIENS.chargers[q]].height / 2, 10)
-						) {
-							ALIENS.existence[ALIENS.chargers[q]].stage = "return";
-							ALIENS.existence[ALIENS.chargers[q]].y = -parseInt(
-								ALIENS.existence[ALIENS.chargers[q]].height / 2,
-								10
-							);
-						}
-						break;
-					case "return":
-						if (ALIENS.existence[ALIENS.chargers[q]].y < INI.TOP_Y) {
-							ALIENS.existence[ALIENS.chargers[q]].y +=
-								GAME.levels[GAME.level].chargerDescent;
-						} else {
-							ALIENS.existence[ALIENS.chargers[q]].stage = "attack";
-						}
-						break;
-					case "turn":
-						vy = GAME.levels[GAME.level].chargerDescent;
-						vx = ALIENS.speed;
-						angle = ALIENS.existence[ALIENS.chargers[q]].angle;
-						var rotDir, vertDir;
-						if (angle >= 180) {
-							rotDir = -1;
-						} else rotDir = 1;
-						if (angle >= 0 && angle < 90) vertDir = 1;
-						if (angle > 270 && angle < 360) vertDir = 1;
-						if (angle === 90 || angle === 270) vertDir = 0;
-						if (angle > 90 && angle <= 180) vertDir = -1;
-						if (angle < 270 && angle > 180) vertDir = -1;
-						angle = angle + 10 * rotDir;
-						if (angle === 180) {
-							ALIENS.existence[ALIENS.chargers[q]].score =
-								ALIENS.existence[ALIENS.chargers[q]].score / 2;
-							ALIENS.existence[ALIENS.chargers[q]].stage = "ascend";
-						}
-						ALIENS.existence[ALIENS.chargers[q]].angle = angle;
-						ALIENS.existence[ALIENS.chargers[q]].x += vx * rotDir * -2;
-						ALIENS.existence[ALIENS.chargers[q]].y += vy * vertDir;
-						if (ALIENS.existence[ALIENS.chargers[q]].x > ENGINE.gameWIDTH)
-							ALIENS.existence[ALIENS.chargers[q]].x = ENGINE.gameWIDTH;
-						if (ALIENS.existence[ALIENS.chargers[q]].x < 0)
-							ALIENS.existence[ALIENS.chargers[q]].x = 0;
-						ALIENS.existence[ALIENS.chargers[q]].refresh();
-						break;
-					case "ascend":
-						ALIENS.existence[ALIENS.chargers[q]].y -=
-							GAME.levels[GAME.level].chargerDescent;
-						if (ALIENS.existence[ALIENS.chargers[q]].y <= INI.TOP_Y + 64) {
-							ALIENS.existence[ALIENS.chargers[q]].stage = "rotate";
-						}
-						break;
-				}
-			}
-		}
-		if (!ALIENS.moving) {
-			ALIENS.moving = true;
-			var options = [LEFT, RIGHT];
-			ALIENS.dir = options[RND(0, 1)];
-			ALIENS.dirCopy = ALIENS.dir;
-		} else {
-			var AEL = ALIENS.existence.length;
-			var i;
-			var minX = ENGINE.gameWIDTH;
-			var maxX = 0;
-			for (i = 0; i < AEL; i++) {
-				if (ALIENS.existence[i].stage === "waiting") {
-					if (ALIENS.existence[i].x > maxX) maxX = ALIENS.existence[i].x;
-					if (ALIENS.existence[i].x < minX) minX = ALIENS.existence[i].x;
-				}
-			}
-			if (maxX < minX) return;
-			if (ALIENS.descent) {
-				ALIENS.descent = false;
-				ALIENS.dir = ALIENS.dirCopy.mirror();
-				ALIENS.dirCopy = ALIENS.dir;
-			} else {
-				if (minX <= ALIENS.minX || maxX >= ALIENS.maxX) {
-					ALIENS.dir = DOWN;
-					ALIENS.descent = true;
-				}
-			}
-			var index;
-			for (index = 0; index < AEL; index++) {
-				if (ALIENS.existence[index].stage === "waiting")
-					ALIENS.existence[index].x += ALIENS.speed * ALIENS.dir.x;
-				if (ALIENS.existence[index].stage === "waiting") {
-					ALIENS.existence[index].y += ALIENS.Dspeed * ALIENS.dir.y;
-					if (ALIENS.existence[index].y > INI.AUTO_ATTACK) {
-						ALIENS.existence[index].type = "charger";
-						ALIENS.existence[index].stage = "attack";
-					}
-				}
-			}
-		}
-	},
-	draw() {
-		ENGINE.clearLayer("aliens");
-		var LN = ALIENS.existence.length;
-		var ix;
-		for (ix = 0; ix < LN; ix++) {
-			ENGINE.spriteDraw(
-				"aliens",
-				ALIENS.existence[ix].x,
-				ALIENS.existence[ix].y,
-				SPRITE[ALIENS.existence[ix].name]
-			);
-		}
-		LN = ALIENS.chargers.length;
-		for (var iy = 0; iy < LN; iy++) {
-			ENGINE.spriteDraw(
-				"aliens",
-				ALIENS.existence[ALIENS.chargers[iy]].x,
-				ALIENS.existence[ALIENS.chargers[iy]].y,
-				SPRITE[ALIENS.existence[ALIENS.chargers[iy]].name]
-			);
-		}
-	},
-	shoot() {
-		if (SHIP.dead) return;
-		if (!ALIENS.ready) return;
-		var ABP = ALIENS.bullet.arsenal.length;
-		if (ABP >= GAME.levels[GAME.level].alienBullets) return;
-		if (ALIENS.existence.length === 0) return;
-		var toss = coinFlip();
-		if (toss) return;
-		var candidates = [];
-		var AEL = ALIENS.existence.length;
-		var X, Y;
-		for (var z = AEL - 1; z >= 0; z--) {
-			X = ALIENS.existence[z].x;
-			Y = ALIENS.existence[z].y;
-			if (candidates[X]) {
-				if (Y > candidates[X].y) {
-					candidates[X].y = Y;
-					candidates[X].i = z;
-				}
-			} else {
-				candidates[X] = { y: Y, i: z };
-			}
-		}
-		var closest = [];
-		var CL = candidates.length;
-		for (var i = 0; i < CL; i++) {
-			if (candidates[i]) {
-				closest.push({ x: i, y: candidates[i].y, i: candidates[i].i });
-			}
-		}
-		ALIENS.closest = closest;
-		var selected = RND(0, closest.length - 1);
-		if (probable(ALIENS.existence[closest[selected].i].probable)) {
-			ALIENS.bullet.arsenal.push(
-				new BulletClass(
-					closest[selected].x,
-					parseInt(
-						closest[selected].y +
-						ALIENS.existence[closest[selected].i].height / 2 +
-						ALIENS.bullet.sprite.height / 2,
-						10
-					)
-				)
-			);
-		}
-	}
-};
-var EXPLOSIONS = {
-	pool: [],
-	draw() {
-		ENGINE.clearLayer("explosion");
-		var PL = EXPLOSIONS.pool.length;
-		if (PL === 0) return;
-		for (var instance = PL - 1; instance >= 0; instance--) {
-			var sprite = EXPLOSIONS.pool[instance].pool.shift();
-			ENGINE.spriteDraw(
-				"explosion",
-				EXPLOSIONS.pool[instance].x,
-				EXPLOSIONS.pool[instance].y,
-				SPRITE[sprite]
-			);
-			if (EXPLOSIONS.pool[instance].pool.length === 0) {
-				EXPLOSIONS.pool.splice(instance, 1);
-			}
-		}
-	}
-};
-var MeteorClass = function (actor, lives) {
-	this.actor = actor;
-	this.lives = lives;
-};
-var RUBBLE = {
-	pool: [],
-	purge(score) {
-		var RPL = RUBBLE.pool.length;
-		if (RPL === 0) return;
-		for (var i = RPL - 1; i >= 0; i--) {
-			RUBBLE.kill(i);
-			if (score) GAME.score += 100;
-		}
-		TEXT.score();
-	},
-	kill(x) {
-		EXPLOSIONS.pool.push(
-			new AnimationSPRITE(
-				RUBBLE.pool[x].actor.x,
-				RUBBLE.pool[x].actor.y,
-				"AstExp",
-				12
-			)
-		);
-		RUBBLE.pool.splice(x, 1);
-	},
-	draw() {
-		var CTX = LAYER["rubble"];
-		CTX.clearRect(0, INI.RUBBLE_Y - 64, ENGINE.gameWIDTH, 128);
-		var PL = RUBBLE.pool.length;
-		var i;
-		for (i = 0; i < PL; i++) {
-			ENGINE.spriteDraw(
-				"rubble",
-				RUBBLE.pool[i].actor.x,
-				RUBBLE.pool[i].actor.y,
-				SPRITE[RUBBLE.pool[i].actor.name]
-			);
-		}
-	},
-	set(num) {
-		var width = parseInt((SHIP.maxX - SHIP.minX) / (num - 1), 10);
-		var graphics = [
-			"Asteroid1",
-			"Asteroid2",
-			"Asteroid3",
-			"Asteroid4",
-			"Asteroid5",
-			"Asteroid6"
-		];
-		var pool = [].concat(graphics);
-		var PL = pool.length;
-		while (PL < num) {
-			pool.push(graphics[RND(0, graphics.length - 1)]);
-			PL = pool.length;
-		}
-		pool.shuffle;
-		var index;
-		var meteor, actor;
-		for (index = 0; index < num; index++) {
-			actor = new ACTOR(
-				pool[index],
-				SHIP.minX + index * width,
-				RNDy(),
-				RND(0, 35) * 10,
-				1
-			);
-			meteor = new MeteorClass(actor, 4);
-			RUBBLE.pool.push(meteor);
-		}
-		return;
-
-		function RNDy() {
-			var flip = coinFlip();
-			var Y = RND(1, 24);
-			if (flip) {
-				return INI.RUBBLE_Y + Y;
-			} else {
-				return INI.RUBBLE_Y - Y;
-			}
-		}
-	},
-	move() {
-		var PL = RUBBLE.pool.length;
-		var i;
-		for (i = 0; i < PL; i++) {
-			RUBBLE.pool[i].actor.x += 1;
-			if (RUBBLE.pool[i].actor.x > ENGINE.gameWIDTH + INI.METEOR_OUT)
-				RUBBLE.pool[i].actor.x = -INI.METEOR_OUT;
-			if (probable(INI.METEOR_ROTATION_PROBABILITY)) {
-				RUBBLE.pool[i].actor.angle += 5;
-				if (RUBBLE.pool[i].actor.angle === 360) RUBBLE.pool[i].actor.angle = 0;
-				RUBBLE.pool[i].actor.refresh();
-			}
-		}
-	}
-};
-*/
-//////////////
-
-const RUBBLE = {};
-
 const GAME = {
 	getRealLevel() {
 		return GAME.level % INI.LAST_LEVEL;
@@ -702,25 +273,9 @@ const GAME = {
 
 		GAME.fps = new FPS_short_term_measurement(300);
 		GAME.ended = false;
-
 		SHIP.dead = false;
 		SHIP.firstInit();
 		GAME.levelStart(GAME.level);
-
-		/*
-		ALIENS.init();
-		ALIENS.ready = false;
-		SHIP.dead = false;
-		SHIP.firstInit(); //
-		GAME.stopAnimation = false;
-		GAME.initLevel(GAME.level);
-		GAME.frame = {};
-		GAME.frame.start = null;
-		GAME.firstFrameDraw();
-		GAME.run();*/
-
-		/** DEBUG */
-		//ENGINE.GAME.ANIMATION.stop();
 	},
 	setup() {
 		console.info("GAME SETUP");
@@ -738,8 +293,14 @@ const GAME = {
 		GAME.initLevel(level);
 		GAME.continueLevel(level);
 	},
+	createLevel(level) {
+		throw "createLevel not yet implemented";
+	},
 	initLevel(level) {
 		console.info("init level", level);
+		if (level > INI.LAST_LEVEL) {
+			GAME.createLevel(level);
+		}
 		GAME.levelComplete = false;
 
 		SHIP.shots = 0;
@@ -748,67 +309,17 @@ const GAME = {
 		SHIP.init();
 		SHIP.bullet.init();
 		SHIP.bullet.max = MAP[level].maxBullets;
+		ALIENS.init();
+		ALIENS.ready = false;
+
+		ALIENS.speed = MAP[level].AXS;
+		ALIENS.Dspeed = MAP[level].AYS;
+
 
 		SPAWN.meteors();
+		SPAWN.aliens();
 		/** */
 	},
-	/*
-initLevel(level) {
-		if (level > INI.LAST_LEVEL) {
-			GAME.createLevel(level);
-		}
-		GAME.levelComplete = false;
-		SHIP.shots = 0;
-		SHIP.killShots = 0;
-		SHIP.ship = GAME.levels[level].ship;
-		SHIP.init();
-		SHIP.bullet.init();
-		SHIP.bullet.max = GAME.levels[level].maxBullets;
-		ALIENS.speed = GAME.levels[level].AXS;
-		ALIENS.Dspeed = GAME.levels[level].AYS;
-		var layout = GAME.levels[level].layout;
-		var center = parseInt(ENGINE.gameWIDTH / 2, 10);
-		for (var row in layout) {
-			var odd = layout[row].num % 2;
-			var count = layout[row].num;
-			var xes = [];
-			if (odd) {
-				xes.push(center);
-				count--;
-			}
-			var round = 1;
-			while (count) {
-				xes.push(center + round * INI.PADDING);
-				xes.push(center - round * INI.PADDING);
-				count -= 2;
-				round++;
-			}
-			var LN = xes.length;
-			var Y = INI.TOP_Y + parseInt(row, 10) * INI.PADDING;
-			for (var q = 0; q < LN; q++) {
-				var angle = 0;
-				if (layout[row].type === "charger") angle = 180;
-				if (layout[row].actor === "random") {
-					layout[row].actor = AlienShips[RND(0, AlienShips.length - 1)];
-				}
-				ALIENS.existence.push(
-					new ACTOR(
-						layout[row].actor,
-						xes[q],
-						Y,
-						angle,
-						layout[row].score,
-						layout[row].probable
-					)
-				);
-				if (layout[row].type === "charger")
-					ALIENS.existence[ALIENS.existence.length - 1].type = "charger";
-			}
-		}
-		RUBBLE.set(GAME.levels[level].asteroids);
-	},
-	*/
-
 	continueLevel(level) {
 		console.log("game continues on level", level);
 		GAME.levelExecute(level);
@@ -1055,6 +566,54 @@ initLevel(level) {
 		GAME.fps.update(fps);
 		CTX.fillText(GAME.fps.getFps(), 5, 10);
 	},
+};
+
+const ALIENS = {
+	bullet: {
+		speed: 16,
+		/* draw() {
+			var LN = ALIENS.bullet.arsenal.length;
+			for (var i = 0; i < LN; i++) {
+				ENGINE.spriteDraw(
+					"bullets",
+					ALIENS.bullet.arsenal[i].x,
+					ALIENS.bullet.arsenal[i].y,
+					ALIENS.bullet.sprite
+				);
+			}
+		}, */
+		/* move() {
+			var LN = ALIENS.bullet.arsenal.length;
+			if (LN < 1) return;
+			for (var i = LN - 1; i >= 0; i--) {
+				ALIENS.bullet.arsenal[i].y += ALIENS.bullet.speed;
+				if (ALIENS.bullet.arsenal[i].y > INI.GAME_HEIGHT) ALIENS.bullet.kill(i);
+			}
+		}, */
+		/* kill(i) {
+			ALIENS.bullet.arsenal.splice(i, 1);
+		}, */
+		/* killAll() {
+			ALIENS.bullet.arsenal.clear();
+		} */
+	},
+	init() {
+		ALIENS.existence = [];
+		ALIENS.chargers = [];
+		ALIENS.bullet.arsenal = [];
+		ALIENS.bullet.sprite = SPRITE.alienbullet;
+		ALIENS.moving = false;
+		ALIENS.speed = 2;
+		ALIENS.Dspeed = 24;
+		ALIENS.descent = false;
+		ALIENS.minX = 52;
+		ALIENS.maxX = ENGINE.gameWIDTH - ALIENS.minX;
+		ALIENS.chargerReady = false;
+		setTimeout(function () {
+			ALIENS.chargerReady = true;
+			console.warn("charger ready");
+		}, MAP[GAME.getRealLevel()].CD);
+	}
 };
 
 const SHIP = {

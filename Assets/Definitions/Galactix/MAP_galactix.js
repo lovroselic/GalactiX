@@ -471,7 +471,39 @@ const SPAWN = {
 
     },
     aliens() {
-        
+        console.log("spawning aliens");
+        const mapLimits = MAP[GAME.getRealLevel()].planeLimits;
+        const layout = MAP[GAME.getRealLevel()].layout;
+        const center = parseInt(ENGINE.gameWIDTH / 2, 10);
+        console.log("..layout", layout);
+
+        for (const row in layout) {
+            console.log("...row", row);
+            const xes = ENGINE.spreadAroundCenter(layout[row].num, center, INI.PADDING);
+            console.log("...xes", xes);
+            const Y = INI.TOP_Y + parseInt(row, 10) * INI.PADDING;
+            for (let q = 0; q < xes.length; q++) {
+                let angle = 0;
+                if (layout[row].type === "charger") {
+                    angle = 180;
+                }
+                if (layout[row].actor === "random") {
+                    layout[row].actor = AlienShips[RND(0, AlienShips.length - 1)];
+                }
+
+                let pos = new Grid(xes[q], Y);
+                const alien = new Alien(pos, layout[row].actor, angle, mapLimits, layout[row].score, layout[row].probable);
+                console.log("alien", alien);
+                PIXEL_ACTORS.add(alien);
+                if (layout[row].type === "charger"){
+                    PIXEL_ACTORS.POOL.last().type = "charger";
+                }
+            }
+        }
         console.log("PIXEL_ACTORS", PIXEL_ACTORS.POOL);
     }
 };
+
+const AlienShips = ["basic7Attacker", "basic4Charger", "basic6Attacker", "basic5Attacker", "basic4Attacker", "basic8Fighter",
+    "basic7Fighter", "basic6Fighter", "basic3Charger", "basic5Fighter", "basic4Fighter", "basic2Charger", "basic3Fighter",
+    "basic2Fighter", "basic3Attacker", "basic1Charger", "basic2Attacker", "basic1Attacker", "basic1Fighter"];
