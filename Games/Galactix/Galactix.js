@@ -147,7 +147,15 @@ class Alien extends GeneralRotatingEntity {
 	move(lapsedTime) {
 		return;
 	}
-	hit(){}
+	hit() {
+		this.explode();
+		GAME.addScore(this.score);
+	}
+	explode() {
+		DESTRUCTION_ANIMATION.add(new AlienExplosion(this.moveState.pos));
+		AUDIO.Explosion.play();
+		PIXEL_ACTORS.remove(this.id);
+	}
 }
 
 class GeneralDestruction {
@@ -167,10 +175,18 @@ class AsteroidExplosion extends GeneralDestruction {
 		this.actor = new ACTOR("AsteroidExp", grid.x, grid.y, "linear", ASSET.AsteroidExp);
 	}
 }
+
+class AlienExplosion extends GeneralDestruction {
+	constructor(grid) {
+		super(grid);
+		this.actor = new ACTOR("AlienExp", grid.x, grid.y, "linear", ASSET.AlienExp);
+	}
+}
+
 /** */
 
 const PRG = {
-	VERSION: "1.07.02",
+	VERSION: "1.07.03",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
