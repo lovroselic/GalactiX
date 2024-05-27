@@ -156,7 +156,7 @@ class AsteroidExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.00",
+	VERSION: "1.07.01",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",

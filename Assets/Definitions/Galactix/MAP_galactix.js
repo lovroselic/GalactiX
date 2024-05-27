@@ -468,6 +468,10 @@ const SPAWN = {
             PIXEL_ACTORS.add(asteroid);
         }
 
+
+    },
+    aliens() {
+        
         console.log("PIXEL_ACTORS", PIXEL_ACTORS.POOL);
     }
 };
