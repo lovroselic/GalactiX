@@ -149,21 +149,6 @@ class Alien extends GeneralRotatingEntity {
 	}
 	move(lapsedTime) {
 		let timeDelta = lapsedTime / 1000;
-		/** finding and releasing chargers */
-
-		/** moving chargers and setting their states */
-
-		/** lateral and downwards movement */
-
-
-		//console.log("\n--- next turn ---");
-		//ALIENS.speed = new Vector(MAP[level].AXS, MAP[level].AYS);
-
-
-
-		/**  */
-		/**  */
-		/**  actual movement */
 
 		if (this.stage === "waiting") {
 			let translate = ALIENS.speed.mul(ALIENS.dir, timeDelta);
@@ -173,14 +158,49 @@ class Alien extends GeneralRotatingEntity {
 			if (this.moveState.pos.y > INI.AUTO_ATTACK) {
 				this.type = "charger";
 				this.stage = "attack";
+				ALIENS.chargers.push(this.id);
+			}
+		} else {
+			/** chargers */
+			const direction = this.moveState.pos.direction(new Grid(SHIP.x, SHIP.y));
+			switch (this.stage) {
+				case "rotate":
+					const rotDir = ALIENS.dir.x || 1;
+					this.setAngle(this.angle + rotDir * 10);
+					this.moveState.pos = this.moveState.pos.add(new Vector(0, -1));
+					if (this.moveState.pos.y < INI.TOP_Y) this.moveState.pos.y = INI.TOP_YM
+					this.moveState.refresh();
+					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+					if (this.angle === 0) this.stage = "descend";
+					//console.log("rotating", this.id, "rotDir", rotDir, "angle", this.angle);
+					break;
+				case "descend":
+					let translate = ALIENS.chargeSpeed.mul(direction, timeDelta);
+					this.moveState.pos = this.moveState.pos.add(translate);
+					this.moveState.refresh();
+					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+					if (this.moveState.pos.y >= INI.ATTACK) {
+						this.stage = "attack";
+						this.score *= 2;
+					}
+					//console.info("descending", this.id, "direction", direction, "translate", translate);
+					break;
+				case "attack":
+					if (!SHIP.live) {
+						this.stage = "turn";
+						break;
+					}
+
+
+
+					console.info("attacking", this.id, "direction", direction);
+					break;
+
+				default:
+					console.error("charger stage error", this.stage);
+					break;
 			}
 		}
-
-
-
-
-
-
 
 		return;
 	}
@@ -192,6 +212,7 @@ class Alien extends GeneralRotatingEntity {
 		DESTRUCTION_ANIMATION.add(new AlienExplosion(this.moveState.pos));
 		AUDIO.Explosion.play();
 		PIXEL_ACTORS.remove(this.id);
+		ALIENS.chargers.remove(this.id);
 	}
 }
 
@@ -223,7 +244,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.05",
+	VERSION: "1.07.06",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -367,6 +388,7 @@ const GAME = {
 		ALIENS.init();
 		ALIENS.ready = false;
 		ALIENS.speed = new FP_Vector(MAP[level].AXS, MAP[level].AYS);
+		ALIENS.chargeSpeed = new FP_Vector(MAP[level].AXS, MAP[level].chargerDescent);
 		ALIENS.dir = [LEFT, RIGHT].chooseRandom();
 		ALIENS.dirCopy = ALIENS.dir;
 
@@ -676,6 +698,7 @@ const ALIENS = {
 	manage(lapsedTime) {
 		ALIENS.getExtremes();
 		ALIENS.checkDescent();
+		ALIENS.checkForChargers();
 	},
 	getExtremes() {
 		let minX = ENGINE.gameWIDTH;
@@ -689,7 +712,6 @@ const ALIENS = {
 		}
 		ALIENS.min = Math.floor(minX);
 		ALIENS.max = Math.floor(maxX);
-		console.warn(ALIENS.min, ALIENS.max);
 	},
 	checkDescent() {
 		if (ALIENS.descent) {
@@ -702,7 +724,32 @@ const ALIENS = {
 				ALIENS.descent = true;
 			}
 		}
-	 }
+	},
+	checkForChargers() {
+		if (ALIENS.chargerReady) {
+			if (MAP[GAME.level].chargers > ALIENS.chargers.length) {
+				ALIENS.releaseCharger();
+				ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
+			}
+		}
+	},
+	releaseCharger() {
+		const find = ALIENS.findChargers();
+		if (find.length === 0) return;
+		const select = find.chooseRandom();
+		ALIENS.chargers.push(select);
+		PIXEL_ACTORS.show(select).stage = "rotate";
+		//console.warn("releasing charger", select, PIXEL_ACTORS.show(select));
+	},
+	findChargers() {
+		const find = [];
+		for (let i = 0; i < ALIENS.existence.length; i++) {
+			const alien = PIXEL_ACTORS.show(ALIENS.existence[i]);
+			if (!alien) continue;
+			if (alien.type === "charger" && alien.stage === "waiting") find.push(alien.id);
+		}
+		return find;
+	},
 };
 
 const SHIP = {

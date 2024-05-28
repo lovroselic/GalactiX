@@ -7,7 +7,7 @@
 
  */
 /////////////////////misc/////////////////////////
-(function() {
+(function () {
 	function RND(start, end) {
 		return Math.floor(Math.random() * (++end - start) + start);
 	}
@@ -57,7 +57,7 @@ var DEBUG = {};
 DEBUG.LEVEL = 10;
 ////////////////////////////////////////////////////////////////////
 
-CanvasRenderingContext2D.prototype.roundRect = function(
+CanvasRenderingContext2D.prototype.roundRect = function (
 	x,
 	y,
 	width,
@@ -106,19 +106,19 @@ CanvasRenderingContext2D.prototype.roundRect = function(
 
 /* collection of prototypes LS */
 
-Array.prototype.clear = function() {
+Array.prototype.clear = function () {
 	if (!this) return false;
 	this.splice(0, this.length);
 };
 
-Array.prototype.swap = function(x, y) {
+Array.prototype.swap = function (x, y) {
 	var TMP = this[x];
 	this[x] = this[y];
 	this[y] = TMP;
 	return this;
 };
 
-Array.prototype.shuffle = function() {
+Array.prototype.shuffle = function () {
 	var i = this.length,
 		j;
 	while (--i > 0) {
@@ -132,7 +132,7 @@ Array.prototype.shuffle = function() {
 	}
 };
 
-Array.prototype.sum = function() {
+Array.prototype.sum = function () {
 	var x = this.length;
 	var total = 0;
 	for (var y = 0; y < x; y++) {
@@ -141,13 +141,13 @@ Array.prototype.sum = function() {
 	return total || -1;
 };
 
-Array.prototype.average = function() {
+Array.prototype.average = function () {
 	var sum = this.sum();
 	var x = this.length;
 	return sum / x || -1;
 };
 
-Array.prototype.createPool = function(mx, N) {
+Array.prototype.createPool = function (mx, N) {
 	if (!this) return false;
 	this.clear();
 	var tempArray = [];
@@ -168,7 +168,7 @@ Array.prototype.createPool = function(mx, N) {
 	}
 };
 
-Array.prototype.compare = function(array) {
+Array.prototype.compare = function (array) {
 	if (!array) return false;
 	var LN = this.length;
 	if (LN !== array.length) return false;
@@ -178,7 +178,7 @@ Array.prototype.compare = function(array) {
 	return true;
 };
 
-Array.prototype.remove = function(value) {
+Array.prototype.remove = function (value) {
 	var LN = this.length;
 	for (var x = 0; x < LN; x++) {
 		if (this[x] === value) {
@@ -188,7 +188,7 @@ Array.prototype.remove = function(value) {
 	}
 };
 
-Array.prototype.chooseRandom = function() {
+Array.prototype.chooseRandom = function () {
 	var LN = this.length;
 	var choose = rnd(1, LN) - 1;
 	return this[choose];
@@ -198,7 +198,7 @@ Array.prototype.chooseRandom = function() {
 	}
 };
 
-Array.prototype.removeRandom = function() {
+Array.prototype.removeRandom = function () {
 	var LN = this.length;
 	var choose = rnd(1, LN) - 1;
 	return this.splice(choose, 1);
@@ -208,9 +208,9 @@ Array.prototype.removeRandom = function() {
 	}
 };
 
-String.prototype.fill = function(stringy, howMany) {
+String.prototype.fill = function (stringy, howMany) {
 	var s = "";
-	for (;;) {
+	for (; ;) {
 		if (howMany & 1) s += stringy;
 		howMany >>= 1;
 		if (howMany) stringy += stringy;
@@ -219,39 +219,39 @@ String.prototype.fill = function(stringy, howMany) {
 	return s;
 };
 
-String.prototype.padLeft = function(LN, fill) {
+String.prototype.padLeft = function (LN, fill) {
 	var s = "".fill(fill, LN) + this;
 	return s.substring(s.length - LN);
 };
 
-String.prototype.padRight = function(LN, fill) {
+String.prototype.padRight = function (LN, fill) {
 	var s = this + "".fill(fill, LN);
 	return s.substring(0, LN);
 };
 
-String.prototype.capitalize = function() {
+String.prototype.capitalize = function () {
 	return this.charAt(0).toUpperCase() + this.substr(1).toLowerCase();
 };
-var Vector = function(x, y) {
+var Vector = function (x, y) {
 	this.x = parseInt(x, 10);
 	this.y = parseInt(y, 10);
 };
-var Pointer = function(x, y, vector) {
+var Pointer = function (x, y, vector) {
 	this.x = x;
 	this.y = y;
 	this.vector = vector;
 };
-Vector.prototype.add = function(vector) {
+Vector.prototype.add = function (vector) {
 	return new Vector(this.x + vector.x, this.y + vector.y);
 };
-Vector.prototype.mul = function(vector, num) {
+Vector.prototype.mul = function (vector, num) {
 	return new Vector(this.x + num * vector.x, this.y + num * vector.y);
 };
-Vector.prototype.distance = function(vector) {
+Vector.prototype.distance = function (vector) {
 	var distance = Math.abs(this.x - vector.x) + Math.abs(this.y - vector.y);
 	return distance;
 };
-Vector.prototype.mirror = function() {
+Vector.prototype.mirror = function () {
 	var nx, ny;
 	if (this.x) {
 		nx = -this.x;
@@ -265,12 +265,12 @@ Vector.prototype.mirror = function() {
 	}
 	return new Vector(nx, ny);
 };
-Vector.prototype.direction = function(vector) {
+Vector.prototype.direction = function (vector) {
 	var dx = (vector.x - this.x) / Math.abs(this.x - vector.x) || 0;
 	var dy = (vector.y - this.y) / Math.abs(this.y - vector.y) || 0;
 	return new Vector(dx, dy);
 };
-var Square = function(x, y, w, h) {
+var Square = function (x, y, w, h) {
 	this.x = x;
 	this.y = y;
 	this.w = w;
@@ -283,7 +283,7 @@ var RIGHT = new Vector(1, 0);
 
 //////////////////engine.js/////////////////////////
 var ENGINE = {
-	init: function() {
+	init: function () {
 		LAYER = {};
 		SPRITE = {};
 		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
@@ -294,7 +294,7 @@ var ENGINE = {
 	gameWindowId: "#game",
 	gameWIDTH: 960,
 	currentTOP: 0,
-	addBOX: function(id, height, layers, alias) {
+	addBOX: function (id, height, layers, alias) {
 		if (id == null) return;
 		if (height == null) return;
 		layers = layers || 1;
@@ -305,12 +305,12 @@ var ENGINE = {
 		if (layers === 1) {
 			$("#" + id).append(
 				"<canvas id='" +
-					id +
-					"_canvas' width='" +
-					ENGINE.gameWIDTH +
-					"' height='" +
-					height +
-					"'></canvas>"
+				id +
+				"_canvas' width='" +
+				ENGINE.gameWIDTH +
+				"' height='" +
+				height +
+				"'></canvas>"
 			);
 			prop = alias.shift();
 			LAYER[prop] = $("#" + id + "_canvas")[0].getContext("2d");
@@ -338,26 +338,26 @@ var ENGINE = {
 			ENGINE.currentTOP = ENGINE.currentTOP + height;
 		}
 	},
-	spriteDraw: function(layer, X, Y, image) {
+	spriteDraw: function (layer, X, Y, image) {
 		var CX = X - image.width / 2;
 		var CY = Y - image.height / 2;
 		var CTX = LAYER[layer];
 		CTX.drawImage(image, CX, CY);
 	},
-	draw: function(layer, X, Y, image) {
+	draw: function (layer, X, Y, image) {
 		var CTX = LAYER[layer];
 		CTX.drawImage(image, X, Y);
 	},
-	clearLayer: function(layer) {
+	clearLayer: function (layer) {
 		var CTX = LAYER[layer];
 		CTX.clearRect(0, 0, CTX.canvas.width, CTX.canvas.height);
 	},
-	fillLayer: function(layer, colour) {
+	fillLayer: function (layer, colour) {
 		var CTX = LAYER[layer];
 		CTX.fillStyle = colour;
 		CTX.fillRect(0, 0, CTX.canvas.width, CTX.canvas.height);
 	},
-	tileToImage: function() {
+	tileToImage: function () {
 		var image;
 		for (var prop in World) {
 			var LN = World[prop].length;
@@ -369,7 +369,7 @@ var ENGINE = {
 			}
 		}
 	},
-	trimCanvas: function(data) {
+	trimCanvas: function (data) {
 		var top = 0,
 			bottom = data.height,
 			left = 0,
@@ -397,7 +397,7 @@ var ENGINE = {
 			return true;
 		}
 	},
-	rotateImage: function(image, degree, newName) {
+	rotateImage: function (image, degree, newName) {
 		var CTX = LAYER.temp;
 		var CW = image.width;
 		var CH = image.height;
@@ -428,7 +428,7 @@ var ENGINE = {
 		SPRITE[newName].width = CTX.canvas.width;
 		SPRITE[newName].height = CTX.canvas.height;
 	},
-	createSprites: function() {
+	createSprites: function () {
 		var LN = Creation.length;
 		var totalLength = 0;
 		for (var x = 0; x < LN; x++) {
@@ -451,7 +451,7 @@ var ENGINE = {
 		}
 		PRG.HMCI = totalLength;
 	},
-	creationSpriteCount: function() {
+	creationSpriteCount: function () {
 		PRG.spriteCount++;
 		ENGINE.drawLoadingGraph(PRG.spriteCount, PRG.HMCI, "Sprites");
 		if (PRG.spriteCount === PRG.HMCI) {
@@ -460,7 +460,7 @@ var ENGINE = {
 			$("#startGame").on("click", PRG.start);
 		}
 	},
-	collision: function(actor1, actor2) {
+	collision: function (actor1, actor2) {
 		var X = Math.abs(actor1.x - actor2.x);
 		var Y = Math.abs(actor1.y - actor2.y);
 		if (Y >= INI.COLLISION_SAFE) return false;
@@ -474,37 +474,37 @@ var ENGINE = {
 		var act1 = new Vector(actor1.x, actor1.y);
 		var act2 = new Vector(actor2.x, actor2.y);
 		var SQ1 = new Square(act1.x - w1, act1.y - h1, w1 * 2, h1 * 2);
-    var SQ2 = new Square(act2.x - w2, act2.y - h2, w2 * 2, h2 * 2);
-		
+		var SQ2 = new Square(act2.x - w2, act2.y - h2, w2 * 2, h2 * 2);
+
 		var x = parseInt(MAX(SQ1.x, SQ2.x), 10) - 1;
-    var y = parseInt(MAX(SQ1.y, SQ2.y), 10) - 1;
-    var w = parseInt(MIN(SQ1.x + SQ1.w - x, SQ2.x + SQ2.w - x), 10) + 1;
-    var h = parseInt(MIN(SQ1.y + SQ1.h - y, SQ2.y + SQ2.h - y), 10) + 1;
+		var y = parseInt(MAX(SQ1.y, SQ2.y), 10) - 1;
+		var w = parseInt(MIN(SQ1.x + SQ1.w - x, SQ2.x + SQ2.w - x), 10) + 1;
+		var h = parseInt(MIN(SQ1.y + SQ1.h - y, SQ2.y + SQ2.h - y), 10) + 1;
 		if (w === 0 || h === 0) return false;
-		
+
 		var area = new Square(x, y, w, h);
 		var area1 = new Square(
-      area.x - SQ1.x, 
-      area.y - SQ1.y,
-      area.w,
-      area.h
-    );
+			area.x - SQ1.x,
+			area.y - SQ1.y,
+			area.w,
+			area.h
+		);
 
-    var area2 = new Square(
-      area.x - SQ2.x, 
-      area.y - SQ2.y,
-      area.w,
-      area.h
-    );
+		var area2 = new Square(
+			area.x - SQ2.x,
+			area.y - SQ2.y,
+			area.w,
+			area.h
+		);
 		var CTX1 = LAYER.temp;
 		var CTX2 = LAYER.temp2;
-		
+
 		CTX1.canvas.width = INI.sprite_maxW;
-    CTX1.canvas.height = INI.sprite_maxH;
-    CTX2.canvas.width = INI.sprite_maxW;
-    CTX2.canvas.height = INI.sprite_maxH;
-		
-		
+		CTX1.canvas.height = INI.sprite_maxH;
+		CTX2.canvas.width = INI.sprite_maxW;
+		CTX2.canvas.height = INI.sprite_maxH;
+
+
 		ENGINE.draw("temp", 0, 0, SPRITE[actor1.name]);
 		ENGINE.draw("temp2", 0, 0, SPRITE[actor2.name]);
 		var data1 = CTX1.getImageData(area1.x, area1.y, area1.w, area1.h);
@@ -516,7 +516,7 @@ var ENGINE = {
 		}
 		return false;
 	},
-	collisionBulletShip: function() {
+	collisionBulletShip: function () {
 		if (SHIP.dead) return;
 		if (DEBUG.INVINCIBLE) return;
 		if (!SHIP.live) return;
@@ -545,7 +545,7 @@ var ENGINE = {
 		}
 		if (GAME.lives < 0) GAME.over();
 	},
-	collisionBulletAlien: function() {
+	collisionBulletAlien: function () {
 		var SBAL = SHIP.bullet.arsenal.length;
 		if (SBAL === 0) return;
 		for (var q = SBAL - 1; q >= 0; q--) {
@@ -583,7 +583,7 @@ var ENGINE = {
 			}
 		}
 	},
-	collisionAlienShip: function() {
+	collisionAlienShip: function () {
 		if (SHIP.dead) return;
 		if (DEBUG.INVINCIBLE) return;
 		if (!SHIP.live) return;
@@ -616,7 +616,7 @@ var ENGINE = {
 		}
 		if (GAME.lives < 0) GAME.over();
 	},
-	collisionBulletRubble: function() {
+	collisionBulletRubble: function () {
 		var SBAL = SHIP.bullet.arsenal.length;
 		var ABAL = ALIENS.bullet.arsenal.length;
 		var RPL = RUBBLE.pool.length;
@@ -669,7 +669,7 @@ var ENGINE = {
 			}
 		}
 	},
-	collisionAlienRubble: function() {
+	collisionAlienRubble: function () {
 		var AEL = ALIENS.existence.length;
 		var RPL = RUBBLE.pool.length;
 		if (AEL === 0 || RPL === 0) return false;
@@ -707,7 +707,7 @@ var ENGINE = {
 			}
 		}
 	},
-	drawLoadingGraph: function(count, HMI, text) {
+	drawLoadingGraph: function (count, HMI, text) {
 		var percent = Math.floor(count / HMI * 100);
 		var CTX = PRG.ctx;
 		CTX.clearRect(0, 0, INI.LOAD_W, INI.LOAD_H);
@@ -743,31 +743,31 @@ var PRG = {
 	SOURCE: "https://www.c00lsch00l.eu/Games/AA/",
 	SRC_rel: "/Games/AA/",
 	tileGraphics: [],
-	INIT: function() {
+	INIT: function () {
 		console.clear();
 		console.log(
 			PRG.NAME +
-				" " +
-				PRG.VERSION +
-				" by Lovro Selic, (c) C00lSch00l 2017 on " +
-				navigator.userAgent
+			" " +
+			PRG.VERSION +
+			" by Lovro Selic, (c) C00lSch00l 2017 on " +
+			navigator.userAgent
 		);
 		PRG.isFirefox = navigator.userAgent.indexOf("Firefox");
 		$("#title").html(PRG.NAME);
 		$("#version").html(
 			PRG.NAME +
-				" V" +
-				PRG.VERSION +
-				" by Lovro Selič <span style='font-size:14px'>&copy</span> C00lSch00l 2017"
+			" V" +
+			PRG.VERSION +
+			" by Lovro Selič <span style='font-size:14px'>&copy</span> C00lSch00l 2017"
 		);
 		$("input#toggleAbout").val("About " + PRG.NAME);
 		$("#about fieldset legend").append(" " + PRG.NAME + " ");
 		$("#load").append(
 			"<canvas id ='preload_canvas' width='" +
-				INI.LOAD_W +
-				"' height='" +
-				INI.LOAD_H +
-				"'></canvas>"
+			INI.LOAD_W +
+			"' height='" +
+			INI.LOAD_H +
+			"'></canvas>"
 		);
 		PRG.ctx = $("#preload_canvas")[0].getContext("2d");
 		ENGINE.init();
@@ -786,24 +786,24 @@ var PRG = {
 
 		$("#temp").append("<canvas id ='temp_canvas'></canvas>");
 	},
-	setup: function() {
-		$("#toggleHelp").click(function() {
+	setup: function () {
+		$("#toggleHelp").click(function () {
 			$("#help").toggle(400);
 		});
-		$("#toggleAbout").click(function() {
+		$("#toggleAbout").click(function () {
 			$("#about").toggle(400);
 		});
 	},
-	start: function() {
+	start: function () {
 		console.log(PRG.NAME + " started.");
 		$("#startGame").addClass("hidden");
 
-		$(document).keypress(function(event) {
+		$(document).keypress(function (event) {
 			if (event.which === 32) {
 				event.preventDefault();
 			}
 		});
-		$(document).keypress(function(event) {
+		$(document).keypress(function (event) {
 			if (event.which === 13) {
 				event.preventDefault();
 			}
@@ -811,7 +811,7 @@ var PRG = {
 
 		GAME.start();
 	},
-	preLoadImages: function() {
+	preLoadImages: function () {
 		PRG.count = 0;
 		PRG.spriteCount = 0;
 		var fileNames = getImgFileNames();
@@ -823,10 +823,10 @@ var PRG = {
 			PRG.tileGraphics[ix].src = fileNames[ix].filename;
 			$("#preload").append(
 				"<img id='" +
-					fileNames[ix].id +
-					"' src='" +
-					fileNames[ix].filename +
-					"' crossOrigin='Anonymous'/>"
+				fileNames[ix].id +
+				"' src='" +
+				fileNames[ix].filename +
+				"' crossOrigin='Anonymous'/>"
 			);
 		}
 		return;
@@ -1109,7 +1109,7 @@ INI.sprite_maxH = 64;
 /////////////////////////////////////////score.js//////////////
 
 var SCORE = {
-	checkScore: function(xxx) {
+	checkScore: function (xxx) {
 		xxx = parseInt(xxx, 10);
 		var start = SCORE.SCORE.depth - 1;
 		while (xxx > SCORE.SCORE.value[start] && start >= 0) {
@@ -1121,8 +1121,8 @@ var SCORE = {
 		} else {
 			var yourName = prompt(
 				"You reached top " +
-					SCORE.SCORE.depth +
-					" score. Enter your name (max 10 characters): "
+				SCORE.SCORE.depth +
+				" score. Enter your name (max 10 characters): "
 			);
 			if (yourName.length > 10) {
 				yourName = yourName.substring(0, 10);
@@ -1138,7 +1138,7 @@ var SCORE = {
 		}
 		return;
 	},
-	hiScore: function() {
+	hiScore: function () {
 		var HS = "";
 		var tempVal;
 		for (var hs = 1; hs <= SCORE.SCORE.depth; hs++) {
@@ -1154,11 +1154,11 @@ var SCORE = {
 		SCORE.saveHS();
 		return;
 	},
-	saveHS: function() {
+	saveHS: function () {
 		localStorage.setItem(SCORE.SCORE.id, JSON.stringify(SCORE.SCORE));
 		return;
 	},
-	loadHS: function() {
+	loadHS: function () {
 		if (localStorage[SCORE.SCORE.id]) {
 			SCORE.SCORE = JSON.parse(localStorage[SCORE.SCORE.id]);
 		}
@@ -1181,7 +1181,7 @@ var SCORE = {
 		id: "GalactiX"
 	},
 	dom: "<div id='hiscore'></div>",
-	init: function(id) {
+	init: function (id) {
 		var appTo;
 		if (!id) {
 			appTo = "body";
@@ -1195,7 +1195,7 @@ var SCORE = {
 
 ///////////////Preloading////////////////////
 
-var Tile = function(id, x, y, type, name) {
+var Tile = function (id, x, y, type, name) {
 	this.id = id;
 	this.x = x;
 	this.y = y;
@@ -1350,7 +1350,7 @@ var World = {
 	],
 	background: [Stars]
 };
-var AnimationSPRITE = function(x, y, type, howmany) {
+var AnimationSPRITE = function (x, y, type, howmany) {
 	this.x = x;
 	this.y = y;
 	this.pool = [];
@@ -1359,7 +1359,7 @@ var AnimationSPRITE = function(x, y, type, howmany) {
 	}
 };
 var Creation;
-var ACTOR = function(sprite_class, x, y, angle, score, probable) {
+var ACTOR = function (sprite_class, x, y, angle, score, probable) {
 	this.class = sprite_class;
 	this.x = x || 0;
 	this.y = y || 0;
@@ -1370,11 +1370,11 @@ var ACTOR = function(sprite_class, x, y, angle, score, probable) {
 	this.type = "grunt";
 	this.stage = "waiting";
 };
-ACTOR.prototype.sprite = function(sprite_class) {
+ACTOR.prototype.sprite = function (sprite_class) {
 	var name = this.class + "_" + this.angle;
 	return SPRITE[name];
 };
-ACTOR.prototype.refresh = function() {
+ACTOR.prototype.refresh = function () {
 	this.name = this.class + "_" + this.angle;
 	this.width = SPRITE[this.name].width;
 	this.height = SPRITE[this.name].height;
@@ -1382,7 +1382,7 @@ ACTOR.prototype.refresh = function() {
 var ALIENS = {
 	bullet: {
 		speed: 16,
-		draw: function() {
+		draw: function () {
 			var LN = ALIENS.bullet.arsenal.length;
 			for (var i = 0; i < LN; i++) {
 				ENGINE.spriteDraw(
@@ -1393,7 +1393,7 @@ var ALIENS = {
 				);
 			}
 		},
-		move: function() {
+		move: function () {
 			var LN = ALIENS.bullet.arsenal.length;
 			if (LN < 1) return;
 			for (var i = LN - 1; i >= 0; i--) {
@@ -1401,14 +1401,14 @@ var ALIENS = {
 				if (ALIENS.bullet.arsenal[i].y > INI.GAME_HEIGHT) ALIENS.bullet.kill(i);
 			}
 		},
-		kill: function(i) {
+		kill: function (i) {
 			ALIENS.bullet.arsenal.splice(i, 1);
 		},
-		killAll: function() {
+		killAll: function () {
 			ALIENS.bullet.arsenal.clear();
 		}
 	},
-	init: function() {
+	init: function () {
 		ALIENS.existence = [];
 		ALIENS.chargers = [];
 		ALIENS.bullet.arsenal = [];
@@ -1420,11 +1420,11 @@ var ALIENS = {
 		ALIENS.minX = 52;
 		ALIENS.maxX = ENGINE.gameWIDTH - ALIENS.minX;
 		ALIENS.chargerReady = false;
-		setTimeout(function() {
+		setTimeout(function () {
 			ALIENS.chargerReady = true;
 		}, GAME.levels[GAME.level].CD);
 	},
-	findChargers: function() {
+	findChargers: function () {
 		var AEL = ALIENS.existence.length;
 		var find = [];
 		for (var i = 0; i < AEL; i++) {
@@ -1436,21 +1436,21 @@ var ALIENS = {
 		}
 		return find;
 	},
-	findActiveChargers: function() {
+	findActiveChargers: function () {
 		ALIENS.chargers.clear();
 		var AEL = ALIENS.existence.length;
 		for (var i = 0; i < AEL; i++) {
 			if (ALIENS.existence[i].stage != "waiting") ALIENS.chargers.push(i);
 		}
 	},
-	releaseCharger: function() {
+	releaseCharger: function () {
 		var find = ALIENS.findChargers();
 		if (find.length === 0) return;
 		var select = find[RND(0, find.length - 1)];
 		ALIENS.chargers.push(select);
 		ALIENS.existence[select].stage = "rotate";
 	},
-	move: function() {
+	move: function () {
 		ALIENS.findActiveChargers();
 		var AC = ALIENS.chargers.length;
 		if (ALIENS.chargerReady) {
@@ -1458,24 +1458,26 @@ var ALIENS = {
 			if (allowed > AC) {
 				ALIENS.releaseCharger();
 				ALIENS.chargerReady = false;
-				setTimeout(function() {
+				setTimeout(function () {
 					ALIENS.chargerReady = true;
 				}, GAME.levels[GAME.level].CD);
 			}
 		}
+
 		if (AC > 0) {
 			var whereX, whereY;
 			for (var q = AC - 1; q >= 0; q--) {
 				var angle;
 				var where =
 					(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) /
-						Math.abs(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) || 0;
+					Math.abs(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) || 0;
 				switch (ALIENS.existence[ALIENS.chargers[q]].stage) {
 					case "rotate":
 						var ROTDIR;
 						if (ALIENS.dir.x != 0) {
 							ROTDIR = ALIENS.dir.x;
 						} else ROTDIR = 1;
+
 						if (angle != 0)
 							angle = ALIENS.existence[ALIENS.chargers[q]].angle + 10 * ROTDIR;
 						if (angle === 360 || angle === 0) {
@@ -1484,20 +1486,22 @@ var ALIENS = {
 						}
 						if (angle < 0) angle += 360;
 						ALIENS.existence[ALIENS.chargers[q]].angle = angle;
+
 						ALIENS.existence[ALIENS.chargers[q]].y -= 1;
 						if (ALIENS.existence[ALIENS.chargers[q]].y <= INI.TOP_Y)
 							ALIENS.existence[ALIENS.chargers[q]].y = INI.TOP_Y;
 						ALIENS.existence[ALIENS.chargers[q]].refresh();
 						break;
 					case "descend":
+						
 						ALIENS.existence[ALIENS.chargers[q]].y +=
 							GAME.levels[GAME.level].chargerDescent;
 						ALIENS.existence[ALIENS.chargers[q]].x += where * ALIENS.speed;
-						if (ALIENS.existence[ALIENS.chargers[q]].x > ENGINE.gameWIDTH)
-							ALIENS.existence[ALIENS.chargers[q]].x = ENGINE.gameWIDTH;
-						if (ALIENS.existence[ALIENS.chargers[q]].x < 0)
-							ALIENS.existence[ALIENS.chargers[q]].x = 0;
-						if (ALIENS.existence[ALIENS.chargers[q]].y >= INI.ATTACK ) {
+
+						if (ALIENS.existence[ALIENS.chargers[q]].x > ENGINE.gameWIDTH) ALIENS.existence[ALIENS.chargers[q]].x = ENGINE.gameWIDTH;
+						if (ALIENS.existence[ALIENS.chargers[q]].x < 0) ALIENS.existence[ALIENS.chargers[q]].x = 0;
+
+						if (ALIENS.existence[ALIENS.chargers[q]].y >= INI.ATTACK) {
 							ALIENS.existence[ALIENS.chargers[q]].stage = "attack";
 							ALIENS.existence[ALIENS.chargers[q]].score =
 								ALIENS.existence[ALIENS.chargers[q]].score * 2;
@@ -1532,7 +1536,7 @@ var ALIENS = {
 						if (
 							ALIENS.existence[ALIENS.chargers[q]].y >=
 							INI.GAME_HEIGHT +
-								parseInt(ALIENS.existence[ALIENS.chargers[q]].height / 2, 10)
+							parseInt(ALIENS.existence[ALIENS.chargers[q]].height / 2, 10)
 						) {
 							ALIENS.existence[ALIENS.chargers[q]].stage = "return";
 							ALIENS.existence[ALIENS.chargers[q]].y = -parseInt(
@@ -1607,7 +1611,7 @@ var ALIENS = {
 			}
 			if (maxX < minX) return;
 
-			
+
 			if (ALIENS.descent) {
 				ALIENS.descent = false;
 				ALIENS.dir = ALIENS.dirCopy.mirror();
@@ -1619,7 +1623,7 @@ var ALIENS = {
 				}
 			}
 			var index;
-			
+
 			for (index = 0; index < AEL; index++) {
 				if (ALIENS.existence[index].stage === "waiting")
 					ALIENS.existence[index].x += ALIENS.speed * ALIENS.dir.x;
@@ -1633,7 +1637,7 @@ var ALIENS = {
 			}
 		}
 	},
-	draw: function() {
+	draw: function () {
 		ENGINE.clearLayer("aliens");
 		var LN = ALIENS.existence.length;
 		var ix;
@@ -1655,7 +1659,7 @@ var ALIENS = {
 			);
 		}
 	},
-	shoot: function() {
+	shoot: function () {
 		if (SHIP.dead) return;
 		if (!ALIENS.ready) return;
 		var ABP = ALIENS.bullet.arsenal.length;
@@ -1693,8 +1697,8 @@ var ALIENS = {
 					closest[selected].x,
 					parseInt(
 						closest[selected].y +
-							ALIENS.existence[closest[selected].i].height / 2 +
-							ALIENS.bullet.sprite.height / 2,
+						ALIENS.existence[closest[selected].i].height / 2 +
+						ALIENS.bullet.sprite.height / 2,
 						10
 					)
 				)
@@ -1704,7 +1708,7 @@ var ALIENS = {
 };
 var EXPLOSIONS = {
 	pool: [],
-	draw: function() {
+	draw: function () {
 		ENGINE.clearLayer("explosion");
 		var PL = EXPLOSIONS.pool.length;
 		if (PL === 0) return;
@@ -1722,14 +1726,14 @@ var EXPLOSIONS = {
 		}
 	}
 };
-var MeteorClass = function(actor, lives) {
+var MeteorClass = function (actor, lives) {
 	this.actor = actor;
 	this.lives = lives;
 };
 
 var RUBBLE = {
 	pool: [],
-	purge: function(score) {
+	purge: function (score) {
 		var RPL = RUBBLE.pool.length;
 		if (RPL === 0) return;
 		for (var i = RPL - 1; i >= 0; i--) {
@@ -1738,7 +1742,7 @@ var RUBBLE = {
 		}
 		TEXT.score();
 	},
-	kill: function(x) {
+	kill: function (x) {
 		EXPLOSIONS.pool.push(
 			new AnimationSPRITE(
 				RUBBLE.pool[x].actor.x,
@@ -1749,7 +1753,7 @@ var RUBBLE = {
 		);
 		RUBBLE.pool.splice(x, 1);
 	},
-	draw: function() {
+	draw: function () {
 		var CTX = LAYER["rubble"];
 		CTX.clearRect(0, INI.RUBBLE_Y - 64, ENGINE.gameWIDTH, 128);
 		var PL = RUBBLE.pool.length;
@@ -1763,7 +1767,7 @@ var RUBBLE = {
 			);
 		}
 	},
-	set: function(num) {
+	set: function (num) {
 		var width = parseInt((SHIP.maxX - SHIP.minX) / (num - 1), 10);
 		var graphics = [
 			"Asteroid1",
@@ -1805,7 +1809,7 @@ var RUBBLE = {
 			}
 		}
 	},
-	move: function() {
+	move: function () {
 		var PL = RUBBLE.pool.length;
 		var i;
 		for (i = 0; i < PL; i++) {
@@ -1822,7 +1826,7 @@ var RUBBLE = {
 };
 //////////////
 var GAME = {
-	start: function() {
+	start: function () {
 		$("#bottom")[0].scrollIntoView();
 		$(document).keydown(GAME.checkKey);
 		$(document).keyup(GAME.clearKey);
@@ -1846,14 +1850,14 @@ var GAME = {
 		GAME.firstFrameDraw();
 		GAME.run();
 	},
-	stop: function() {
+	stop: function () {
 		console.log(PRG.NAME, " is stopping.");
 		GAME.stopAnimation = true;
 		$(document).off("keyup", GAME.clearKey);
 		$(document).off("keydown", GAME.checkKey);
 		GAME.end();
 	},
-	over: function() {
+	over: function () {
 		if (SHIP.dead) return;
 		RUBBLE.purge(false);
 		console.log("GAME OVER");
@@ -1862,7 +1866,7 @@ var GAME = {
 		TITLE.gameOver();
 		setTimeout(GAME.stop, 2000);
 	},
-	end: function() {
+	end: function () {
 		TITLE.render();
 		console.log(PRG.NAME, " ended.");
 		SCORE.checkScore(GAME.score);
@@ -1870,7 +1874,7 @@ var GAME = {
 		TEXT.score();
 		$("#startGame").removeClass("hidden");
 	},
-	run: function() {
+	run: function () {
 		if (!GAME.frame.start) GAME.frame.start = Date.now();
 		var current = Date.now();
 		GAME.frame.delta = current - GAME.frame.start;
@@ -1893,7 +1897,7 @@ var GAME = {
 			return;
 		} else requestAnimationFrame(GAME.run);
 	},
-	firstFrameDraw: function() {
+	firstFrameDraw: function () {
 		TITLE.render();
 		BACKGROUND.render();
 		TEXT.ships();
@@ -1902,7 +1906,7 @@ var GAME = {
 		ALIENS.draw();
 		RUBBLE.draw();
 	},
-	frameDraw: function() {
+	frameDraw: function () {
 		SHIP.draw();
 		ENGINE.clearLayer("bullets");
 		SHIP.bullet.draw();
@@ -1911,7 +1915,7 @@ var GAME = {
 		RUBBLE.draw();
 		EXPLOSIONS.draw();
 	},
-	endLevel: function() {
+	endLevel: function () {
 		GAME.levelComplete = true;
 		ALIENS.bullet.killAll();
 		var RPL = RUBBLE.pool.length;
@@ -1931,18 +1935,18 @@ var GAME = {
 		TITLE.centeredText("Asteroid bonus: " + RPL + " * 100 = " + RPL * 100, fs, y);
 		GAME.score += bonus;
 		TEXT.score();
-		setTimeout(function() {
+		setTimeout(function () {
 			GAME.nextLevel();
 		}, INI.LEVEL_DELAY);
 	},
-	nextLevel: function() {
+	nextLevel: function () {
 		ENGINE.clearLayer("text");
 		GAME.level++;
 		console.log("Ascending to level ", GAME.level);
 		ALIENS.ready = false;
 		GAME.initLevel(GAME.level);
 	},
-	createLevel: function(level) {
+	createLevel: function (level) {
 		GAME.levels[level] = $.extend(true, {}, GAME.levels[level - 1]);
 		var layout = GAME.levels[level].layout;
 		for (var row in layout) {
@@ -1953,7 +1957,7 @@ var GAME = {
 		GAME.levels[level].AXS++;
 		GAME.levels[level].chargerDescent;
 	},
-	initLevel: function(level) {
+	initLevel: function (level) {
 		if (level > INI.LAST_LEVEL) {
 			GAME.createLevel(level);
 		}
@@ -2008,7 +2012,7 @@ var GAME = {
 		}
 		RUBBLE.set(GAME.levels[level].asteroids);
 	},
-	respond: function() {
+	respond: function () {
 		if (map[17]) {
 			SHIP.shoot();
 		}
@@ -2029,13 +2033,13 @@ var GAME = {
 			return;
 		}
 	},
-	clearKey: function(e) {
+	clearKey: function (e) {
 		e = e || window.event;
 		if (e.keyCode in map) {
 			map[e.keyCode] = false;
 		}
 	},
-	checkKey: function(e) {
+	checkKey: function (e) {
 		e = e || window.event;
 		if (e.keyCode in map) {
 			map[e.keyCode] = true;
@@ -2480,7 +2484,7 @@ var GAME = {
 		}
 	}
 };
-var BulletClass = function(x, y) {
+var BulletClass = function (x, y) {
 	this.x = x;
 	this.y = y;
 };
@@ -2488,11 +2492,11 @@ var SHIP = {
 	bullet: {
 		max: 1,
 		speed: 24,
-		init: function() {
+		init: function () {
 			SHIP.bullet.sprite = SPRITE.bullet;
 			SHIP.bullet.arsenal = [];
 		},
-		shoot: function() {
+		shoot: function () {
 			SHIP.cannonHot = true;
 			SHIP.shots += 1;
 			SHIP.bullet.arsenal.push(
@@ -2505,15 +2509,15 @@ var SHIP = {
 				)
 			);
 			if (SHIP.bullet.arsenal.length >= SHIP.bullet.max) SHIP.loaded = false;
-			setTimeout(function() {
+			setTimeout(function () {
 				SHIP.cannonHot = false;
 			}, INI.BULLET_TIMEOUT);
 		},
-		kill: function(i) {
+		kill: function (i) {
 			SHIP.bullet.arsenal.splice(i, 1);
 			if (SHIP.bullet.arsenal.length < SHIP.bullet.max) SHIP.loaded = true;
 		},
-		draw: function() {
+		draw: function () {
 			var LN = SHIP.bullet.arsenal.length;
 			for (var i = 0; i < LN; i++) {
 				ENGINE.spriteDraw(
@@ -2524,7 +2528,7 @@ var SHIP = {
 				);
 			}
 		},
-		move: function() {
+		move: function () {
 			var LN = SHIP.bullet.arsenal.length;
 			if (LN < 1) return;
 			for (var i = LN - 1; i >= 0; i--) {
@@ -2533,7 +2537,7 @@ var SHIP = {
 			}
 		}
 	},
-	firstInit: function() {
+	firstInit: function () {
 		SHIP.live = false;
 		SHIP.maxX = ENGINE.gameWIDTH - INI.BORDER_PADDING;
 		SHIP.minX = INI.BORDER_PADDING;
@@ -2544,31 +2548,31 @@ var SHIP = {
 		SHIP.y = parseInt((SHIP.maxY - SHIP.minY) / 2) + SHIP.minY;
 		SHIP.speed = 10;
 	},
-	init: function() {
+	init: function () {
 		if (SHIP.dead) return;
 		if (GAME.levelComplete) GAME.endLevel();
 		TITLE.getReady();
 		SHIP.sprite = SPRITE[SHIP.ship];
 		SHIP.loaded = true;
 		SHIP.cannonHot = false;
-		setTimeout(function() {
+		setTimeout(function () {
 			SHIP.live = true;
 		}, INI.SHIP_TIMEOUT);
-		setTimeout(function() {
+		setTimeout(function () {
 			if (!SHIP.dead) ENGINE.clearLayer("text");
-			setTimeout(function() {
+			setTimeout(function () {
 				ALIENS.ready = true;
 			}, INI.ALIEN_DELAY_TIMEOUT);
 		}, INI.START_TIMEOUT);
 	},
-	draw: function() {
+	draw: function () {
 		var CTX = LAYER["ship"];
 		CTX.clearRect(0, SHIP.minY - 24, CTX.canvas.width, INI.SHIPS_SPACE + 48);
 		if (!SHIP.live) return;
 		if (SHIP.dead) return;
 		ENGINE.spriteDraw("ship", SHIP.x, SHIP.y, SHIP.sprite);
 	},
-	move: function(dir) {
+	move: function (dir) {
 		SHIP.x += SHIP.speed * dir.x;
 		SHIP.y += SHIP.speed * dir.y;
 		if (SHIP.x < SHIP.minX) {
@@ -2588,7 +2592,7 @@ var SHIP = {
 			return;
 		}
 	},
-	shoot: function() {
+	shoot: function () {
 		if (!SHIP.loaded) return;
 		if (SHIP.cannonHot) return;
 		if (!SHIP.live) return;
@@ -2597,13 +2601,13 @@ var SHIP = {
 	}
 };
 var BACKGROUND = {
-	render: function() {
+	render: function () {
 		ENGINE.draw("background", 0, 0, SPRITE.stars);
 	}
 };
 var TEXT = {
-	render: function() {},
-	ships: function() {
+	render: function () { },
+	ships: function () {
 		var x = 0;
 		var y = INI.GAME_HEIGHT - 20;
 		TEXT.clearSign(x, y, ENGINE.gameWIDTH, 20);
@@ -2612,11 +2616,11 @@ var TEXT = {
 			ENGINE.draw("sign", x + i * 16, y, SPRITE.smallship);
 		}
 	},
-	clearSign: function(x, y, w, h) {
+	clearSign: function (x, y, w, h) {
 		var CTX = LAYER["sign"];
 		CTX.clearRect(x, y, w, h);
 	},
-	score: function() {
+	score: function () {
 		var EL = GAME.extraLife[0];
 		if (GAME.score >= EL) {
 			GAME.lives++;
@@ -2652,20 +2656,20 @@ var TEXT = {
 	}
 };
 var TITLE = {
-	render: function() {
+	render: function () {
 		TITLE.background();
 		TITLE.title();
 	},
-	bigText: function(text, fs) {
+	bigText: function (text, fs) {
 		var x = ENGINE.gameWIDTH / 2;
 		var y = INI.GAME_HEIGHT / 2;
 		TITLE.text(text, fs, x, y);
 	},
-	centeredText: function(text, fs, y) {
+	centeredText: function (text, fs, y) {
 		var x = ENGINE.gameWIDTH / 2;
 		TITLE.text(text, fs, x, y);
 	},
-	text: function(text, fs, x, y) {
+	text: function (text, fs, x, y) {
 		var CTX = LAYER["text"];
 		CTX.fillStyle = "#FFF";
 		//CTX.font = fs + "px Consolas";
@@ -2677,15 +2681,15 @@ var TITLE = {
 		CTX.textAlign = "center";
 		CTX.fillText(text, x, y);
 	},
-	gameOver: function() {
+	gameOver: function () {
 		TITLE.bigText("GAME OVER", 120);
 	},
-	getReady: function() {
+	getReady: function () {
 		if (GAME.levelComplete) return;
 		ENGINE.clearLayer("text");
 		TITLE.bigText("GET READY FOR WAVE " + GAME.level, 60);
 	},
-	title: function() {
+	title: function () {
 		var CTX = LAYER.title;
 		var grad = CTX.createLinearGradient(8, 100, 128, 128);
 		grad.addColorStop("0", "#000000");
@@ -2719,7 +2723,7 @@ var TITLE = {
 		//CTX.font = "14px Arcade";
 		CTX.fillText(String.fromCharCode(169) + " C00lSch00l 2017", x, y);
 	},
-	background: function() {
+	background: function () {
 		var CTX = LAYER.title;
 		CTX.fillStyle = "#000";
 		CTX.roundRect(
@@ -2739,7 +2743,7 @@ var TITLE = {
 	}
 };
 
-$(document).ready(function() {
+$(document).ready(function () {
 	PRG.INIT();
 	PRG.setup();
 	PRG.preLoadImages();

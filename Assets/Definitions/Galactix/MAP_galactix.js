@@ -50,7 +50,7 @@ const MAP = {
         maxBullets: 2,
         chargers: 1,
         CD: 10,
-        chargerDescent: 4,
+        chargerDescent: 200, //was 4
         alienBullets: 3,
         AXS: 100,
         AYS: 1000,
