@@ -133,10 +133,12 @@ class Meteor extends GeneralRotatingEntity {
 }
 
 class Alien extends GeneralRotatingEntity {
-	constructor(position, assetName, angle, limits, score, probable) {
+	constructor(position, assetName, angle, limits, score, probable, type) {
 		super(position, assetName, angle, limits);
 		this.score = score;
 		this.probable = probable;
+		this.type = type;
+		this.stage = "waiting";
 	}
 	collisionToActors(map) {
 		return;
@@ -146,9 +148,40 @@ class Alien extends GeneralRotatingEntity {
 		ENGINE.layersToClear.add("aliens");
 	}
 	move(lapsedTime) {
+		let timeDelta = lapsedTime / 1000;
 		/** finding and releasing chargers */
+
 		/** moving chargers and setting their states */
+
 		/** lateral and downwards movement */
+
+
+		//console.log("\n--- next turn ---");
+		//ALIENS.speed = new Vector(MAP[level].AXS, MAP[level].AYS);
+
+
+
+		/**  */
+		/**  */
+		/**  actual movement */
+
+		if (this.stage === "waiting") {
+			let translate = ALIENS.speed.mul(ALIENS.dir, timeDelta);
+			this.moveState.pos = this.moveState.pos.add(translate);
+			this.moveState.refresh();
+			this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+			if (this.moveState.pos.y > INI.AUTO_ATTACK) {
+				this.type = "charger";
+				this.stage = "attack";
+			}
+		}
+
+
+
+
+
+
+
 		return;
 	}
 	hit() {
@@ -190,7 +223,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.04",
+	VERSION: "1.07.05",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -278,7 +311,8 @@ const GAME = {
 		ENGINE.watchVisibility(GAME.lostFocus);
 		ENGINE.GAME.start(16);
 
-		GAME.level = 1;
+		//GAME.level = 1;
+		GAME.level = 2;
 
 		/****************/
 
@@ -329,11 +363,12 @@ const GAME = {
 		SHIP.init();
 		SHIP.bullet.init();
 		SHIP.bullet.max = MAP[level].maxBullets;
+
 		ALIENS.init();
 		ALIENS.ready = false;
-
-		ALIENS.speed = MAP[level].AXS;
-		ALIENS.Dspeed = MAP[level].AYS;
+		ALIENS.speed = new FP_Vector(MAP[level].AXS, MAP[level].AYS);
+		ALIENS.dir = [LEFT, RIGHT].chooseRandom();
+		ALIENS.dirCopy = ALIENS.dir;
 
 
 		SPAWN.meteors();
@@ -342,6 +377,7 @@ const GAME = {
 	},
 	continueLevel(level) {
 		console.log("game continues on level", level);
+
 		GAME.levelExecute(level);
 	},
 	levelExecute(level) {
@@ -377,6 +413,7 @@ const GAME = {
 		if (ENGINE.GAME.stopAnimation) return;
 		SHIP.bullet.move(lapsedTime);
 		PIXEL_ACTORS.manage(lapsedTime);
+		ALIENS.manage(lapsedTime);
 		SHIP.bullet.manage(lapsedTime);
 		DESTRUCTION_ANIMATION.manage(lapsedTime);
 
@@ -626,8 +663,6 @@ const ALIENS = {
 		ALIENS.bullet.arsenal = [];
 		ALIENS.bullet.sprite = SPRITE.alienbullet;
 		ALIENS.moving = false;
-		ALIENS.speed = 2;
-		ALIENS.Dspeed = 24;
 		ALIENS.descent = false;
 		ALIENS.minX = 52;
 		ALIENS.maxX = ENGINE.gameWIDTH - ALIENS.minX;
@@ -637,7 +672,37 @@ const ALIENS = {
 	nextCharger() {
 		ALIENS.chargerReady = true;
 		console.warn("charger ready");
-	}
+	},
+	manage(lapsedTime) {
+		ALIENS.getExtremes();
+		ALIENS.checkDescent();
+	},
+	getExtremes() {
+		let minX = ENGINE.gameWIDTH;
+		let maxX = 0;
+		for (let i = 0; i < ALIENS.existence.length; i++) {
+			const alien = PIXEL_ACTORS.show(ALIENS.existence[i]);
+			if (alien?.stage === "waiting") {
+				if (alien.moveState.pos.x > maxX) maxX = alien.moveState.pos.x;
+				if (alien.moveState.pos.x < minX) minX = alien.moveState.pos.x;
+			}
+		}
+		ALIENS.min = Math.floor(minX);
+		ALIENS.max = Math.floor(maxX);
+		console.warn(ALIENS.min, ALIENS.max);
+	},
+	checkDescent() {
+		if (ALIENS.descent) {
+			ALIENS.descent = false;
+			ALIENS.dir = ALIENS.dirCopy.mirror();
+			ALIENS.dirCopy = ALIENS.dir;
+		} else {
+			if (ALIENS.min <= ALIENS.minX || ALIENS.max >= ALIENS.maxX) {
+				ALIENS.dir = DOWN;
+				ALIENS.descent = true;
+			}
+		}
+	 }
 };
 
 const SHIP = {

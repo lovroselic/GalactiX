@@ -15,8 +15,8 @@ const MAP = {
         CD: 10,
         chargerDescent: 4,
         alienBullets: 2,
-        AXS: 2,
-        AYS: 24,
+        AXS: 120,
+        AYS: 1440,
         asteroids: 10,
         ship: "whiteship",
         layout: {
@@ -52,8 +52,8 @@ const MAP = {
         CD: 10,
         chargerDescent: 4,
         alienBullets: 3,
-        AXS: 3,
-        AYS: 26,
+        AXS: 100,
+        AYS: 1000,
         asteroids: 9,
         ship: "redship",
         layout: {
@@ -492,13 +492,13 @@ const SPAWN = {
                 }
 
                 let pos = new Grid(xes[q], Y);
-                const alien = new Alien(pos, layout[row].actor, angle, mapLimits, layout[row].score, layout[row].probable);
+                const alien = new Alien(pos, layout[row].actor, angle, mapLimits, layout[row].score, layout[row].probable, layout[row].type || "grunt");
                 //console.log("alien", alien);
                 PIXEL_ACTORS.add(alien);
                 ALIENS.existence.push(alien.id);
-                if (layout[row].type === "charger") {
+                /* if (layout[row].type === "charger") {
                     PIXEL_ACTORS.POOL.last().type = "charger";
-                }
+                } */
             }
         }
         console.log("PIXEL_ACTORS", PIXEL_ACTORS.POOL);

@@ -1587,13 +1587,14 @@ var ALIENS = {
 				}
 			}
 		}
-		
+
 		if (!ALIENS.moving) {
 			ALIENS.moving = true;
 			var options = [LEFT, RIGHT];
 			ALIENS.dir = options[RND(0, 1)];
 			ALIENS.dirCopy = ALIENS.dir;
 		} else {
+
 			var AEL = ALIENS.existence.length;
 			var i;
 			var minX = ENGINE.gameWIDTH;
@@ -1605,6 +1606,8 @@ var ALIENS = {
 				}
 			}
 			if (maxX < minX) return;
+
+			
 			if (ALIENS.descent) {
 				ALIENS.descent = false;
 				ALIENS.dir = ALIENS.dirCopy.mirror();
@@ -1616,6 +1619,7 @@ var ALIENS = {
 				}
 			}
 			var index;
+			
 			for (index = 0; index < AEL; index++) {
 				if (ALIENS.existence[index].stage === "waiting")
 					ALIENS.existence[index].x += ALIENS.speed * ALIENS.dir.x;
