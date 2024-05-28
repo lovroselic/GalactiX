@@ -46,6 +46,7 @@ const INI = {
 	METEOR_LIVES: 4,
 	METEOR_SPEED: 25,
 	METEOR_ROTATION_SPEED: 25,
+	CD_TIMER: "ChargerDelay",
 };
 
 /** */
@@ -145,6 +146,9 @@ class Alien extends GeneralRotatingEntity {
 		ENGINE.layersToClear.add("aliens");
 	}
 	move(lapsedTime) {
+		/** finding and releasing chargers */
+		/** moving chargers and setting their states */
+		/** lateral and downwards movement */
 		return;
 	}
 	hit() {
@@ -186,7 +190,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.03",
+	VERSION: "1.07.04",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -376,6 +380,8 @@ const GAME = {
 		SHIP.bullet.manage(lapsedTime);
 		DESTRUCTION_ANIMATION.manage(lapsedTime);
 
+
+		ENGINE.TIMERS.update();
 		GAME.respond(lapsedTime);
 		GAME.frameDraw(lapsedTime);
 
@@ -478,7 +484,6 @@ const GAME = {
 		GAME.levels[level].AXS++;
 		GAME.levels[level].chargerDescent;
 	},
-
 	respond(lapsedTime) {
 		if (SHIP.dead) return;
 		if (!SHIP.live) return;
@@ -563,6 +568,7 @@ const GAME = {
 		ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.clickPause, "F4"));
 		ENGINE.TEXT.centeredText("Game Paused", ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
 		GAME.paused = true;
+		ENGINE.TIMERS.stop();
 	},
 	resume() {
 		console.log("%cGAME resumed.", PRG.CSS);
@@ -570,6 +576,7 @@ const GAME = {
 		$("#pause").off("click", GAME.resume);
 		$("#pause").on("click", GAME.pause);
 		if (SHIP.live) ENGINE.clearLayer("text");
+		ENGINE.TIMERS.start();
 		ENGINE.GAME.ANIMATION.resetTimer();
 		ENGINE.GAME.ANIMATION.next(GAME.run);
 		GAME.paused = false;
@@ -625,10 +632,11 @@ const ALIENS = {
 		ALIENS.minX = 52;
 		ALIENS.maxX = ENGINE.gameWIDTH - ALIENS.minX;
 		ALIENS.chargerReady = false;
-		setTimeout(function () {
-			ALIENS.chargerReady = true;
-			console.warn("charger ready");
-		}, MAP[GAME.getRealLevel()].CD);
+		ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
+	},
+	nextCharger() {
+		ALIENS.chargerReady = true;
+		console.warn("charger ready");
 	}
 };
 
@@ -705,7 +713,7 @@ const SHIP = {
 			if (!SHIP.dead) ENGINE.clearLayer("text");
 
 			setTimeout(function () {
-				//ALIENS.ready = true;
+				ALIENS.ready = true;
 				console.warn("ALIENS.ready = true;");
 			}, INI.ALIEN_DELAY_TIMEOUT);
 
@@ -725,7 +733,6 @@ const SHIP = {
 		SHIP.x = Math.max(SHIP.minX, Math.min(SHIP.x, SHIP.maxX));
 		SHIP.y = Math.max(SHIP.minY, Math.min(SHIP.y, SHIP.maxY));
 	},
-
 	shoot() {
 		if (!SHIP.loaded) return;
 		if (SHIP.cannonHot) return;

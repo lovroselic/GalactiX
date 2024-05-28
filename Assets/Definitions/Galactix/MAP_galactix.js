@@ -12,7 +12,7 @@ const MAP = {
     1: {
         maxBullets: 1,
         chargers: 0,
-        CD: 9999,
+        CD: 10,
         chargerDescent: 4,
         alienBullets: 2,
         AXS: 2,
@@ -49,7 +49,7 @@ const MAP = {
     2: {
         maxBullets: 2,
         chargers: 1,
-        CD: 9999,
+        CD: 10,
         chargerDescent: 4,
         alienBullets: 3,
         AXS: 3,
@@ -87,7 +87,7 @@ const MAP = {
     3: {
         maxBullets: 2,
         chargers: 2,
-        CD: 8000,
+        CD: 8,
         chargerDescent: 4,
         alienBullets: 4,
         AXS: 3,
@@ -126,7 +126,7 @@ const MAP = {
     4: {
         maxBullets: 2,
         chargers: 4,
-        CD: 4000,
+        CD: 4,
         chargerDescent: 4,
         alienBullets: 4,
         AXS: 3,
@@ -165,7 +165,7 @@ const MAP = {
     5: {
         maxBullets: 3,
         chargers: 4,
-        CD: 2000,
+        CD: 2,
         chargerDescent: 4,
         alienBullets: 4,
         AXS: 3,
@@ -204,7 +204,7 @@ const MAP = {
     6: {
         maxBullets: 3,
         chargers: 4,
-        CD: 2000,
+        CD: 2,
         chargerDescent: 5,
         alienBullets: 4,
         AXS: 4,
@@ -244,7 +244,7 @@ const MAP = {
     7: {
         maxBullets: 4,
         chargers: 4,
-        CD: 2000,
+        CD: 2,
         chargerDescent: 6,
         alienBullets: 5,
         AXS: 4,
@@ -284,7 +284,7 @@ const MAP = {
     8: {
         maxBullets: 4,
         chargers: 5,
-        CD: 2000,
+        CD: 2,
         chargerDescent: 7,
         alienBullets: 5,
         AXS: 4,
@@ -325,7 +325,7 @@ const MAP = {
     9: {
         maxBullets: 4,
         chargers: 5,
-        CD: 1750,
+        CD: 2,
         chargerDescent: 8,
         alienBullets: 5,
         AXS: 4,
@@ -366,7 +366,7 @@ const MAP = {
     10: {
         maxBullets: 4,
         chargers: 5,
-        CD: 1750,
+        CD: 2,
         chargerDescent: 8,
         alienBullets: 5,
         AXS: 4,
@@ -406,7 +406,7 @@ const MAP = {
     11: {
         maxBullets: 4,
         chargers: 6,
-        CD: 1500,
+        CD: 1,
         chargerDescent: 9,
         alienBullets: 6,
         AXS: 5,
@@ -475,12 +475,12 @@ const SPAWN = {
         const mapLimits = MAP[GAME.getRealLevel()].planeLimits;
         const layout = MAP[GAME.getRealLevel()].layout;
         const center = parseInt(ENGINE.gameWIDTH / 2, 10);
-        console.log("..layout", layout);
+        //console.log("..layout", layout);
 
         for (const row in layout) {
-            console.log("...row", row);
+            //console.log("...row", row);
             const xes = ENGINE.spreadAroundCenter(layout[row].num, center, INI.PADDING);
-            console.log("...xes", xes);
+            //console.log("...xes", xes);
             const Y = INI.TOP_Y + parseInt(row, 10) * INI.PADDING;
             for (let q = 0; q < xes.length; q++) {
                 let angle = 0;
@@ -493,14 +493,16 @@ const SPAWN = {
 
                 let pos = new Grid(xes[q], Y);
                 const alien = new Alien(pos, layout[row].actor, angle, mapLimits, layout[row].score, layout[row].probable);
-                console.log("alien", alien);
+                //console.log("alien", alien);
                 PIXEL_ACTORS.add(alien);
-                if (layout[row].type === "charger"){
+                ALIENS.existence.push(alien.id);
+                if (layout[row].type === "charger") {
                     PIXEL_ACTORS.POOL.last().type = "charger";
                 }
             }
         }
         console.log("PIXEL_ACTORS", PIXEL_ACTORS.POOL);
+        console.info("ALIENS.existence", ALIENS.existence);
     }
 };
 

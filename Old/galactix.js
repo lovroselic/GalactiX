@@ -1587,6 +1587,7 @@ var ALIENS = {
 				}
 			}
 		}
+		
 		if (!ALIENS.moving) {
 			ALIENS.moving = true;
 			var options = [LEFT, RIGHT];
