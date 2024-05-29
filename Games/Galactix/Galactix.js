@@ -47,6 +47,7 @@ const INI = {
 	METEOR_SPEED: 25,
 	METEOR_ROTATION_SPEED: 25,
 	CD_TIMER: "ChargerDelay",
+	FORCED_DONW_SPEED: 0.5,
 };
 
 /** */
@@ -75,7 +76,7 @@ class GeneralRotatingEntity {
 		this.setAngle(angle);
 	}
 	setAngle(a) {
-		this.angle = a % 360;
+		this.angle = (a + 360) % 360;
 		this.actor.setAngle(Math.round(this.angle) % 360);
 	}
 	addAngle(a) {
@@ -163,7 +164,11 @@ class Alien extends GeneralRotatingEntity {
 		} else {
 			/** chargers */
 			const direction = this.moveState.pos.direction(new Grid(SHIP.x, SHIP.y));
+			direction.y = Math.max(direction.y, INI.FORCED_DONW_SPEED);
+			let translate = ALIENS.chargeSpeed.mul(direction, timeDelta);
+
 			switch (this.stage) {
+
 				case "rotate":
 					const rotDir = ALIENS.dir.x || 1;
 					this.setAngle(this.angle + rotDir * 10);
@@ -174,8 +179,9 @@ class Alien extends GeneralRotatingEntity {
 					if (this.angle === 0) this.stage = "descend";
 					//console.log("rotating", this.id, "rotDir", rotDir, "angle", this.angle);
 					break;
+
 				case "descend":
-					let translate = ALIENS.chargeSpeed.mul(direction, timeDelta);
+					//let translate = ALIENS.chargeSpeed.mul(direction, timeDelta);
 					this.moveState.pos = this.moveState.pos.add(translate);
 					this.moveState.refresh();
 					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
@@ -185,15 +191,36 @@ class Alien extends GeneralRotatingEntity {
 					}
 					//console.info("descending", this.id, "direction", direction, "translate", translate);
 					break;
+
 				case "attack":
 					if (!SHIP.live) {
 						this.stage = "turn";
 						break;
 					}
+					this.probable = 99;
+					let radAngle = direction.radAngleBetweenVectorsSharp(DOWN);
+					let degAngle = -Math.degrees(radAngle);
+					degAngle = round10(degAngle);
+					degAngle = Math.min(40, Math.max(degAngle, -40));
 
+					this.setAngle(degAngle);
+					this.moveState.pos = this.moveState.pos.add(translate);
+					this.moveState.refresh();
+					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
 
+					if (this.moveState.pos.y >= ENGINE.gameHEIGHT + this.actor.height) {
+						this.moveState.pos.y = -this.actor.height;
+						this.stage = "return";
+					}
+					//console.info("attacking", this.id, "direction", direction, "degAngle", degAngle, "this.moveState.pos.y", this.moveState.pos.y, ENGINE.gameHEIGHT + this.actor.height / 2);
+					break;
 
-					console.info("attacking", this.id, "direction", direction);
+				case "return":
+					this.moveState.pos.y = -this.actor.height;
+					this.moveState.refresh();
+					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+					console.info("returning", this.id);
+					this.stage = "attack";
 					break;
 
 				default:
@@ -244,7 +271,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.06",
+	VERSION: "1.07.07",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -727,6 +754,7 @@ const ALIENS = {
 	},
 	checkForChargers() {
 		if (ALIENS.chargerReady) {
+			console.log("checking for chargers", MAP[GAME.level].chargers, ALIENS.chargers, MAP[GAME.level].chargers > ALIENS.chargers.length);
 			if (MAP[GAME.level].chargers > ALIENS.chargers.length) {
 				ALIENS.releaseCharger();
 				ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
@@ -735,11 +763,12 @@ const ALIENS = {
 	},
 	releaseCharger() {
 		const find = ALIENS.findChargers();
+		console.warn("trying to release charger", find);
 		if (find.length === 0) return;
 		const select = find.chooseRandom();
 		ALIENS.chargers.push(select);
 		PIXEL_ACTORS.show(select).stage = "rotate";
-		//console.warn("releasing charger", select, PIXEL_ACTORS.show(select));
+		console.warn("releasing charger", find, select, PIXEL_ACTORS.show(select));
 	},
 	findChargers() {
 		const find = [];

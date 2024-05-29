@@ -721,7 +721,6 @@ class FP_Vector extends MasterVectorClass {
       angle -= Math.PI;
     }
     return angle;
-    //return Math.max(-Math.PI / 2, Math.min(angle, Math.PI / 2));
   }
 }
 

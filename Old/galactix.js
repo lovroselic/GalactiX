@@ -1468,9 +1468,7 @@ var ALIENS = {
 			var whereX, whereY;
 			for (var q = AC - 1; q >= 0; q--) {
 				var angle;
-				var where =
-					(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) /
-					Math.abs(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) || 0;
+				var where =					(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) /					Math.abs(SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x) || 0;
 				switch (ALIENS.existence[ALIENS.chargers[q]].stage) {
 					case "rotate":
 						var ROTDIR;
@@ -1493,7 +1491,7 @@ var ALIENS = {
 						ALIENS.existence[ALIENS.chargers[q]].refresh();
 						break;
 					case "descend":
-						
+
 						ALIENS.existence[ALIENS.chargers[q]].y +=
 							GAME.levels[GAME.level].chargerDescent;
 						ALIENS.existence[ALIENS.chargers[q]].x += where * ALIENS.speed;
@@ -1513,26 +1511,38 @@ var ALIENS = {
 							break;
 						}
 						ALIENS.existence[ALIENS.chargers[q]].probable = 99;
+
+
 						whereX = SHIP.x - ALIENS.existence[ALIENS.chargers[q]].x;
 						whereY = SHIP.y - ALIENS.existence[ALIENS.chargers[q]].y;
 						var hyp = Math.sqrt(Math.pow(whereX, 2) + Math.pow(whereY, 2));
 						var cosa = whereY / hyp;
 						var rota = Math.acos(cosa) * (180 / Math.PI);
+						
 						var rot = Math.round(rota / 10) * 10;
 						if (rot > 40) rot = 40;
+
+
 						rot = rot * where * -1;
+
+
 						var vx = ALIENS.speed * where;
 						var vy = GAME.levels[GAME.level].chargerDescent;
 						ALIENS.existence[ALIENS.chargers[q]].x += vx;
 						ALIENS.existence[ALIENS.chargers[q]].y += vy;
+
 						if (ALIENS.existence[ALIENS.chargers[q]].x > ENGINE.gameWIDTH)
 							ALIENS.existence[ALIENS.chargers[q]].x = ENGINE.gameWIDTH;
 						if (ALIENS.existence[ALIENS.chargers[q]].x < 0)
 							ALIENS.existence[ALIENS.chargers[q]].x = 0;
+
 						if (rot < 0) rot += 360;
 						if (rot === -0) rot = 0;
+						
 						ALIENS.existence[ALIENS.chargers[q]].angle = rot;
 						ALIENS.existence[ALIENS.chargers[q]].refresh();
+
+
 						if (
 							ALIENS.existence[ALIENS.chargers[q]].y >=
 							INI.GAME_HEIGHT +
