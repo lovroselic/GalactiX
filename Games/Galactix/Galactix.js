@@ -140,6 +140,7 @@ class Alien extends GeneralRotatingEntity {
 		this.probable = probable;
 		this.type = type;
 		this.stage = "waiting";
+		this.name = "Alien";
 	}
 	collisionToActors(map) {
 		return;
@@ -157,6 +158,7 @@ class Alien extends GeneralRotatingEntity {
 			this.moveState.refresh();
 			this.actor.setPositionFromMoveStatePos(this.moveState.pos);
 			if (this.moveState.pos.y > INI.AUTO_ATTACK) {
+				console.info("auto attack", this.id);
 				this.type = "charger";
 				this.stage = "attack";
 				ALIENS.chargers.push(this.id);
@@ -271,7 +273,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.08",
+	VERSION: "1.07.09",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -723,9 +725,27 @@ const ALIENS = {
 		console.warn("charger ready");
 	},
 	manage(lapsedTime) {
+		ALIENS.reindex();
 		ALIENS.getExtremes();
 		ALIENS.checkDescent();
 		ALIENS.checkForChargers();
+	},
+	reindex() {
+		console.warn("reindexing aliens");
+		/** existence */
+		if (this.existence.length) {
+			this.existence.clear();
+			this.chargers.clear();
+			console.warn(".. existence");
+			for (let actor of PIXEL_ACTORS.POOL) {
+				if (actor && actor.name === "Alien") {
+					this.existence.push(actor.id);
+					if (actor.type === "charger" && actor.stage !== "waiting") {
+						this.chargers.push(actor.id);
+					}
+				}
+			}
+		}
 	},
 	getExtremes() {
 		let minX = ENGINE.gameWIDTH;
@@ -1048,7 +1068,6 @@ const TITLE = {
 $(document).ready(function () {
 	PRG.INIT();
 	PRG.setup();
-	//PRG.preLoadImages();
 	ENGINE.LOAD.preload();
 	SCORE.init("SC", "Galactix", 10, 2500);
 	SCORE.loadHS();
