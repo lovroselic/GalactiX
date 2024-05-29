@@ -271,7 +271,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.07",
+	VERSION: "1.07.08",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",

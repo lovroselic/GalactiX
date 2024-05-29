@@ -1563,6 +1563,7 @@ var ALIENS = {
 							ALIENS.existence[ALIENS.chargers[q]].stage = "attack";
 						}
 						break;
+						
 					case "turn":
 						vy = GAME.levels[GAME.level].chargerDescent;
 						vx = ALIENS.speed;
