@@ -273,7 +273,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.09",
+	VERSION: "1.07.10",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -729,14 +729,12 @@ const ALIENS = {
 		ALIENS.getExtremes();
 		ALIENS.checkDescent();
 		ALIENS.checkForChargers();
+		ALIENS.shoot();
 	},
 	reindex() {
-		console.warn("reindexing aliens");
-		/** existence */
 		if (this.existence.length) {
 			this.existence.clear();
 			this.chargers.clear();
-			console.warn(".. existence");
 			for (let actor of PIXEL_ACTORS.POOL) {
 				if (actor && actor.name === "Alien") {
 					this.existence.push(actor.id);
@@ -799,6 +797,27 @@ const ALIENS = {
 		}
 		return find;
 	},
+	shoot() {
+		if (SHIP.dead) return;
+		if (!ALIENS.ready) return;
+		const ABP = ALIENS.bullet.arsenal.length;
+		if (ABP >= MAP[GAME.level].alienBullets) return;
+		if (ALIENS.existence.length === 0) return;
+		if (coinFlip()) return;
+		console.warn("aliens prepare for shooting");
+
+		const W = MAP[GAME.level].planeLimits.width;
+		const candidates = new Array(W);
+
+		for (let index of ALIENS.existence) {
+
+			const alien = PIXEL_ACTORS.show(index);
+			console.log(".index", index, "alien", alien);
+		}
+
+		console.info("candidates", candidates);
+		throw "DEBUG";
+	}
 };
 
 const SHIP = {

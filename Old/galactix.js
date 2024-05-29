@@ -1681,6 +1681,8 @@ var ALIENS = {
 		var candidates = [];
 		var AEL = ALIENS.existence.length;
 		var X, Y;
+
+		/** getting the front row */
 		for (var z = AEL - 1; z >= 0; z--) {
 			X = ALIENS.existence[z].x;
 			Y = ALIENS.existence[z].y;
@@ -1693,6 +1695,8 @@ var ALIENS = {
 				candidates[X] = { y: Y, i: z };
 			}
 		}
+
+
 		var closest = [];
 		var CL = candidates.length;
 		for (var i = 0; i < CL; i++) {
@@ -1700,6 +1704,8 @@ var ALIENS = {
 				closest.push({ x: i, y: candidates[i].y, i: candidates[i].i });
 			}
 		}
+
+		
 		ALIENS.closest = closest;
 		var selected = RND(0, closest.length - 1);
 		if (probable(ALIENS.existence[closest[selected].i].probable)) {
