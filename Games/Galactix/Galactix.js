@@ -2,7 +2,9 @@
 /*
  
  to do:
-	* timer for realeasing chargers
+	* timer aliesn shooting
+	* sound alien shooting
+	* sound release charger
  known bugs: 
 
  */
@@ -47,6 +49,8 @@ const INI = {
 	METEOR_SPEED: 25,
 	METEOR_ROTATION_SPEED: 25,
 	CD_TIMER: "ChargerDelay",
+	ALIEN_SHOOTING_COOLDOWN: "ShootingDelay",
+	ALIEN_SHOOTING_COOLDOWN_DELAY: 2, //seconds
 	FORCED_DONW_SPEED: 0.5,
 };
 
@@ -62,9 +66,6 @@ class Bullet {
 		this.actor.x = this.x;
 		this.actor.y = this.y;
 	}
-	/* hit(index) {
-		SHIP.bullet.kill(index);
-	} */
 }
 
 class ShipBullet extends Bullet {
@@ -236,6 +237,7 @@ class Alien extends GeneralRotatingEntity {
 					break;
 
 				case "return":
+					ALIENS.maxChargers++;
 					this.moveState.pos.y = -this.actor.height;
 					this.moveState.refresh();
 					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
@@ -291,7 +293,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.11",
+	VERSION: "1.07.12",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -402,6 +404,7 @@ const GAME = {
 	setup() {
 		console.info("GAME SETUP");
 		$("#conv").remove();
+		AUDIO.AlienShoot.volume = 0.3;
 	},
 	prepareForRestart() {
 		let clear = ["background", "text", "FPS", "button", "bottomText"];
@@ -740,6 +743,12 @@ const ALIENS = {
 		ALIENS.maxX = ENGINE.gameWIDTH - ALIENS.minX;
 		ALIENS.chargerReady = false;
 		ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
+		ALIENS.canShoot = false;
+		ALIENS.shootTimer = new CountDown(INI.ALIEN_SHOOTING_COOLDOWN, INI.ALIEN_SHOOTING_COOLDOWN_DELAY, ALIENS.nextBullet);
+		ALIENS.maxChargers = MAP[GAME.level].chargers;
+	},
+	nextBullet() {
+		ALIENS.canShoot = true;
 	},
 	nextCharger() {
 		ALIENS.chargerReady = true;
@@ -794,7 +803,7 @@ const ALIENS = {
 	checkForChargers() {
 		if (ALIENS.chargerReady) {
 			//console.log("checking for chargers", MAP[GAME.level].chargers, ALIENS.chargers, MAP[GAME.level].chargers > ALIENS.chargers.length);
-			if (MAP[GAME.level].chargers > ALIENS.chargers.length) {
+			if (ALIENS.maxChargers > ALIENS.chargers.length) {
 				ALIENS.releaseCharger();
 				ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
 			}
@@ -807,6 +816,7 @@ const ALIENS = {
 		const select = find.chooseRandom();
 		ALIENS.chargers.push(select);
 		PIXEL_ACTORS.show(select).stage = "rotate";
+		AUDIO.Dive.play();
 		//console.warn("releasing charger", find, select, PIXEL_ACTORS.show(select));
 	},
 	findChargers() {
@@ -821,6 +831,7 @@ const ALIENS = {
 	shoot() {
 		if (SHIP.dead) return;
 		if (!ALIENS.ready) return;
+		if (!ALIENS.canShoot) return;
 		const ABP = ALIENS.bullet.arsenal.length;
 		if (ABP >= MAP[GAME.level].alienBullets) return;
 		if (ALIENS.existence.length === 0) return;
@@ -850,6 +861,9 @@ const ALIENS = {
 		if (probable(selected.probable)) {
 			console.error("alien shoots", selected.id, selected);
 			ALIENS.bullet.arsenal.push(new AlienBullet(selected.moveState.pos.x, Math.round(selected.moveState.pos.y + selected.actor.height / 2 + ALIENS.bullet.sprite.height * 0.8), "alienbullet"));
+			ALIENS.canShoot = false;
+			ALIENS.shootTimer = new CountDown(INI.ALIEN_SHOOTING_COOLDOWN, INI.ALIEN_SHOOTING_COOLDOWN_DELAY, ALIENS.nextBullet);
+			AUDIO.AlienShoot.play();
 		}
 		//throw "DEBUG";
 	}
@@ -1023,6 +1037,7 @@ const TITLE = {
 	startTitle() {
 		console.info(" - start title -");
 		if (AUDIO.Title) TITLE.music();
+		AUDIO.Title.stop(); //DEBUG
 		TITLE.render();
 		ENGINE.draw("background", (ENGINE.gameWIDTH - TEXTURE.Title.width) / 2, (ENGINE.gameHEIGHT - TEXTURE.Title.height) / 2, TEXTURE.Title);
 		ENGINE.topCanvas = ENGINE.getCanvasName("ROOM");

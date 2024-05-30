@@ -23,6 +23,8 @@ LoadAudio = [
   { srcName: "Shoot.mp3", name: "Shoot" },
   { srcName: "Ufo.mp3", name: "Ufo" },
   { srcName: "ClosedDoor.mp3", name: "Hit" },
+  { srcName: "AlienShoot.mp3", name: "AlienShoot" },
+  { srcName: "Dive.mp3", name: "Dive" },
 ];
 
 LoadSequences = [
