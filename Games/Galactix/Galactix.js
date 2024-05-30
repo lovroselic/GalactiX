@@ -2,9 +2,8 @@
 /*
  
  to do:
-	* timer aliesn shooting
-	* sound alien shooting
-	* sound release charger
+	* friendly fire,
+	* friendly collsision
  known bugs: 
 
  */
@@ -243,8 +242,35 @@ class Alien extends GeneralRotatingEntity {
 					this.moveState.pos.y = -this.actor.height;
 					this.moveState.refresh();
 					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
-					console.info("returning", this.id);
+					//console.info("returning", this.id);
 					this.stage = "attack";
+					break;
+
+				case "turn":
+					let angle = new Angle(this.angle);
+					let turningDir = angle.getDirectionVector(DOWN);
+					const rotSign = -Math.sign(turningDir.x) || 1;
+					this.setAngle(angle.angle + rotSign * 10);
+					if (this.angle === 180) {
+						this.score /= 2;
+						this.stage = "ascend";
+					}
+
+					this.moveState.pos = this.moveState.pos.add(ALIENS.chargeSpeed.mul(turningDir, timeDelta));
+					this.moveState.refresh();
+					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+					//console.info("turning", this.id, "turningDir", turningDir, "angle", angle, "rotSign", rotSign);
+					break;
+
+				case "ascend":
+					this.moveState.pos = this.moveState.pos.sub(translate);
+					this.moveState.refresh();
+					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+
+					if (this.moveState.pos.y <= INI.TOP_Y + 64) {
+						this.stage = "rotate";
+					}
+					//console.info("ascend", this.id);
 					break;
 
 				default:
@@ -302,7 +328,7 @@ class ShipExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.12",
+	VERSION: "1.08.00",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -727,11 +753,17 @@ const ALIENS = {
 			const delta = Math.round(ALIENS.bullet.speed * timeDelta);
 			for (let i = LN - 1; i >= 0; i--) {
 				ALIENS.bullet.arsenal[i].y += delta;
-				if (ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT) ALIENS.bullet.kill(i);
+				//console.log("bullet y check", ALIENS.bullet.arsenal[i].y, ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT);
+				if (ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT) {
+					//console.warn("removed alien buller", ALIENS.bullet.arsenal[i].y, i);
+					//ALIENS.bullet.arsenal[i] = null;
+					ALIENS.bullet.kill(i);
+				}
 			}
 		},
 		kill(i) {
 			ALIENS.bullet.arsenal.splice(i, 1);
+			//console.error("..killed bullet", i);
 		},
 		killAll() {
 			ALIENS.bullet.arsenal.clear();
@@ -854,6 +886,7 @@ const ALIENS = {
 			//console.log(".index", index, "alien", alien);
 			let X = alien.moveState.homeGrid.x;
 			let y = alien.moveState.pos.y;
+			if (y >= ENGINE.gameHEIGHT - 64) continue;
 			//console.log(".X", X, "y", y);
 
 			if (!candidates[X] || y > candidates[X].y) {
