@@ -1708,6 +1708,7 @@ var ALIENS = {
 		
 		ALIENS.closest = closest;
 		var selected = RND(0, closest.length - 1);
+		
 		if (probable(ALIENS.existence[closest[selected].i].probable)) {
 			ALIENS.bullet.arsenal.push(
 				new BulletClass(

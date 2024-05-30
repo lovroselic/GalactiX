@@ -62,8 +62,26 @@ class Bullet {
 		this.actor.x = this.x;
 		this.actor.y = this.y;
 	}
+	/* hit(index) {
+		SHIP.bullet.kill(index);
+	} */
+}
+
+class ShipBullet extends Bullet {
+	constructor(x, y, sprite) {
+		super(x, y, sprite);
+	}
 	hit(index) {
 		SHIP.bullet.kill(index);
+	}
+}
+
+class AlienBullet extends Bullet {
+	constructor(x, y, sprite) {
+		super(x, y, sprite);
+	}
+	hit(index) {
+		ALIENS.bullet.kill(index);
 	}
 }
 
@@ -273,7 +291,7 @@ class AlienExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.07.10",
+	VERSION: "1.07.11",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -463,9 +481,11 @@ const GAME = {
 	run(lapsedTime) {
 		if (ENGINE.GAME.stopAnimation) return;
 		SHIP.bullet.move(lapsedTime);
+		ALIENS.bullet.move(lapsedTime);
 		PIXEL_ACTORS.manage(lapsedTime);
 		ALIENS.manage(lapsedTime);
 		SHIP.bullet.manage(lapsedTime);
+		ALIENS.bullet.manage(lapsedTime);
 		DESTRUCTION_ANIMATION.manage(lapsedTime);
 
 
@@ -521,6 +541,7 @@ const GAME = {
 		ENGINE.clearLayerStack();
 		SHIP.draw();
 		SHIP.bullet.draw();
+		ALIENS.bullet.draw();
 		PIXEL_ACTORS.draw(lapsedTime);
 		DESTRUCTION_ANIMATION.draw(lapsedTime);
 
@@ -681,32 +702,32 @@ const GAME = {
 
 const ALIENS = {
 	bullet: {
-		speed: 16,
-		/* draw() {
-			var LN = ALIENS.bullet.arsenal.length;
-			for (var i = 0; i < LN; i++) {
-				ENGINE.spriteDraw(
-					"bullets",
-					ALIENS.bullet.arsenal[i].x,
-					ALIENS.bullet.arsenal[i].y,
-					ALIENS.bullet.sprite
-				);
+		speed: 800,
+		draw() {
+			ENGINE.layersToClear.add("bullets");
+			for (let i = 0; i < ALIENS.bullet.arsenal.length; i++) {
+				ENGINE.spriteDraw("bullets", ALIENS.bullet.arsenal[i].x, ALIENS.bullet.arsenal[i].y, ALIENS.bullet.sprite);
 			}
-		}, */
-		/* move() {
-			var LN = ALIENS.bullet.arsenal.length;
+		},
+		move(lapsedTime) {
+			const LN = ALIENS.bullet.arsenal.length;
 			if (LN < 1) return;
-			for (var i = LN - 1; i >= 0; i--) {
-				ALIENS.bullet.arsenal[i].y += ALIENS.bullet.speed;
-				if (ALIENS.bullet.arsenal[i].y > INI.GAME_HEIGHT) ALIENS.bullet.kill(i);
+			let timeDelta = lapsedTime / 1000;
+			const delta = Math.round(ALIENS.bullet.speed * timeDelta);
+			for (let i = LN - 1; i >= 0; i--) {
+				ALIENS.bullet.arsenal[i].y += delta;
+				if (ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT) ALIENS.bullet.kill(i);
 			}
-		}, */
-		/* kill(i) {
+		},
+		kill(i) {
 			ALIENS.bullet.arsenal.splice(i, 1);
-		}, */
-		/* killAll() {
+		},
+		killAll() {
 			ALIENS.bullet.arsenal.clear();
-		} */
+		},
+		manage(lapsedTime) {
+			PIXEL_ACTORS.collisionFromExternalPool(ALIENS.bullet.arsenal);
+		}
 	},
 	init() {
 		ALIENS.existence = [];
@@ -772,7 +793,7 @@ const ALIENS = {
 	},
 	checkForChargers() {
 		if (ALIENS.chargerReady) {
-			console.log("checking for chargers", MAP[GAME.level].chargers, ALIENS.chargers, MAP[GAME.level].chargers > ALIENS.chargers.length);
+			//console.log("checking for chargers", MAP[GAME.level].chargers, ALIENS.chargers, MAP[GAME.level].chargers > ALIENS.chargers.length);
 			if (MAP[GAME.level].chargers > ALIENS.chargers.length) {
 				ALIENS.releaseCharger();
 				ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
@@ -781,12 +802,12 @@ const ALIENS = {
 	},
 	releaseCharger() {
 		const find = ALIENS.findChargers();
-		console.warn("trying to release charger", find);
+		//console.warn("trying to release charger", find);
 		if (find.length === 0) return;
 		const select = find.chooseRandom();
 		ALIENS.chargers.push(select);
 		PIXEL_ACTORS.show(select).stage = "rotate";
-		console.warn("releasing charger", find, select, PIXEL_ACTORS.show(select));
+		//console.warn("releasing charger", find, select, PIXEL_ACTORS.show(select));
 	},
 	findChargers() {
 		const find = [];
@@ -804,19 +825,33 @@ const ALIENS = {
 		if (ABP >= MAP[GAME.level].alienBullets) return;
 		if (ALIENS.existence.length === 0) return;
 		if (coinFlip()) return;
-		console.warn("aliens prepare for shooting");
+		//console.warn("aliens prepare for shooting");
 
 		const W = MAP[GAME.level].planeLimits.width;
-		const candidates = new Array(W);
+		let candidates = new Array(W);
 
 		for (let index of ALIENS.existence) {
-
 			const alien = PIXEL_ACTORS.show(index);
-			console.log(".index", index, "alien", alien);
-		}
+			//console.log(".index", index, "alien", alien);
+			let X = alien.moveState.homeGrid.x;
+			let y = alien.moveState.pos.y;
+			//console.log(".X", X, "y", y);
 
-		console.info("candidates", candidates);
-		throw "DEBUG";
+			if (!candidates[X] || y > candidates[X].y) {
+				candidates[X] = { y: alien.moveState.pos.y, index: index };
+			}
+		}
+		candidates = candidates.filter(candidate => candidate !== undefined);
+
+		//console.info("candidates", candidates);
+
+		const selected = PIXEL_ACTORS.show(candidates.chooseRandom().index);
+		//console.log("selected", selected);
+		if (probable(selected.probable)) {
+			console.error("alien shoots", selected.id, selected);
+			ALIENS.bullet.arsenal.push(new AlienBullet(selected.moveState.pos.x, Math.round(selected.moveState.pos.y + selected.actor.height / 2 + ALIENS.bullet.sprite.height * 0.8), "alienbullet"));
+		}
+		//throw "DEBUG";
 	}
 };
 
@@ -833,7 +868,7 @@ const SHIP = {
 			console.log("shooting ...");
 			SHIP.cannonHot = true;
 			SHIP.shots += 1;
-			SHIP.bullet.arsenal.push(new Bullet(SHIP.x, parseInt(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height / 2, 10), 'bullet'));
+			SHIP.bullet.arsenal.push(new ShipBullet(SHIP.x, Math.round(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height * 0.7), 'bullet'));
 			AUDIO.Shoot.play();
 			if (SHIP.bullet.arsenal.length >= SHIP.bullet.max) SHIP.loaded = false;
 
@@ -858,7 +893,7 @@ const SHIP = {
 			const delta = Math.round(SHIP.bullet.speed * timeDelta);
 			for (let i = LN - 1; i >= 0; i--) {
 				SHIP.bullet.arsenal[i].y -= delta;
-				if (SHIP.bullet.arsenal[i].y < 0) SHIP.bullet.kill(i);
+				if (SHIP.bullet.arsenal[i].y <= 0) SHIP.bullet.kill(i);
 			}
 		},
 		manage(lapsedTime) {

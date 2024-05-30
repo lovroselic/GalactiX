@@ -68,19 +68,19 @@ const MAP = {
                 num: 8,
                 actor: "basic1Attacker",
                 score: 75,
-                probable: 40
+                probable: 35
             },
             3: {
                 num: 8,
                 actor: "basic2Attacker",
                 score: 40,
-                probable: 35
+                probable: 30
             },
             4: {
                 num: 7,
                 actor: "basic1Fighter",
                 score: 40,
-                probable: 35
+                probable: 25
             }
         }
     },

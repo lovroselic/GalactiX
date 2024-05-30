@@ -220,6 +220,7 @@ class Pixel_Actors extends IAM {
                 //console.warn("ids", ids);
                 for (const id of ids) {
                     const actor = PIXEL_ACTORS.show(id);
+                    if (!actor) continue;
                     //console.log("--------------------------------");
                     //console.log("..meteor", "hg", actor.moveState.homeGrid, "object", actor, "actor", actor.actor, "grids", actor.moveState.useGrids);
                     let hit = ENGINE.collisionArea(actor.actor, obj.actor);
