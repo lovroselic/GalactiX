@@ -14,6 +14,8 @@ const DEBUG = {
 	FPS: true,
 	grid: false,
 	coord: false,
+	INVINCIBLE: false,
+	ININITE_LIVES: false,
 };
 
 const CONST = {
@@ -290,6 +292,13 @@ class AlienExplosion extends GeneralDestruction {
 	}
 }
 
+class ShipExplosion extends GeneralDestruction {
+	constructor(grid) {
+		super(grid);
+		this.actor = new ACTOR("ShipExp", grid.x, grid.y, "linear", ASSET.ShipExp);
+	}
+}
+
 /** */
 
 const PRG = {
@@ -427,6 +436,7 @@ const GAME = {
 			GAME.createLevel(level);
 		}
 		GAME.levelComplete = false;
+		PIXEL_ACTORS.clearAll();
 
 		SHIP.shots = 0;
 		SHIP.killShots = 0;
@@ -442,10 +452,8 @@ const GAME = {
 		ALIENS.dir = [LEFT, RIGHT].chooseRandom();
 		ALIENS.dirCopy = ALIENS.dir;
 
-
 		SPAWN.meteors();
 		SPAWN.aliens();
-		/** */
 	},
 	continueLevel(level) {
 		console.log("game continues on level", level);
@@ -466,8 +474,8 @@ const GAME = {
 	},
 	over() {
 		if (SHIP.dead) return;
-		RUBBLE.purge(false);
 		console.log("GAME OVER");
+		RUBBLE.purge(false);
 		SHIP.dead = true;
 		ENGINE.clearLayer("text");
 		TITLE.gameOver();
@@ -870,7 +878,7 @@ const ALIENS = {
 };
 
 const SHIP = {
-	ship: null,
+	ship: "whiteship",
 	bullet: {
 		max: 1,
 		speed: 1400,//24
@@ -924,6 +932,11 @@ const SHIP = {
 		SHIP.x = parseInt(ENGINE.gameWIDTH / 2, 10);
 		SHIP.y = parseInt((SHIP.maxY - SHIP.minY) / 2) + SHIP.minY;
 		SHIP.speed = 500;
+		this.ignoreByManager = true;
+		this.limits = MAP[GAME.level].planeLimits;
+		this.actor = new ACTOR(SHIP.ship);
+		this.updateMS();
+
 	},
 	init() {
 		if (SHIP.dead) return;
@@ -933,6 +946,8 @@ const SHIP = {
 		SHIP.sprite = SPRITE[SHIP.ship];
 		SHIP.loaded = true;
 		SHIP.cannonHot = false;
+		this.actor = new ACTOR(SHIP.ship);                                   //IAM compatibility
+		PIXEL_ACTORS.add(SHIP);
 
 		setTimeout(function () {
 			SHIP.live = true;
@@ -948,6 +963,11 @@ const SHIP = {
 
 		}, INI.START_TIMEOUT);
 	},
+	updateMS() {
+		this.moveState = new PX_MoveState(new Grid(SHIP.x, SHIP.y), SHIP);
+		this.actor.x = SHIP.x;
+		this.actor.y = SHIP.y;
+	},
 	draw() {
 		const CTX = LAYER["ship"];
 		CTX.clearRect(0, SHIP.minY - 24, CTX.canvas.width, INI.SHIPS_SPACE + 48);
@@ -961,6 +981,7 @@ const SHIP = {
 		SHIP.y += Math.round(SHIP.speed * dir.y * timeDelta);
 		SHIP.x = Math.max(SHIP.minX, Math.min(SHIP.x, SHIP.maxX));
 		SHIP.y = Math.max(SHIP.minY, Math.min(SHIP.y, SHIP.maxY));
+		this.updateMS();
 	},
 	shoot() {
 		if (!SHIP.loaded) return;
@@ -968,6 +989,22 @@ const SHIP = {
 		if (!SHIP.live) return;
 		SHIP.bullet.shoot();
 		return;
+	},
+	hit() {
+		if (DEBUG.INVINCIBLE) return;
+		if (!DEBUG.ININITE_LIVES) GAME.lives--;
+		this.explode();
+		TEXT.ships();
+		ALIENS.ready = false;
+		if (ALIENS.existence.length === 0) GAME.levelComplete = true;
+		SHIP.live = false;
+		SHIP.init();
+		if (GAME.lives < 0) GAME.over();
+	},
+	explode() {
+		DESTRUCTION_ANIMATION.add(new ShipExplosion(this.moveState.pos));
+		AUDIO.Explosion.play();
+		PIXEL_ACTORS.remove(this.id);
 	}
 };
 
