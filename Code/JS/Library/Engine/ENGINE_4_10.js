@@ -3366,6 +3366,9 @@ class PX_MoveState {
     const rightLimit = (this.parent.limits.width * ENGINE.INI.GRIDPIX) - 1;
     const bottomLimit = (this.parent.limits.height * ENGINE.INI.GRIDPIX) - 1;
 
+    this.homeGrid.x = Math.min(this.homeGrid.x, rightLimit);
+    this.homeGrid.y = Math.min(this.homeGrid.y, bottomLimit);
+
     this.useGrids = [
       GRID.pointToGrid(this.pos.add(new Vector(left, top)).limit(rightLimit, bottomLimit)),
       GRID.pointToGrid(this.pos.add(new Vector(right, top)).limit(rightLimit, bottomLimit)),

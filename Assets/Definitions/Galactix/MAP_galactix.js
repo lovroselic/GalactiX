@@ -13,8 +13,8 @@ const MAP = {
         maxBullets: 1,
         chargers: 0,
         CD: 10,
-        chargerDescent: 4,
-        alienBullets: 2,
+        chargerDescent: 200,
+        alienBullets: 3,
         AXS: 120,
         AYS: 1440,
         asteroids: 10,
@@ -51,7 +51,7 @@ const MAP = {
         chargers: 1,
         CD: 10,
         chargerDescent: 200, //was 4
-        alienBullets: 3,
+        alienBullets: 4,
         AXS: 100,
         AYS: 1000,
         asteroids: 9,
@@ -68,19 +68,19 @@ const MAP = {
                 num: 8,
                 actor: "basic1Attacker",
                 score: 75,
-                probable: 40
+                probable: 45
             },
             3: {
                 num: 8,
                 actor: "basic2Attacker",
                 score: 40,
-                probable: 35
+                probable: 40
             },
             4: {
                 num: 7,
                 actor: "basic1Fighter",
                 score: 40,
-                probable: 30
+                probable: 35
             }
         }
     },

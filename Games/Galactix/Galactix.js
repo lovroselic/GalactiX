@@ -53,6 +53,7 @@ const INI = {
 	ALIEN_SHOOTING_COOLDOWN: "ShootingDelay",
 	ALIEN_SHOOTING_COOLDOWN_DELAY: 2, //seconds
 	FORCED_DONW_SPEED: 0.5,
+	METEOR_SCORE: 100,
 };
 
 /** */
@@ -108,6 +109,22 @@ class GeneralRotatingEntity {
 	getSprite() {
 		return this.actor.sprite();
 	}
+	collisionToActors(map) {
+		if (this.name !== "Alien") return;
+		let ids = map["pixel_actor_IA"].unroll(this.moveState.homeGrid);
+		for (let id of ids) {
+			const actor = PIXEL_ACTORS.show(id);
+			if (!actor) continue;
+			if (actor.name === "Alien") continue;
+			//console.log("collision to actors", this, actor);
+			let hit = ENGINE.collisionArea(actor.actor, this.actor);
+			if (hit) {
+				actor.hit();
+				this.hit();
+			}
+		}
+
+	}
 }
 
 class Meteor extends GeneralRotatingEntity {
@@ -147,9 +164,9 @@ class Meteor extends GeneralRotatingEntity {
 		AUDIO.Explosion.play();
 		PIXEL_ACTORS.remove(this.id);
 	}
-
-	collisionToActors(map) {
-		return;
+	kill(score) {
+		if (score) GAME.addScore(INI.METEOR_SCORE);
+		this.explode();
 	}
 }
 
@@ -161,9 +178,6 @@ class Alien extends GeneralRotatingEntity {
 		this.type = type;
 		this.stage = "waiting";
 		this.name = "Alien";
-	}
-	collisionToActors(map) {
-		return;
 	}
 	draw() {
 		ENGINE.spriteDraw('aliens', this.actor.x, this.actor.y, this.getSprite());
@@ -328,7 +342,7 @@ class ShipExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.08.00",
+	VERSION: "1.08.01",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -404,7 +418,6 @@ const GAME = {
 			AUDIO.Title.currentTime = 0;
 		}
 
-
 		$(ENGINE.topCanvas).off("mousemove", ENGINE.mouseOver);
 		$(ENGINE.topCanvas).off("click", ENGINE.mouseClick);
 		$(ENGINE.topCanvas).css("cursor", "");
@@ -428,7 +441,8 @@ const GAME = {
 		/****************/
 		GAME.score = 0;
 		GAME.extraLife = SCORE.extraLife.clone();
-		GAME.lives = 4;
+		//GAME.lives = 4;
+		GAME.lives = 0;
 
 		GAME.fps = new FPS_short_term_measurement(300);
 		GAME.ended = false;
@@ -491,29 +505,23 @@ const GAME = {
 		GAME.firstFrameDraw();
 		GAME.resume();
 	},
-	stop() {
-		console.log(PRG.NAME, " is stopping.");
-		GAME.stopAnimation = true;
-		$(document).off("keyup", GAME.clearKey);
-		$(document).off("keydown", GAME.checkKey);
-		GAME.end();
-	},
 	over() {
 		if (SHIP.dead) return;
 		console.log("GAME OVER");
-		RUBBLE.purge(false);
-		SHIP.dead = true;
+		PIXEL_ACTORS.purge("name", "Asteroid", null);
 		ENGINE.clearLayer("text");
 		TITLE.gameOver();
-		setTimeout(GAME.stop, 2000);
+		SHIP.dead = true;
+		AUDIO.ArcadeClose.play();
 	},
 	end() {
-		TITLE.render();
+		if (GAME.ended) return;
+		GAME.ended = true;
 		console.log(PRG.NAME, " ended.");
 		SCORE.checkScore(GAME.score);
 		SCORE.hiScore();
 		TEXT.score();
-		$("#startGame").removeClass("hidden");
+		ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, TITLE.startTitle, "enter"));
 	},
 	run(lapsedTime) {
 		if (ENGINE.GAME.stopAnimation) return;
@@ -524,44 +532,15 @@ const GAME = {
 		SHIP.bullet.manage(lapsedTime);
 		ALIENS.bullet.manage(lapsedTime);
 		DESTRUCTION_ANIMATION.manage(lapsedTime);
-
-
 		ENGINE.TIMERS.update();
 		GAME.respond(lapsedTime);
 		GAME.frameDraw(lapsedTime);
-
 		if (SHIP.dead) GAME.checkIfProcessesComplete();
-		/*
-
-
-		
-		if (!GAME.frame.start) GAME.frame.start = Date.now();
-		var current = Date.now();
-		GAME.frame.delta = current - GAME.frame.start;
-		if (GAME.frame.delta > INI.ANIMATION_INTERVAL) {
-			ALIENS.move();
-			ALIENS.shoot();
-			
-			ALIENS.bullet.move();
-			RUBBLE.move();
-			GAME.respond();
-			GAME.frameDraw();
-			ENGINE.collisionBulletAlien();
-			ENGINE.collisionBulletShip();
-			ENGINE.collisionAlienShip();
-			ENGINE.collisionBulletRubble();
-			ENGINE.collisionAlienRubble();
-			GAME.frame.start = null;
-		}
-		if (GAME.stopAnimation) {
-			return;
-		} else requestAnimationFrame(GAME.run);
-		*/
 	},
 	checkIfProcessesComplete() {
 		if (DESTRUCTION_ANIMATION.POOL.length !== 0) return;
 		console.log("SCENE completed!");
-		SHIP.death();
+		GAME.end();
 	},
 	firstFrameDraw() {
 		TITLE.render();
@@ -900,7 +879,7 @@ const ALIENS = {
 		const selected = PIXEL_ACTORS.show(candidates.chooseRandom().index);
 		//console.log("selected", selected);
 		if (probable(selected.probable)) {
-			console.error("alien shoots", selected.id, selected);
+			//console.error("alien shoots", selected.id, selected);
 			ALIENS.bullet.arsenal.push(new AlienBullet(selected.moveState.pos.x, Math.round(selected.moveState.pos.y + selected.actor.height / 2 + ALIENS.bullet.sprite.height * 0.8), "alienbullet"));
 			ALIENS.canShoot = false;
 			ALIENS.shootTimer = new CountDown(INI.ALIEN_SHOOTING_COOLDOWN, INI.ALIEN_SHOOTING_COOLDOWN_DELAY, ALIENS.nextBullet);
@@ -1105,6 +1084,7 @@ const TEXT = {
 
 const TITLE = {
 	startTitle() {
+		ENGINE.clearManylayers(["sign", "ship", "aliens", "explosion", "rubble", "bullets", "FPS"]);
 		console.info(" - start title -");
 		if (AUDIO.Title) TITLE.music();
 		AUDIO.Title.stop(); //DEBUG
@@ -1142,16 +1122,13 @@ const TITLE = {
 		BACKGROUND.black();
 		TITLE.bottomBackground();
 	},
-
 	centeredText(text, fs = 48) {
 		let GameRD = new RenderData("Arcade", fs, "#DDD", "text", "#000", 2, 2, 2);
 		ENGINE.TEXT.setRD(GameRD);
 		ENGINE.TEXT.centeredText(text, ENGINE.gameWIDTH, ENGINE.gameHEIGHT / 2);
 	},
-
 	gameOver() {
 		TITLE.centeredText("GAME OVER", 120);
-		//TITLE.bigText("GAME OVER", 120);
 	},
 	getReady() {
 		if (GAME.levelComplete) return;

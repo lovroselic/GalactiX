@@ -1577,6 +1577,7 @@ var ALIENS = {
 						if (angle === 90 || angle === 270) vertDir = 0;
 						if (angle > 90 && angle <= 180) vertDir = -1;
 						if (angle < 270 && angle > 180) vertDir = -1;
+
 						angle = angle + 10 * rotDir;
 						if (angle === 180) {
 							ALIENS.existence[ALIENS.chargers[q]].score =
@@ -1586,10 +1587,12 @@ var ALIENS = {
 						ALIENS.existence[ALIENS.chargers[q]].angle = angle;
 						ALIENS.existence[ALIENS.chargers[q]].x += vx * rotDir * -2;
 						ALIENS.existence[ALIENS.chargers[q]].y += vy * vertDir;
+
 						if (ALIENS.existence[ALIENS.chargers[q]].x > ENGINE.gameWIDTH)
 							ALIENS.existence[ALIENS.chargers[q]].x = ENGINE.gameWIDTH;
 						if (ALIENS.existence[ALIENS.chargers[q]].x < 0)
 							ALIENS.existence[ALIENS.chargers[q]].x = 0;
+						
 						ALIENS.existence[ALIENS.chargers[q]].refresh();
 						break;
 					case "ascend":
