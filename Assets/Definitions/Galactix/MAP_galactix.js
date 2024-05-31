@@ -276,7 +276,7 @@ const MAP = {
         alienBullets: 5,
         AXS: 140,
         AYS: 1200,
-        asteroids: 5,
+        asteroids: 6,
         ship: "slimship",
         layout: {
             1: {
@@ -353,40 +353,41 @@ const MAP = {
     9: {
         maxBullets: 4,
         chargers: 5,
-        CD: 2,
-        chargerDescent: 8,
+        CD: 1750,
+        AlienBulletDelay: 750,//m
+        chargerDescent: 400,
         alienBullets: 5,
-        AXS: 4,
-        AYS: 26,
-        asteroids: 7,
+        AXS: 150,
+        AYS: 1200,
+        asteroids: 5,
         ship: "slimship",
         layout: {
             1: {
                 num: 7,
                 actor: "basic5Fighter",
                 score: 100,
-                probable: 50,
+                probable: 99,
                 type: "charger"
             },
             2: {
                 num: 8,
                 actor: "basic2Attacker",
                 score: 50,
-                probable: 40,
+                probable: 85,
                 type: "charger"
             },
             3: {
                 num: 9,
                 actor: "basic2Fighter",
                 score: 40,
-                probable: 35,
+                probable: 75,
                 type: "charger"
             },
             4: {
                 num: 7,
                 actor: "basic1Charger",
                 score: 25,
-                probable: 30,
+                probable: 50,
                 type: "charger"
             }
         }
@@ -394,23 +395,24 @@ const MAP = {
     10: {
         maxBullets: 4,
         chargers: 5,
-        CD: 2,
-        chargerDescent: 8,
+        CD: 1750,
+        AlienBulletDelay: 750,//m
+        chargerDescent: 400,
         alienBullets: 5,
-        AXS: 4,
-        AYS: 26,
-        asteroids: 7,
+        AXS: 150,
+        AYS: 1200,
+        asteroids: 5,
         ship: "slimship",
         layout: {
             1: {
                 num: 7,
                 actor: "basic8Fighter",
                 score: 66,
-                probable: 70,
+                probable: 80,
                 type: "charger"
             },
             2: {
-                num: 2,
+                num: 1,
                 actor: "alienMother",
                 score: 1000,
                 probable: 99
@@ -434,26 +436,27 @@ const MAP = {
     11: {
         maxBullets: 4,
         chargers: 6,
-        CD: 1,
-        chargerDescent: 9,
+        CD: 1750,
+        AlienBulletDelay: 750,//m
+        chargerDescent: 400,
         alienBullets: 6,
-        AXS: 5,
-        AYS: 26,
-        asteroids: 7,
+        AXS: 175,
+        AYS: 1250,
+        asteroids: 4,
         ship: "slimship",
         layout: {
             1: {
                 num: 7,
                 actor: "random",
-                sscore: 50,
-                probable: 50,
+                score: 50,
+                probable: 99,
                 type: "charger"
             },
             2: {
                 num: 8,
                 actor: "random",
                 score: 50,
-                probable: 50,
+                probable: 80,
                 type: "charger"
             },
             3: {
@@ -467,7 +470,7 @@ const MAP = {
                 num: 7,
                 actor: "random",
                 score: 50,
-                probable: 50,
+                probable: 70,
                 type: "charger"
             }
         }

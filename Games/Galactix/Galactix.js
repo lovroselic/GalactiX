@@ -345,7 +345,7 @@ class ShipExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.09.01",
+	VERSION: "1.09.02",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -430,7 +430,7 @@ const GAME = {
 		ENGINE.GAME.start(16);
 
 		//GAME.level = 1;
-		GAME.level = 8;
+		GAME.level = 11
 
 		/****************/
 
@@ -631,6 +631,12 @@ const GAME = {
 			SHIP.move(DOWN, lapsedTime);
 			return;
 		}
+
+		if (map[ENGINE.KEY.map.F9]) {
+			console.log("*******************************************");
+			console.table(PIXEL_ACTORS.POOL, ["score"]);
+			console.log("*******************************************");
+		}
 	},
 	setTitle() {
 		const text = GAME.generateTitleText();
@@ -725,7 +731,7 @@ const ALIENS = {
 			for (let i = LN - 1; i >= 0; i--) {
 				ALIENS.bullet.arsenal[i].y += delta;
 				//console.log("bullet y check", ALIENS.bullet.arsenal[i].y, ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT);
-				if (ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT) {
+				if (ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT || ALIENS.bullet.arsenal[i].y < 0) {
 					//console.warn("removed alien buller", ALIENS.bullet.arsenal[i].y, i);
 					//ALIENS.bullet.arsenal[i] = null;
 					ALIENS.bullet.kill(i);
@@ -863,7 +869,9 @@ const ALIENS = {
 			//console.log(".index", index, "alien", alien);
 			let X = alien.moveState.homeGrid.x;
 			let y = alien.moveState.pos.y;
-			if (y >= ENGINE.gameHEIGHT - 64) continue;
+			let x = alien.moveState.pos.y;
+			if (y >= ENGINE.gameHEIGHT - 64 || y < 64) continue;
+			if (x <= 32 || x >= ENGINE.gameWIDTH - 32) continue;
 			//console.log(".X", X, "y", y);
 
 			if (!candidates[X] || y > candidates[X].y) {
@@ -881,7 +889,7 @@ const ALIENS = {
 			//console.error("alien shoots", selected.id, selected);
 			ALIENS.bullet.arsenal.push(new AlienBullet(selected.moveState.pos.x, Math.round(selected.moveState.pos.y + selected.actor.height / 2 + ALIENS.bullet.sprite.height * 0.8), "alienbullet"));
 			ALIENS.canShoot = false;
-			ALIENS.shootTimer = new CountDownMS(INI.ALIEN_SHOOTING_COOLDOWN,MAP[GAME.level].AlienBulletDelay, ALIENS.nextBullet);
+			ALIENS.shootTimer = new CountDownMS(INI.ALIEN_SHOOTING_COOLDOWN, MAP[GAME.level].AlienBulletDelay, ALIENS.nextBullet);
 			AUDIO.AlienShoot.play();
 		}
 		//throw "DEBUG";
@@ -1189,6 +1197,7 @@ const TITLE = {
 		let accuracy = SHIP.killShots / SHIP.shots * 100;
 		accuracy = Math.min(accuracy, 100);
 		accuracy = accuracy.toFixed(1);
+		console.log("accuracy", accuracy, "RPL", RPL);
 		ENGINE.TEXT.centeredText(`Wave ${GAME.level} destroyed`, x, y);
 		y += fs;
 		ENGINE.TEXT.centeredText(`Accuracy: ${accuracy}%`, x, y);
@@ -1199,8 +1208,8 @@ const TITLE = {
 		ENGINE.TEXT.centeredText(`Asteroid bonus: ${RPL} * 100 = ${RPL * 100}`, x, y);
 		y += fs;
 		ENGINE.TEXT.centeredText(`Press ENTER to continue`, x, y);
-		GAME.score += bonus;
-		TEXT.score();
+		GAME.addScore(bonus);
+		console.info("bonus", bonus);
 	}
 };
 
