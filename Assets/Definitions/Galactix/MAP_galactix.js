@@ -9,6 +9,26 @@ const MAP = {
         });
         console.info("init map", MAP);
     },
+    0: {
+        maxBullets: 5,
+        chargers: 2,
+        CD: 10,
+        chargerDescent: 200,
+        alienBullets: 3,
+        AXS: 120,
+        AYS: 1440,
+        asteroids: 10,
+        ship: "whiteship",
+        layout: {
+            1: {
+                num: 3,
+                actor: "redinvader",
+                score: 30,
+                probable: 50,
+                type: "charger"
+            },
+        },
+    },
     1: {
         maxBullets: 1,
         chargers: 0,

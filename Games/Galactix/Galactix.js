@@ -123,7 +123,6 @@ class GeneralRotatingEntity {
 				this.hit();
 			}
 		}
-
 	}
 }
 
@@ -295,9 +294,13 @@ class Alien extends GeneralRotatingEntity {
 
 		return;
 	}
-	hit() {
+	hit(i = null) {
 		this.explode();
-		GAME.addScore(this.score);
+		if (i >= 0) {
+			GAME.addScore(this.score);
+			SHIP.killShots++;
+		}
+
 	}
 	explode() {
 		DESTRUCTION_ANIMATION.add(new AlienExplosion(this.moveState.pos));
@@ -342,7 +345,7 @@ class ShipExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.08.01",
+	VERSION: "1.09.0",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -430,7 +433,7 @@ const GAME = {
 		ENGINE.GAME.start(16);
 
 		//GAME.level = 1;
-		GAME.level = 2;
+		GAME.level = 0;
 
 		/****************/
 
@@ -535,12 +538,14 @@ const GAME = {
 		ENGINE.TIMERS.update();
 		GAME.respond(lapsedTime);
 		GAME.frameDraw(lapsedTime);
-		if (SHIP.dead) GAME.checkIfProcessesComplete();
+		if (SHIP.dead || GAME.levelComplete) GAME.checkIfProcessesComplete();
 	},
 	checkIfProcessesComplete() {
 		if (DESTRUCTION_ANIMATION.POOL.length !== 0) return;
 		console.log("SCENE completed!");
-		GAME.end();
+		if (SHIP.dead) return GAME.end();
+		if (GAME.levelComplete) return GAME.levelDone();
+
 	},
 	firstFrameDraw() {
 		TITLE.render();
@@ -568,35 +573,24 @@ const GAME = {
 		//EXPLOSIONS.draw();
 	},
 	endLevel() {
+		if (GAME.levelComplete) return;
+		console.error("ENDING LEVEL");
 		GAME.levelComplete = true;
+		SHIP.live = false;
 		ALIENS.bullet.killAll();
-		var RPL = RUBBLE.pool.length;
-		RUBBLE.purge(true);
-		ENGINE.clearLayer("text");
-		var y = INI.GAME_HEIGHT / 2 - 100;
-		var accuracy = SHIP.killShots / SHIP.shots * 100;
-		accuracy = accuracy.toFixed(1);
-		var fs = 32;
-		TITLE.centeredText("Wave " + GAME.level + " destroyed", fs, y);
-		y += fs;
-		TITLE.centeredText("Accuracy: " + accuracy + "%", fs, y);
-		y += fs;
-		var bonus = parseInt(accuracy * GAME.level * 1000 / 100, 10);
-		TITLE.centeredText("Level bonus: " + bonus, fs, y);
-		y += fs;
-		TITLE.centeredText("Asteroid bonus: " + RPL + " * 100 = " + RPL * 100, fs, y);
-		GAME.score += bonus;
-		TEXT.score();
-		setTimeout(function () {
-			GAME.nextLevel();
-		}, INI.LEVEL_DELAY);
+		const RPL = PIXEL_ACTORS.purge("name", "Asteroid", true);
+		TITLE.levelEnd(RPL);
+	},
+	levelDone() {
+		console.warn("LEVEL DONE");
+		ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.nextLevel, "enter"));
 	},
 	nextLevel() {
-		ENGINE.clearLayer("text");
 		GAME.level++;
 		console.log("Ascending to level ", GAME.level);
 		ALIENS.ready = false;
 		GAME.initLevel(GAME.level);
+		GAME.resume();
 	},
 	createLevel(level) {
 		GAME.levels[level] = $.extend(true, {}, GAME.levels[level - 1]);
@@ -612,6 +606,7 @@ const GAME = {
 	respond(lapsedTime) {
 		if (SHIP.dead) return;
 		if (!SHIP.live) return;
+		if (GAME.levelComplete) return;
 		const map = ENGINE.GAME.keymap;
 
 		if (map[ENGINE.KEY.map.F4]) {
@@ -749,6 +744,11 @@ const ALIENS = {
 		},
 		manage(lapsedTime) {
 			PIXEL_ACTORS.collisionFromExternalPool(ALIENS.bullet.arsenal);
+			if (ALIENS.existence.length === 0) {
+				console.log("Level " + GAME.level + " clear!");
+				//GAME.levelComplete = true;
+				GAME.endLevel();
+			}
 		}
 	},
 	init() {
@@ -901,7 +901,7 @@ const SHIP = {
 		shoot() {
 			console.log("shooting ...");
 			SHIP.cannonHot = true;
-			SHIP.shots += 1;
+			SHIP.shots++;
 			SHIP.bullet.arsenal.push(new ShipBullet(SHIP.x, Math.round(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height * 0.7), 'bullet'));
 			AUDIO.Shoot.play();
 			if (SHIP.bullet.arsenal.length >= SHIP.bullet.max) SHIP.loaded = false;
@@ -1008,7 +1008,7 @@ const SHIP = {
 		this.explode();
 		TEXT.ships();
 		ALIENS.ready = false;
-		if (ALIENS.existence.length === 0) GAME.levelComplete = true;
+		//if (ALIENS.existence.length === 0) GAME.levelComplete = true;
 		SHIP.live = false;
 		SHIP.init();
 		if (GAME.lives < 0) GAME.over();
@@ -1134,6 +1134,7 @@ const TITLE = {
 		if (GAME.levelComplete) return;
 		ENGINE.clearLayer("text");
 		TITLE.centeredText("GET READY FOR WAVE " + GAME.level);
+		console.info("GET READY FOR WAVE " + GAME.level);
 	},
 	title() {
 		var CTX = LAYER.title;
@@ -1179,6 +1180,28 @@ const TITLE = {
 	music() {
 		AUDIO.Title.play();
 	},
+	levelEnd(RPL) {
+		const fs = 32;
+		let GameRD = new RenderData("Arcade", fs, "#DDD", "text", "#000", 2, 2, 2);
+		ENGINE.TEXT.setRD(GameRD);
+		const x = ENGINE.gameWIDTH;
+		let y = INI.GAME_HEIGHT / 2 - 100;
+		ENGINE.clearLayer("text");
+		let accuracy = SHIP.killShots / SHIP.shots * 100;
+		accuracy = accuracy.toFixed(1);
+		ENGINE.TEXT.centeredText(`Wave ${GAME.level} destroyed`, x, y);
+		y += fs;
+		ENGINE.TEXT.centeredText(`Accuracy: ${accuracy}%`, x, y);
+		y += fs;
+		const bonus = parseInt(accuracy * GAME.level * 1000 / 100, 10);
+		ENGINE.TEXT.centeredText(`Level bonus: ${bonus}`, x, y);
+		y += fs;
+		ENGINE.TEXT.centeredText(`Asteroid bonus: ${RPL} * 100 = ${RPL * 100}`, x, y);
+		y += fs;
+		ENGINE.TEXT.centeredText(`Press ENTER to continue`, x, y);
+		GAME.score += bonus;
+		TEXT.score();
+	}
 };
 
 $(document).ready(function () {

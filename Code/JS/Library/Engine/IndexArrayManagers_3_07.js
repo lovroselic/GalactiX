@@ -221,7 +221,7 @@ class Pixel_Actors extends IAM {
                     if (!actor) continue;
                     let hit = ENGINE.collisionArea(actor.actor, obj.actor);
                     if (hit) {
-                        actor.hit();
+                        actor.hit(i);
                         obj.hit(i);
                     }
                 }
@@ -229,11 +229,14 @@ class Pixel_Actors extends IAM {
         }
     }
     purge(property, value, arg) {
+        let count = 0;
         for (const obj of this.POOL) {
             if (obj) {
                 if (obj[property] === value) obj.kill(arg);
+                count++;
             }
         }
+        return count;
     }
 }
 
