@@ -40,6 +40,9 @@ LoadSprites = [
   { srcName: "Items/redship.png", name: "redship" },
   { srcName: "Items/ship.png", name: "whiteship" },
   { srcName: "Items/smallship.png", name: "smallship" },
+  { srcName: "Items/motherShip4.png", name: "darkship" },
+  { srcName: "Items/motherShip3.png", name: "slimship" },
+
 ];
 
 LoadRotatedSheetSequences = [
@@ -72,8 +75,6 @@ LoadRotatedSheetSequences = [
   { srcName: "alienShip9.png", name: "basic4Fighter", count: 1, rotate: { first: 0, last: 350, step: 10 } },
   { srcName: "greeninvader.png", name: "greeninvader", count: 1, rotate: { first: 0, last: 350, step: 10 } },
   { srcName: "invader.png", name: "invader", count: 1, rotate: { first: 0, last: 350, step: 10 } },
-  { srcName: "motherShip3.png", name: "slimship", count: 1, rotate: { first: 0, last: 350, step: 10 } },
-  { srcName: "motherShip4.png", name: "darkship", count: 1, rotate: { first: 0, last: 350, step: 10 } },
   { srcName: "redinvader.png", name: "redinvader", count: 1, rotate: { first: 0, last: 350, step: 10 } },
 ];
 console.log("Assets for Galactix completed");

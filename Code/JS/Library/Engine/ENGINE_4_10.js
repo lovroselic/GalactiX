@@ -3366,8 +3366,10 @@ class PX_MoveState {
     const rightLimit = (this.parent.limits.width * ENGINE.INI.GRIDPIX) - 1;
     const bottomLimit = (this.parent.limits.height * ENGINE.INI.GRIDPIX) - 1;
 
-    this.homeGrid.x = Math.min(this.homeGrid.x, rightLimit);
-    this.homeGrid.y = Math.min(this.homeGrid.y, bottomLimit);
+    this.homeGrid.x = Math.min(this.homeGrid.x, this.parent.limits.width - 1);
+    this.homeGrid.y = Math.min(this.homeGrid.y, this.parent.limits.height - 1);
+    this.homeGrid.x = Math.max(this.homeGrid.x, 0);
+    this.homeGrid.y = Math.max(this.homeGrid.y, 0);
 
     this.useGrids = [
       GRID.pointToGrid(this.pos.add(new Vector(left, top)).limit(rightLimit, bottomLimit)),
@@ -3646,6 +3648,15 @@ class CountDown extends Timer {
   }
   remains() {
     return this.value - this.now;
+  }
+}
+class CountDownMS extends CountDown {
+  constructor(id, ms, func, kwargs) {
+    super(id, ms, func, kwargs);
+  }
+  update() {
+    this.now = (this.delta + (Date.now() - this.start));
+    if (this.now >= this.value) this.quit();
   }
 }
 const CONSOLE = {

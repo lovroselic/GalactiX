@@ -9,30 +9,31 @@ const MAP = {
         });
         console.info("init map", MAP);
     },
-    0: {
-        maxBullets: 5,
-        chargers: 2,
-        CD: 10,
-        chargerDescent: 200,
-        alienBullets: 3,
-        AXS: 120,
-        AYS: 1440,
-        asteroids: 10,
-        ship: "whiteship",
-        layout: {
-            1: {
-                num: 3,
-                actor: "redinvader",
-                score: 30,
-                probable: 50,
-                type: "charger"
+    /*     0: {
+            maxBullets: 5,
+            chargers: 2,
+            CD: 10,
+            chargerDescent: 200,
+            alienBullets: 3,
+            AXS: 120,
+            AYS: 1440,
+            asteroids: 10,
+            ship: "whiteship",
+            layout: {
+                1: {
+                    num: 3,
+                    actor: "redinvader",
+                    score: 30,
+                    probable: 50,
+                    type: "charger"
+                },
             },
-        },
-    },
+        }, */
     1: {
         maxBullets: 1,
         chargers: 0,
-        CD: 10,
+        CD: 10000,
+        AlienBulletDelay: 1500,//ms
         chargerDescent: 200,
         alienBullets: 3,
         AXS: 120,
@@ -69,7 +70,8 @@ const MAP = {
     2: {
         maxBullets: 2,
         chargers: 1,
-        CD: 10,
+        CD: 10000,
+        AlienBulletDelay: 1000,//ms
         chargerDescent: 200, //was 4
         alienBullets: 4,
         AXS: 100,
@@ -107,11 +109,12 @@ const MAP = {
     3: {
         maxBullets: 2,
         chargers: 2,
-        CD: 8,
-        chargerDescent: 4,
+        CD: 8000,
+        AlienBulletDelay: 1000,//ms
+        chargerDescent: 200,
         alienBullets: 4,
-        AXS: 3,
-        AYS: 26,
+        AXS: 100,
+        AYS: 1000,
         asteroids: 9,
         ship: "redship",
         layout: {
@@ -119,7 +122,7 @@ const MAP = {
                 num: 3,
                 actor: "basic1Charger",
                 score: 100,
-                probable: 50,
+                probable: 60,
                 type: "charger"
             },
             2: {
@@ -133,7 +136,7 @@ const MAP = {
                 num: 8,
                 actor: "basic2Attacker",
                 score: 40,
-                probable: 35
+                probable: 40
             },
             4: {
                 num: 7,
@@ -146,11 +149,12 @@ const MAP = {
     4: {
         maxBullets: 2,
         chargers: 4,
-        CD: 4,
-        chargerDescent: 4,
+        CD: 4000,
+        AlienBulletDelay: 1000,//ms
+        chargerDescent: 250,
         alienBullets: 4,
-        AXS: 3,
-        AYS: 26,
+        AXS: 100,
+        AYS: 1000,
         asteroids: 8,
         ship: "redship",
         layout: {
@@ -158,60 +162,61 @@ const MAP = {
                 num: 7,
                 actor: "basic2Charger",
                 score: 100,
-                probable: 50,
+                probable: 75,
                 type: "charger"
             },
             2: {
                 num: 5,
                 actor: "basic4Attacker",
                 score: 50,
-                probable: 40,
+                probable: 60,
                 type: "charger"
             },
             3: {
                 num: 8,
                 actor: "basic2Fighter",
                 score: 40,
-                probable: 40
+                probable: 50
             },
             4: {
                 num: 7,
                 actor: "basic4Attacker",
                 score: 25,
-                probable: 40
+                probable: 45
             }
         }
     },
     5: {
         maxBullets: 3,
         chargers: 4,
-        CD: 2,
-        chargerDescent: 4,
-        alienBullets: 4,
-        AXS: 3,
-        AYS: 26,
-        asteroids: 8,
+        CD: 2000,
+        AlienBulletDelay: 900,//ms
+        chargerDescent: 250,
+        alienBullets: 5,
+        AXS: 125,
+        AYS: 1200,
+        asteroids: 7,
         ship: "darkship",
         layout: {
             1: {
                 num: 7,
                 actor: "basic4Charger",
                 score: 100,
-                probable: 50,
+                probable: 99,
                 type: "charger"
             },
             2: {
                 num: 5,
                 actor: "basic3Charger",
                 score: 50,
-                probable: 40,
+                probable: 60,
                 type: "charger"
             },
             3: {
                 num: 7,
                 actor: "basic3Fighter",
                 score: 40,
-                probable: 40
+                probable: 50
             },
             4: {
                 num: 8,
@@ -224,120 +229,123 @@ const MAP = {
     6: {
         maxBullets: 3,
         chargers: 4,
-        CD: 2,
-        chargerDescent: 5,
-        alienBullets: 4,
-        AXS: 4,
-        AYS: 26,
-        asteroids: 8,
+        CD: 2000,
+        AlienBulletDelay: 800,//m
+        chargerDescent: 300,
+        alienBullets: 6,
+        AXS: 125,
+        AYS: 1100,
+        asteroids: 6,
         ship: "darkship",
         layout: {
             1: {
                 num: 7,
                 actor: "basic6Fighter",
                 score: 100,
-                probable: 50,
+                probable: 99,
                 type: "charger"
             },
             2: {
                 num: 8,
                 actor: "basic5Fighter",
                 score: 50,
-                probable: 40,
+                probable: 99,
                 type: "charger"
             },
             3: {
                 num: 7,
                 actor: "basic7Attacker",
                 score: 40,
-                probable: 35,
+                probable: 80,
                 type: "charger"
             },
             4: {
                 num: 8,
                 actor: "basic4Fighter",
                 score: 25,
-                probable: 30
+                probable: 70
             }
         }
     },
     7: {
         maxBullets: 4,
-        chargers: 4,
-        CD: 2,
-        chargerDescent: 6,
+        chargers: 5,
+        CD: 2000,
+        AlienBulletDelay: 800,//m
+        chargerDescent: 350,
         alienBullets: 5,
-        AXS: 4,
-        AYS: 26,
-        asteroids: 7,
+        AXS: 140,
+        AYS: 1200,
+        asteroids: 5,
         ship: "slimship",
         layout: {
             1: {
                 num: 7,
                 actor: "basic7Fighter",
                 score: 100,
-                probable: 50,
+                probable: 99,
                 type: "charger"
             },
             2: {
                 num: 8,
                 actor: "basic8Fighter",
                 score: 50,
-                probable: 40,
+                probable: 85,
                 type: "charger"
             },
             3: {
                 num: 7,
                 actor: "basic4Fighter",
                 score: 40,
-                probable: 35,
+                probable: 70,
                 type: "charger"
             },
             4: {
                 num: 5,
                 actor: "basic7Attacker",
                 score: 25,
-                probable: 30
+                probable: 50
             }
         }
     },
     8: {
         maxBullets: 4,
         chargers: 5,
-        CD: 2,
-        chargerDescent: 7,
+        CD: 2000,
+        AlienBulletDelay: 800,//m
+        chargerDescent: 350,
         alienBullets: 5,
-        AXS: 4,
-        AYS: 26,
-        asteroids: 7,
+        AXS: 150,
+        AYS: 1200,
+        asteroids: 5,
         ship: "slimship",
         layout: {
             1: {
                 num: 7,
                 actor: "basic6Attacker",
                 score: 100,
-                probable: 50,
+                probable: 99,
                 type: "charger"
             },
             2: {
                 num: 8,
                 actor: "basic5Attacker",
                 score: 50,
-                probable: 40,
+                probable: 80,
                 type: "charger"
             },
             3: {
                 num: 9,
                 actor: "basic1Charger",
                 score: 40,
-                probable: 35,
+                probable: 70,
                 type: "charger"
             },
             4: {
                 num: 7,
                 actor: "basic2Charger",
                 score: 25,
-                probable: 30,
+                probable: 60,
                 type: "charger"
             }
         }
@@ -468,7 +476,7 @@ const MAP = {
 
 const SPAWN = {
     meteors() {
-        const num = MAP[GAME.getRealLevel()].asteroids;
+        const num = MAP[GAME.level].asteroids;
         const width = parseInt((SHIP.maxX - SHIP.minX) / (num - 1), 10);
         let assetnames = [];
         for (let a = 0; a < INI.NMETEORS; a++) {
@@ -483,7 +491,7 @@ const SPAWN = {
             let x = SHIP.minX + m * width;
             let y = INI.RUBBLE_Y + RND(-24, 24);
             let angle = RND(0, 35) * 10;
-            const mapLimits = MAP[GAME.getRealLevel()].planeLimits;
+            const mapLimits = MAP[GAME.level].planeLimits;
             const asteroid = new Meteor(new Grid(x, y), assetName, angle, mapLimits);
             PIXEL_ACTORS.add(asteroid);
         }
@@ -492,8 +500,8 @@ const SPAWN = {
     },
     aliens() {
         console.log("spawning aliens");
-        const mapLimits = MAP[GAME.getRealLevel()].planeLimits;
-        const layout = MAP[GAME.getRealLevel()].layout;
+        const mapLimits = MAP[GAME.level].planeLimits;
+        const layout = MAP[GAME.level].layout;
         const center = parseInt(ENGINE.gameWIDTH / 2, 10);
         //console.log("..layout", layout);
 

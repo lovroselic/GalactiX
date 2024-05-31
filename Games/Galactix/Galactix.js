@@ -3,7 +3,7 @@
  
  to do:
 	* friendly fire,
-	* friendly collsision
+
  known bugs: 
 
  */
@@ -51,7 +51,7 @@ const INI = {
 	METEOR_ROTATION_SPEED: 25,
 	CD_TIMER: "ChargerDelay",
 	ALIEN_SHOOTING_COOLDOWN: "ShootingDelay",
-	ALIEN_SHOOTING_COOLDOWN_DELAY: 2, //seconds
+	ALIEN_SHOOTING_COOLDOWN_DELAY: 1000, //ms
 	FORCED_DONW_SPEED: 0.5,
 	METEOR_SCORE: 100,
 };
@@ -345,7 +345,7 @@ class ShipExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.09.0",
+	VERSION: "1.09.01",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -411,9 +411,6 @@ const PRG = {
 };
 
 const GAME = {
-	getRealLevel() {
-		return GAME.level % INI.LAST_LEVEL;
-	},
 	start() {
 		console.log("GAME started");
 		if (AUDIO.Title) {
@@ -433,7 +430,7 @@ const GAME = {
 		ENGINE.GAME.start(16);
 
 		//GAME.level = 1;
-		GAME.level = 0;
+		GAME.level = 8;
 
 		/****************/
 
@@ -445,7 +442,7 @@ const GAME = {
 		GAME.score = 0;
 		GAME.extraLife = SCORE.extraLife.clone();
 		//GAME.lives = 4;
-		GAME.lives = 0;
+		GAME.lives = 10;
 
 		GAME.fps = new FPS_short_term_measurement(300);
 		GAME.ended = false;
@@ -466,7 +463,7 @@ const GAME = {
 		console.info(" - start -", GAME.level);
 		GAME.prepareForRestart();
 		DESTRUCTION_ANIMATION.init(null);
-		PIXEL_ACTORS.init(MAP[GAME.getRealLevel()]);
+		PIXEL_ACTORS.init(MAP[GAME.level]);
 		GAME.initLevel(level);
 		GAME.continueLevel(level);
 	},
@@ -555,7 +552,7 @@ const GAME = {
 		SHIP.draw();
 		//ALIENS.draw();
 
-		if (DEBUG.coord) GRID.paintCoord("coord", MAP[GAME.getRealLevel()].planeLimits, true);
+		if (DEBUG.coord) GRID.paintCoord("coord", MAP[GAME.level].planeLimits, true);
 		if (DEBUG.grid) GRID.grid();
 	},
 	frameDraw(lapsedTime) {
@@ -761,9 +758,9 @@ const ALIENS = {
 		ALIENS.minX = 52;
 		ALIENS.maxX = ENGINE.gameWIDTH - ALIENS.minX;
 		ALIENS.chargerReady = false;
-		ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
+		ALIENS.chargerTimer = new CountDownMS(INI.CD_TIMER, MAP[GAME.level].CD, ALIENS.nextCharger);
 		ALIENS.canShoot = false;
-		ALIENS.shootTimer = new CountDown(INI.ALIEN_SHOOTING_COOLDOWN, INI.ALIEN_SHOOTING_COOLDOWN_DELAY, ALIENS.nextBullet);
+		ALIENS.shootTimer = new CountDownMS(INI.ALIEN_SHOOTING_COOLDOWN, MAP[GAME.level].AlienBulletDelay, ALIENS.nextBullet);
 		ALIENS.maxChargers = MAP[GAME.level].chargers;
 	},
 	nextBullet() {
@@ -824,7 +821,7 @@ const ALIENS = {
 			//console.log("checking for chargers", MAP[GAME.level].chargers, ALIENS.chargers, MAP[GAME.level].chargers > ALIENS.chargers.length);
 			if (ALIENS.maxChargers > ALIENS.chargers.length) {
 				ALIENS.releaseCharger();
-				ALIENS.chargerTimer = new CountDown(INI.CD_TIMER, MAP[GAME.getRealLevel()].CD, ALIENS.nextCharger);
+				ALIENS.chargerTimer = new CountDownMS(INI.CD_TIMER, MAP[GAME.level].CD, ALIENS.nextCharger);
 			}
 		}
 	},
@@ -859,6 +856,7 @@ const ALIENS = {
 
 		const W = MAP[GAME.level].planeLimits.width;
 		let candidates = new Array(W);
+		if (candidates.length === 0) return;
 
 		for (let index of ALIENS.existence) {
 			const alien = PIXEL_ACTORS.show(index);
@@ -873,6 +871,7 @@ const ALIENS = {
 			}
 		}
 		candidates = candidates.filter(candidate => candidate !== undefined);
+		if (candidates.length === 0) return;
 
 		//console.info("candidates", candidates);
 
@@ -882,7 +881,7 @@ const ALIENS = {
 			//console.error("alien shoots", selected.id, selected);
 			ALIENS.bullet.arsenal.push(new AlienBullet(selected.moveState.pos.x, Math.round(selected.moveState.pos.y + selected.actor.height / 2 + ALIENS.bullet.sprite.height * 0.8), "alienbullet"));
 			ALIENS.canShoot = false;
-			ALIENS.shootTimer = new CountDown(INI.ALIEN_SHOOTING_COOLDOWN, INI.ALIEN_SHOOTING_COOLDOWN_DELAY, ALIENS.nextBullet);
+			ALIENS.shootTimer = new CountDownMS(INI.ALIEN_SHOOTING_COOLDOWN,MAP[GAME.level].AlienBulletDelay, ALIENS.nextBullet);
 			AUDIO.AlienShoot.play();
 		}
 		//throw "DEBUG";
@@ -1188,6 +1187,7 @@ const TITLE = {
 		let y = INI.GAME_HEIGHT / 2 - 100;
 		ENGINE.clearLayer("text");
 		let accuracy = SHIP.killShots / SHIP.shots * 100;
+		accuracy = Math.min(accuracy, 100);
 		accuracy = accuracy.toFixed(1);
 		ENGINE.TEXT.centeredText(`Wave ${GAME.level} destroyed`, x, y);
 		y += fs;
