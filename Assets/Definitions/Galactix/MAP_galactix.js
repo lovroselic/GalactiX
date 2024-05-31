@@ -8,26 +8,27 @@ const MAP = {
             }
         });
     },
-    /*     0: {
-            maxBullets: 5,
-            chargers: 2,
-            CD: 10,
-            chargerDescent: 200,
-            alienBullets: 3,
-            AXS: 120,
-            AYS: 1440,
-            asteroids: 10,
-            ship: "whiteship",
-            layout: {
-                1: {
-                    num: 3,
-                    actor: "redinvader",
-                    score: 30,
-                    probable: 50,
-                    type: "charger"
-                },
+    0: {
+        maxBullets: 5,
+        chargers: 2,
+        CD: 2000,
+        chargerDescent: 200,
+        AlienBulletDelay: 1500,//ms
+        alienBullets: 3,
+        AXS: 200,
+        AYS: 1500,
+        asteroids: 2,
+        ship: "whiteship",
+        layout: {
+            1: {
+                num: 3,
+                actor: "redinvader",
+                score: 30,
+                probable: 50,
+                type: "charger"
             },
-        }, */
+        },
+    },
     1: {
         maxBullets: 1,
         chargers: 0,
@@ -35,8 +36,8 @@ const MAP = {
         AlienBulletDelay: 1500,//ms
         chargerDescent: 200,
         alienBullets: 3,
-        AXS: 120,
-        AYS: 1440,
+        AXS: 100,
+        AYS: 1000,
         asteroids: 10,
         ship: "whiteship",
         layout: {

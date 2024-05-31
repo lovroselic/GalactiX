@@ -331,7 +331,7 @@ class ShipExplosion extends GeneralDestruction {
 }
 
 const PRG = {
-	VERSION: "1.09.04",
+	VERSION: "1.09.05",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -415,7 +415,7 @@ const GAME = {
 		ENGINE.watchVisibility(GAME.lostFocus);
 		ENGINE.GAME.start(16);
 
-		GAME.level = 6; //1
+		GAME.level = 1; //1
 		GAME.score = 0;
 		GAME.extraLife = SCORE.extraLife.clone();
 		GAME.lives = 3;		//3+1
@@ -903,7 +903,8 @@ const SHIP = {
 	},
 	init() {
 		if (SHIP.dead) return;
-		if (GAME.levelComplete) GAME.endLevel();
+		if (GAME.levelComplete) return GAME.endLevel();
+		console.info("SHIP INIT RUN");
 		TITLE.getReady();
 		AUDIO.Ufo.play();
 		SHIP.sprite = SPRITE[SHIP.ship];
@@ -918,11 +919,11 @@ const SHIP = {
 		}, INI.SHIP_TIMEOUT);
 
 		setTimeout(function () {
-			if (!SHIP.dead) ENGINE.clearLayer("text");
+			if (!SHIP.dead && !GAME.levelComplete) ENGINE.clearLayer("text");
 
 			setTimeout(function () {
 				ALIENS.ready = true;
-				console.warn("ALIENS.ready = true;");
+				//console.warn("ALIENS.ready = true;");
 			}, INI.ALIEN_DELAY_TIMEOUT);
 
 		}, INI.START_TIMEOUT);
@@ -1138,7 +1139,6 @@ const TITLE = {
 		let accuracy = SHIP.killShots / SHIP.shots * 100;
 		accuracy = Math.min(accuracy, 100);
 		accuracy = accuracy.toFixed(1);
-		console.log("accuracy", accuracy, "RPL", RPL);
 		ENGINE.TEXT.centeredText(`Wave ${GAME.level} destroyed`, x, y);
 		y += fs;
 		ENGINE.TEXT.centeredText(`Accuracy: ${accuracy}%`, x, y);
