@@ -7,7 +7,6 @@ const MAP = {
                 MAP[key].planeLimits = { width: ENGINE.gameWIDTH / ENGINE.INI.GRIDPIX, height: ENGINE.gameHEIGHT / ENGINE.INI.GRIDPIX };
             }
         });
-        console.info("init map", MAP);
     },
     /*     0: {
             maxBullets: 5,
@@ -498,20 +497,15 @@ const SPAWN = {
             const asteroid = new Meteor(new Grid(x, y), assetName, angle, mapLimits);
             PIXEL_ACTORS.add(asteroid);
         }
-
-
     },
     aliens() {
         console.log("spawning aliens");
         const mapLimits = MAP[GAME.level].planeLimits;
         const layout = MAP[GAME.level].layout;
         const center = parseInt(ENGINE.gameWIDTH / 2, 10);
-        //console.log("..layout", layout);
 
         for (const row in layout) {
-            //console.log("...row", row);
             const xes = ENGINE.spreadAroundCenter(layout[row].num, center, INI.PADDING);
-            //console.log("...xes", xes);
             const Y = INI.TOP_Y + parseInt(row, 10) * INI.PADDING;
             for (let q = 0; q < xes.length; q++) {
                 let angle = 0;
@@ -524,12 +518,8 @@ const SPAWN = {
 
                 let pos = new Grid(xes[q], Y);
                 const alien = new Alien(pos, layout[row].actor, angle, mapLimits, layout[row].score, layout[row].probable, layout[row].type || "grunt");
-                //console.log("alien", alien);
                 PIXEL_ACTORS.add(alien);
                 ALIENS.existence.push(alien.id);
-                /* if (layout[row].type === "charger") {
-                    PIXEL_ACTORS.POOL.last().type = "charger";
-                } */
             }
         }
         console.log("PIXEL_ACTORS", PIXEL_ACTORS.POOL);

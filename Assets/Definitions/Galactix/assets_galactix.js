@@ -11,7 +11,6 @@ LoadFonts = [
 ];
 
 LoadTextures = [
-
   //title
   { srcName: "Title/GalactixWarrior768.jpg", name: "Title" },
   { srcName: "Title/stars.jpg", name: "stars" },
@@ -26,6 +25,7 @@ LoadAudio = [
   { srcName: "AlienShoot.mp3", name: "AlienShoot" },
   { srcName: "Dive.mp3", name: "Dive" },
   { srcName: "ArcadeClose.mp3", name: "ArcadeClose" },
+  { srcName: "ExtraLife.mp3", name: "ExtraLife" },
 ];
 
 LoadSequences = [
@@ -42,7 +42,6 @@ LoadSprites = [
   { srcName: "Items/smallship.png", name: "smallship" },
   { srcName: "Items/motherShip4.png", name: "darkship" },
   { srcName: "Items/motherShip3.png", name: "slimship" },
-
 ];
 
 LoadRotatedSheetSequences = [
@@ -77,4 +76,5 @@ LoadRotatedSheetSequences = [
   { srcName: "invader.png", name: "invader", count: 1, rotate: { first: 0, last: 350, step: 10 } },
   { srcName: "redinvader.png", name: "redinvader", count: 1, rotate: { first: 0, last: 350, step: 10 } },
 ];
+
 console.log("Assets for Galactix completed");

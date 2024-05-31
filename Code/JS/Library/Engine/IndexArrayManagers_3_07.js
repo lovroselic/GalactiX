@@ -213,7 +213,10 @@ class Pixel_Actors extends IAM {
         for (let i = pool.length - 1; i >= 0; i--) {
             let obj = pool[i];
             if (obj) {
-                obj.homeGrid = GRID.pointToGrid(new Point(obj.x, obj.y));
+                const rightLimit = (this.map.planeLimits.width * ENGINE.INI.GRIDPIX) - 1;
+                const bottomLimit = (this.map.planeLimits.height * ENGINE.INI.GRIDPIX) - 1;
+                const point = new Point(obj.x, obj.y).limit(rightLimit, bottomLimit);
+                obj.homeGrid = GRID.pointToGrid(point);
                 obj.updateActor();
                 let ids = this.map[this.IA].unroll(obj.homeGrid);
                 for (const id of ids) {
@@ -239,8 +242,6 @@ class Pixel_Actors extends IAM {
         return count;
     }
 }
-
-
 
 /** Texture grid IA Managers */
 class Enemy_TG extends IAM {
@@ -990,7 +991,6 @@ class Store {
         }
     }
 }
-
 
 /**  IAM INSTANCES: SUPER GLOBALS */
 const DECOR = new Decor();

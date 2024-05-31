@@ -3371,6 +3371,9 @@ class PX_MoveState {
     this.homeGrid.x = Math.max(this.homeGrid.x, 0);
     this.homeGrid.y = Math.max(this.homeGrid.y, 0);
 
+    if (isNaN(this.homeGrid.x)) throw "NaN in homeGrid";
+    if (isNaN(this.homeGrid.y)) throw "NaN in homeGrid";
+
     this.useGrids = [
       GRID.pointToGrid(this.pos.add(new Vector(left, top)).limit(rightLimit, bottomLimit)),
       GRID.pointToGrid(this.pos.add(new Vector(right, top)).limit(rightLimit, bottomLimit)),

@@ -2,7 +2,7 @@
 /*
  
  to do:
-	* friendly fire,
+	* meteor kill with ship!
 
  known bugs: 
 
@@ -14,7 +14,7 @@ const DEBUG = {
 	grid: false,
 	coord: false,
 	INVINCIBLE: false,
-	ININITE_LIVES: false,
+	ININITE_LIVES: true,
 };
 
 const CONST = {
@@ -55,8 +55,6 @@ const INI = {
 	FORCED_DONW_SPEED: 0.5,
 	METEOR_SCORE: 100,
 };
-
-/** */
 
 class Bullet {
 	constructor(x, y, sprite) {
@@ -116,10 +114,9 @@ class GeneralRotatingEntity {
 			const actor = PIXEL_ACTORS.show(id);
 			if (!actor) continue;
 			if (actor.name === "Alien") continue;
-			//console.log("collision to actors", this, actor);
 			let hit = ENGINE.collisionArea(actor.actor, this.actor);
 			if (hit) {
-				actor.hit();
+				actor.hit(5);
 				this.hit();
 			}
 		}
@@ -150,8 +147,8 @@ class Meteor extends GeneralRotatingEntity {
 		let angleDelta = INI.METEOR_ROTATION_SPEED * timeDelta * this.rotSpeedFactor;
 		this.addAngle(angleDelta);
 	}
-	hit() {
-		this.lives--;
+	hit(lives = 1) {
+		this.lives -= lives;
 		if (this.lives > 0) {
 			AUDIO.Hit.play();
 		} else {
@@ -191,7 +188,6 @@ class Alien extends GeneralRotatingEntity {
 			this.moveState.refresh();
 			this.actor.setPositionFromMoveStatePos(this.moveState.pos);
 			if (this.moveState.pos.y > INI.AUTO_ATTACK) {
-				console.info("auto attack", this.id);
 				this.type = "charger";
 				this.stage = "attack";
 				ALIENS.chargers.push(this.id);
@@ -212,11 +208,9 @@ class Alien extends GeneralRotatingEntity {
 					this.moveState.refresh();
 					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
 					if (this.angle === 0) this.stage = "descend";
-					//console.log("rotating", this.id, "rotDir", rotDir, "angle", this.angle);
 					break;
 
 				case "descend":
-					//let translate = ALIENS.chargeSpeed.mul(direction, timeDelta);
 					this.moveState.pos = this.moveState.pos.add(translate);
 					this.moveState.refresh();
 					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
@@ -224,11 +218,10 @@ class Alien extends GeneralRotatingEntity {
 						this.stage = "attack";
 						this.score *= 2;
 					}
-					//console.info("descending", this.id, "direction", direction, "translate", translate);
 					break;
 
 				case "attack":
-					if (!SHIP.live) {
+					if (!SHIP.live && this.moveState.pos.y >= INI.ATTACK) {
 						this.stage = "turn";
 						break;
 					}
@@ -247,7 +240,6 @@ class Alien extends GeneralRotatingEntity {
 						this.moveState.pos.y = -this.actor.height;
 						this.stage = "return";
 					}
-					//console.info("attacking", this.id, "direction", direction, "degAngle", degAngle, "this.moveState.pos.y", this.moveState.pos.y, ENGINE.gameHEIGHT + this.actor.height / 2);
 					break;
 
 				case "return":
@@ -255,7 +247,6 @@ class Alien extends GeneralRotatingEntity {
 					this.moveState.pos.y = -this.actor.height;
 					this.moveState.refresh();
 					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
-					//console.info("returning", this.id);
 					this.stage = "attack";
 					break;
 
@@ -272,7 +263,6 @@ class Alien extends GeneralRotatingEntity {
 					this.moveState.pos = this.moveState.pos.add(ALIENS.chargeSpeed.mul(turningDir, timeDelta));
 					this.moveState.refresh();
 					this.actor.setPositionFromMoveStatePos(this.moveState.pos);
-					//console.info("turning", this.id, "turningDir", turningDir, "angle", angle, "rotSign", rotSign);
 					break;
 
 				case "ascend":
@@ -283,7 +273,6 @@ class Alien extends GeneralRotatingEntity {
 					if (this.moveState.pos.y <= INI.TOP_Y + 64) {
 						this.stage = "rotate";
 					}
-					//console.info("ascend", this.id);
 					break;
 
 				default:
@@ -300,7 +289,6 @@ class Alien extends GeneralRotatingEntity {
 			GAME.addScore(this.score);
 			SHIP.killShots++;
 		}
-
 	}
 	explode() {
 		DESTRUCTION_ANIMATION.add(new AlienExplosion(this.moveState.pos));
@@ -342,10 +330,8 @@ class ShipExplosion extends GeneralDestruction {
 	}
 }
 
-/** */
-
 const PRG = {
-	VERSION: "1.09.03",
+	VERSION: "1.09.04",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -429,20 +415,10 @@ const GAME = {
 		ENGINE.watchVisibility(GAME.lostFocus);
 		ENGINE.GAME.start(16);
 
-		GAME.level = 1;
-		//GAME.level = 11
-
-		/****************/
-
-		if (DEBUG.CHEAT) {
-			GAME.level = DEBUG.LEVEL;
-		}
-
-		/****************/
+		GAME.level = 6; //1
 		GAME.score = 0;
 		GAME.extraLife = SCORE.extraLife.clone();
 		GAME.lives = 3;		//3+1
-		
 		GAME.fps = new FPS_short_term_measurement(300);
 		GAME.ended = false;
 		SHIP.dead = false;
@@ -459,7 +435,6 @@ const GAME = {
 		ENGINE.clearManylayers(clear);
 	},
 	levelStart(level) {
-		console.info(" - start -", GAME.level);
 		GAME.prepareForRestart();
 		DESTRUCTION_ANIMATION.init(null);
 		PIXEL_ACTORS.init(MAP[GAME.level]);
@@ -493,7 +468,6 @@ const GAME = {
 	},
 	continueLevel(level) {
 		console.log("game continues on level", level);
-
 		GAME.levelExecute(level);
 	},
 	levelExecute(level) {
@@ -546,7 +520,6 @@ const GAME = {
 		TEXT.ships();
 		TEXT.score();
 		SHIP.draw();
-		//ALIENS.draw();
 
 		if (DEBUG.coord) GRID.paintCoord("coord", MAP[GAME.level].planeLimits, true);
 		if (DEBUG.grid) GRID.grid();
@@ -558,24 +531,18 @@ const GAME = {
 		ALIENS.bullet.draw();
 		PIXEL_ACTORS.draw(lapsedTime);
 		DESTRUCTION_ANIMATION.draw(lapsedTime);
-
 		if (DEBUG.FPS) GAME.FPS(lapsedTime);
-		//ALIENS.bullet.draw();
-		//ALIENS.draw();
-		//RUBBLE.draw();
-		//EXPLOSIONS.draw();
 	},
 	endLevel() {
 		if (GAME.levelComplete) return;
-		console.error("ENDING LEVEL");
 		GAME.levelComplete = true;
 		SHIP.live = false;
 		ALIENS.bullet.killAll();
 		const RPL = PIXEL_ACTORS.purge("name", "Asteroid", true);
 		TITLE.levelEnd(RPL);
+		ENGINE.TIMERS.clear();
 	},
 	levelDone() {
-		console.warn("LEVEL DONE");
 		ENGINE.GAME.ANIMATION.next(ENGINE.KEY.waitFor.bind(null, GAME.nextLevel, "enter"));
 	},
 	nextLevel() {
@@ -595,7 +562,6 @@ const GAME = {
 		MAP[level].alienBullets++;
 		MAP[level].AXS += 25;
 		MAP[level].chargerDescent += 20;
-		//console.log("created", MAP[level]);
 	},
 	respond(lapsedTime) {
 		if (SHIP.dead) return;
@@ -727,17 +693,13 @@ const ALIENS = {
 			const delta = Math.round(ALIENS.bullet.speed * timeDelta);
 			for (let i = LN - 1; i >= 0; i--) {
 				ALIENS.bullet.arsenal[i].y += delta;
-				//console.log("bullet y check", ALIENS.bullet.arsenal[i].y, ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT);
 				if (ALIENS.bullet.arsenal[i].y >= ENGINE.gameHEIGHT || ALIENS.bullet.arsenal[i].y < 0) {
-					//console.warn("removed alien buller", ALIENS.bullet.arsenal[i].y, i);
-					//ALIENS.bullet.arsenal[i] = null;
 					ALIENS.bullet.kill(i);
 				}
 			}
 		},
 		kill(i) {
 			ALIENS.bullet.arsenal.splice(i, 1);
-			//console.error("..killed bullet", i);
 		},
 		killAll() {
 			ALIENS.bullet.arsenal.clear();
@@ -746,7 +708,6 @@ const ALIENS = {
 			PIXEL_ACTORS.collisionFromExternalPool(ALIENS.bullet.arsenal);
 			if (ALIENS.existence.length === 0) {
 				console.log("Level " + GAME.level + " clear!");
-				//GAME.levelComplete = true;
 				GAME.endLevel();
 			}
 		}
@@ -771,7 +732,6 @@ const ALIENS = {
 	},
 	nextCharger() {
 		ALIENS.chargerReady = true;
-		console.warn("charger ready");
 	},
 	manage(lapsedTime) {
 		ALIENS.reindex();
@@ -821,7 +781,6 @@ const ALIENS = {
 	},
 	checkForChargers() {
 		if (ALIENS.chargerReady) {
-			//console.log("checking for chargers", MAP[GAME.level].chargers, ALIENS.chargers, MAP[GAME.level].chargers > ALIENS.chargers.length);
 			if (ALIENS.maxChargers > ALIENS.chargers.length) {
 				ALIENS.releaseCharger();
 				ALIENS.chargerTimer = new CountDownMS(INI.CD_TIMER, MAP[GAME.level].CD, ALIENS.nextCharger);
@@ -830,13 +789,11 @@ const ALIENS = {
 	},
 	releaseCharger() {
 		const find = ALIENS.findChargers();
-		//console.warn("trying to release charger", find);
 		if (find.length === 0) return;
 		const select = find.chooseRandom();
 		ALIENS.chargers.push(select);
 		PIXEL_ACTORS.show(select).stage = "rotate";
 		AUDIO.Dive.play();
-		//console.warn("releasing charger", find, select, PIXEL_ACTORS.show(select));
 	},
 	findChargers() {
 		const find = [];
@@ -855,7 +812,6 @@ const ALIENS = {
 		if (ABP >= MAP[GAME.level].alienBullets) return;
 		if (ALIENS.existence.length === 0) return;
 		if (coinFlip()) return;
-		//console.warn("aliens prepare for shooting");
 
 		const W = MAP[GAME.level].planeLimits.width;
 		let candidates = new Array(W);
@@ -863,13 +819,11 @@ const ALIENS = {
 
 		for (let index of ALIENS.existence) {
 			const alien = PIXEL_ACTORS.show(index);
-			//console.log(".index", index, "alien", alien);
 			let X = alien.moveState.homeGrid.x;
 			let y = alien.moveState.pos.y;
 			let x = alien.moveState.pos.y;
 			if (y >= ENGINE.gameHEIGHT - 64 || y < 64) continue;
 			if (x <= 32 || x >= ENGINE.gameWIDTH - 32) continue;
-			//console.log(".X", X, "y", y);
 
 			if (!candidates[X] || y > candidates[X].y) {
 				candidates[X] = { y: alien.moveState.pos.y, index: index };
@@ -878,18 +832,13 @@ const ALIENS = {
 		candidates = candidates.filter(candidate => candidate !== undefined);
 		if (candidates.length === 0) return;
 
-		//console.info("candidates", candidates);
-
 		const selected = PIXEL_ACTORS.show(candidates.chooseRandom().index);
-		//console.log("selected", selected);
 		if (probable(selected.probable)) {
-			//console.error("alien shoots", selected.id, selected);
 			ALIENS.bullet.arsenal.push(new AlienBullet(selected.moveState.pos.x, Math.round(selected.moveState.pos.y + selected.actor.height / 2 + ALIENS.bullet.sprite.height * 0.8), "alienbullet"));
 			ALIENS.canShoot = false;
 			ALIENS.shootTimer = new CountDownMS(INI.ALIEN_SHOOTING_COOLDOWN, MAP[GAME.level].AlienBulletDelay, ALIENS.nextBullet);
 			AUDIO.AlienShoot.play();
 		}
-		//throw "DEBUG";
 	}
 };
 
@@ -903,7 +852,6 @@ const SHIP = {
 			SHIP.bullet.arsenal = [];
 		},
 		shoot() {
-			console.log("shooting ...");
 			SHIP.cannonHot = true;
 			SHIP.shots++;
 			SHIP.bullet.arsenal.push(new ShipBullet(SHIP.x, Math.round(SHIP.y - SHIP.sprite.height / 2 - SHIP.bullet.sprite.height * 0.7), 'bullet'));
@@ -952,7 +900,6 @@ const SHIP = {
 		this.limits = MAP[GAME.level].planeLimits;
 		this.actor = new ACTOR(SHIP.ship);
 		this.updateMS();
-
 	},
 	init() {
 		if (SHIP.dead) return;
@@ -963,6 +910,7 @@ const SHIP = {
 		SHIP.loaded = true;
 		SHIP.cannonHot = false;
 		this.actor = new ACTOR(SHIP.ship);                                   //IAM compatibility
+		SHIP.updateMS();
 		PIXEL_ACTORS.add(SHIP);
 
 		setTimeout(function () {
@@ -1012,7 +960,6 @@ const SHIP = {
 		this.explode();
 		TEXT.ships();
 		ALIENS.ready = false;
-		//if (ALIENS.existence.length === 0) GAME.levelComplete = true;
 		SHIP.live = false;
 		SHIP.init();
 		if (GAME.lives < 0) GAME.over();
@@ -1056,6 +1003,7 @@ const TEXT = {
 			GAME.lives++;
 			GAME.extraLife.shift();
 			TEXT.ships();
+			AUDIO.ExtraLife.play();
 		}
 		var CTX = LAYER["sign"];
 		var x = 80;
@@ -1063,7 +1011,6 @@ const TEXT = {
 		TEXT.clearSign(x, 0, ENGINE.gameWIDTH - x, y + 8);
 		CTX.color = "#00FF00";
 		CTX.fillStyle = "#00FF00";
-		//CTX.font = "24px Consolas";
 		CTX.font = "14px Emulogic";
 		CTX.shadowColor = "#000";
 		CTX.shadowOffsetX = 1;
@@ -1088,10 +1035,8 @@ const TEXT = {
 
 const TITLE = {
 	startTitle() {
-		ENGINE.clearManylayers(["sign", "ship", "aliens", "explosion", "rubble", "bullets", "FPS"]);
-		console.info(" - start title -");
+		ENGINE.clearManylayers(["sign", "ship", "aliens", "explosion", "rubble", "bullets", "FPS", "text"]);
 		if (AUDIO.Title) TITLE.music();
-		AUDIO.Title.stop(); //DEBUG
 		TITLE.render();
 		ENGINE.draw("background", (ENGINE.gameWIDTH - TEXTURE.Title.width) / 2, (ENGINE.gameHEIGHT - TEXTURE.Title.height) / 2, TEXTURE.Title);
 		ENGINE.topCanvas = ENGINE.getCanvasName("ROOM");
@@ -1138,7 +1083,6 @@ const TITLE = {
 		if (GAME.levelComplete) return;
 		ENGINE.clearLayer("text");
 		TITLE.centeredText("GET READY FOR WAVE " + GAME.level);
-		console.info("GET READY FOR WAVE " + GAME.level);
 	},
 	title() {
 		var CTX = LAYER.title;
@@ -1206,7 +1150,6 @@ const TITLE = {
 		y += fs;
 		ENGINE.TEXT.centeredText(`Press ENTER to continue`, x, y);
 		GAME.addScore(bonus);
-		console.info("bonus", bonus);
 	}
 };
 
