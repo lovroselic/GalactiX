@@ -345,7 +345,7 @@ class ShipExplosion extends GeneralDestruction {
 /** */
 
 const PRG = {
-	VERSION: "1.09.02",
+	VERSION: "1.09.03",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -429,8 +429,8 @@ const GAME = {
 		ENGINE.watchVisibility(GAME.lostFocus);
 		ENGINE.GAME.start(16);
 
-		//GAME.level = 1;
-		GAME.level = 11
+		GAME.level = 1;
+		//GAME.level = 11
 
 		/****************/
 
@@ -441,9 +441,8 @@ const GAME = {
 		/****************/
 		GAME.score = 0;
 		GAME.extraLife = SCORE.extraLife.clone();
-		//GAME.lives = 4;
-		GAME.lives = 10;
-
+		GAME.lives = 3;		//3+1
+		
 		GAME.fps = new FPS_short_term_measurement(300);
 		GAME.ended = false;
 		SHIP.dead = false;
@@ -466,9 +465,6 @@ const GAME = {
 		PIXEL_ACTORS.init(MAP[GAME.level]);
 		GAME.initLevel(level);
 		GAME.continueLevel(level);
-	},
-	createLevel(level) {
-		throw "createLevel not yet implemented";
 	},
 	initLevel(level) {
 		console.info("init level", level);
@@ -590,15 +586,16 @@ const GAME = {
 		GAME.resume();
 	},
 	createLevel(level) {
-		GAME.levels[level] = $.extend(true, {}, GAME.levels[level - 1]);
-		var layout = GAME.levels[level].layout;
-		for (var row in layout) {
+		MAP[level] = $.extend(true, {}, MAP[level - 1]);
+		const layout = MAP[level].layout;
+		for (const row in layout) {
 			layout[row].actor = "random";
 		}
-		GAME.levels[level].chargers++;
-		GAME.levels[level].alienBullets++;
-		GAME.levels[level].AXS++;
-		GAME.levels[level].chargerDescent;
+		MAP[level].chargers++;
+		MAP[level].alienBullets++;
+		MAP[level].AXS += 25;
+		MAP[level].chargerDescent += 20;
+		//console.log("created", MAP[level]);
 	},
 	respond(lapsedTime) {
 		if (SHIP.dead) return;
