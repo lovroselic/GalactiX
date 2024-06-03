@@ -14,7 +14,7 @@ const DEBUG = {
 	grid: false,
 	coord: false,
 	INVINCIBLE: false,
-	ININITE_LIVES: true,
+	ININITE_LIVES: false,
 };
 
 const CONST = {
@@ -187,6 +187,7 @@ class Alien extends GeneralRotatingEntity {
 			this.moveState.pos = this.moveState.pos.add(translate);
 			this.moveState.refresh();
 			this.actor.setPositionFromMoveStatePos(this.moveState.pos);
+			this.logMove();
 			if (this.moveState.pos.y > INI.AUTO_ATTACK) {
 				this.type = "charger";
 				this.stage = "attack";
@@ -283,6 +284,16 @@ class Alien extends GeneralRotatingEntity {
 
 		return;
 	}
+	logMove() {
+		if (ALIENS.dir.x !== 0) {
+			if (ALIENS.dir.x === 1) {
+				ALIENS.lastMove = "right";
+			} else ALIENS.lastMove = "left";
+
+		} else if (ALIENS.dir.y === 1) {
+			ALIENS.lastMove = "vertical";
+		} else throw "Aliens move error";
+	}
 	hit(i = null) {
 		this.explode();
 		if (i >= 0) {
@@ -331,7 +342,7 @@ class ShipExplosion extends GeneralDestruction {
 }
 
 const PRG = {
-	VERSION: "1.09.05",
+	VERSION: "1.09.06",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
@@ -678,6 +689,7 @@ const GAME = {
 };
 
 const ALIENS = {
+	lastMove: null,
 	bullet: {
 		speed: 800,
 		draw() {
@@ -768,12 +780,21 @@ const ALIENS = {
 		ALIENS.max = Math.floor(maxX);
 	},
 	checkDescent() {
+		if (ALIENS.min > ALIENS.max) return; // ??
+
 		if (ALIENS.descent) {
 			ALIENS.descent = false;
 			ALIENS.dir = ALIENS.dirCopy.mirror();
 			ALIENS.dirCopy = ALIENS.dir;
 		} else {
+
 			if (ALIENS.min <= ALIENS.minX || ALIENS.max >= ALIENS.maxX) {
+
+				/** */
+				if (ALIENS.min <= ALIENS.minX && ALIENS.lastMove === "right") return;
+				if (ALIENS.max >= ALIENS.maxX && ALIENS.lastMove === "left") return;
+				/** */
+
 				ALIENS.dir = DOWN;
 				ALIENS.descent = true;
 			}
@@ -904,7 +925,6 @@ const SHIP = {
 	init() {
 		if (SHIP.dead) return;
 		if (GAME.levelComplete) return GAME.endLevel();
-		console.info("SHIP INIT RUN");
 		TITLE.getReady();
 		AUDIO.Ufo.play();
 		SHIP.sprite = SPRITE[SHIP.ship];

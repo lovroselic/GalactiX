@@ -500,7 +500,6 @@ const SPAWN = {
         }
     },
     aliens() {
-        console.log("spawning aliens");
         const mapLimits = MAP[GAME.level].planeLimits;
         const layout = MAP[GAME.level].layout;
         const center = parseInt(ENGINE.gameWIDTH / 2, 10);
@@ -523,8 +522,6 @@ const SPAWN = {
                 ALIENS.existence.push(alien.id);
             }
         }
-        console.log("PIXEL_ACTORS", PIXEL_ACTORS.POOL);
-        console.info("ALIENS.existence", ALIENS.existence);
     }
 };
 

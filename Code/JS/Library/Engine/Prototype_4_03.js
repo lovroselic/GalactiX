@@ -194,7 +194,6 @@ Date.prototype.stringify = function () {
   return `${d}/${m}/${y}`;
 };
 
-
 /** Math */
 
 /**
@@ -224,7 +223,6 @@ Math.degrees = function (radians) {
 
   return (radians * 180) / Math.PI;
 };
-
 
 /**
  * Rounds a floating-point number to the specified precision.
@@ -522,10 +520,6 @@ Set.prototype.removeArray = function (arr) {
 };
 Set.prototype.intersect = function (x) {
   return new Set([...this].filter(el => x.has(el)));
-};
-Audio.prototype.stop = function () {
-  this.pause();
-  this.currentTime = 0;
 };
 
 class MasterGridClass {
@@ -1048,6 +1042,10 @@ class Angle {
 //audio
 HTMLAudioElement.prototype.isPlaying = function() {
   return !this.paused && this.currentTime > 0;
+};
+Audio.prototype.stop = function () {
+  this.pause();
+  this.currentTime = 0;
 };
 
 class DefaultDict {
