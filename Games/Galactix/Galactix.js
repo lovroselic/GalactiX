@@ -342,7 +342,7 @@ class ShipExplosion extends GeneralDestruction {
 }
 
 const PRG = {
-	VERSION: "1.09.06",
+	VERSION: "1.10",
 	NAME: "GalactiX",
 	YEAR: "2017",
 	CSS: "color: #239AFF;",
